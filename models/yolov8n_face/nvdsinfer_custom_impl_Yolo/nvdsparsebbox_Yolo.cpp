@@ -166,10 +166,15 @@ decodeTensorYoloFace(const float* boxes, const float* scores, const float* landm
       continue;
     }
 
-    float bx1 = boxes[b * 4 + 0];
-    float by1 = boxes[b * 4 + 1];
-    float bx2 = boxes[b * 4 + 2];
-    float by2 = boxes[b * 4 + 3];
+    float bxc = boxes[b * 4 + 0];
+    float byc = boxes[b * 4 + 1];
+    float bw = boxes[b * 4 + 2];
+    float bh = boxes[b * 4 + 3];
+
+    float bx1 = bxc - bw / 2;
+    float by1 = byc - bh / 2;
+    float bx2 = bx1 + bw;
+    float by2 = by1 + bh;
 
     NvDsInferObjectDetectionInfo bbi;
 
