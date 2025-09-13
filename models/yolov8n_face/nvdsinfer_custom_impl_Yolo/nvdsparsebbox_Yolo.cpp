@@ -178,16 +178,88 @@ decodeTensorYoloFace(const float* boxes, const float* scores, const float* landm
 
     NvDsInferObjectDetectionInfo bbi;
 
-    if (!addBBoxProposal(bx1, by1, bx2, by2, netW, netH, 0, maxProb, bbi)) {
+  if (!addBBoxProposal(bx1, by1, bx2, by2, netW, netH, 0, maxProb, bbi)) {
       continue;
     }
 
-    for (unsigned int i2=0; i2 < 5; i2++) {
-      bbi.landmark[i2*2] = lround(CLIP(landmarks[b * 15 + i2 * 3], 0, netW));
-      bbi.landmark[i2*2 + 1] = lround(CLIP(landmarks[b * 15 + i2 * 3 + 1], 0, netH));
+    // Landmarks layout can be either 10 (x,y pairs) or 15 (x,y,score per point)
+    unsigned int num_points = 5;
+    if (landmarks && (landmarksSize == 10 || landmarksSize >= 15)) {
+      for (unsigned int i2 = 0; i2 < num_points; i2++) {
+        unsigned int base = b * landmarksSize;
+        unsigned int x_idx = (landmarksSize == 10) ? (base + i2 * 2) : (base + i2 * 3);
+        unsigned int y_idx = (landmarksSize == 10) ? (base + i2 * 2 + 1) : (base + i2 * 3 + 1);
+        float lx = landmarks[x_idx];
+        float ly = landmarks[y_idx];
+        // If the model outputs normalized coords (0..1), scale to pixels
+        if (lx >= 0.0f && lx <= 1.5f && ly >= 0.0f && ly <= 1.5f) {
+          lx *= static_cast<float>(netW);
+          ly *= static_cast<float>(netH);
+        }
+        // Basic sanity: guard NaN/Inf
+        if (!std::isfinite(lx) || !std::isfinite(ly)) {
+          lx = (bx1 + bx2) * 0.5f; // fallback to box center
+          ly = (by1 + by2) * 0.5f;
+        }
+        bbi.landmark[i2 * 2] = lround(CLIP(lx, 0, netW));
+        bbi.landmark[i2 * 2 + 1] = lround(CLIP(ly, 0, netH));
+      }
+  bbi.numLmks = 10;
+    } else {
+      // Fallback: synthesize 5 points from bbox to avoid bad alignment crashes
+      float cx = (bx1 + bx2) * 0.5f;
+      float cy = (by1 + by2) * 0.5f;
+      float w = MAX(1.0f, bx2 - bx1);
+      float h = MAX(1.0f, by2 - by1);
+      float lx[5] = {cx - 0.2f * w, cx + 0.2f * w, cx, cx - 0.15f * w, cx + 0.15f * w};
+      float ly[5] = {cy - 0.2f * h, cy - 0.2f * h, cy, cy + 0.2f * h, cy + 0.2f * h};
+      for (unsigned int i2 = 0; i2 < num_points; i2++) {
+        bbi.landmark[i2 * 2] = lround(CLIP(lx[i2], 0, netW));
+        bbi.landmark[i2 * 2 + 1] = lround(CLIP(ly[i2], 0, netH));
+      }
+      bbi.numLmks = 10;
     }
 
-    bbi.numLmks = 10;
+    // Additional safety: ensure bbox is large enough and landmarks lie within bbox
+    const float min_box_size = 12.0f;
+    if (bbi.width < min_box_size || bbi.height < min_box_size) {
+      continue;
+    }
+    bool lmk_valid = true;
+    for (unsigned int i2 = 0; i2 < 5; i2++) {
+      int lx = bbi.landmark[i2 * 2];
+      int ly = bbi.landmark[i2 * 2 + 1];
+      if (lx < bbi.left - 2 || lx > (bbi.left + bbi.width + 2) ||
+          ly < bbi.top - 2 || ly > (bbi.top + bbi.height + 2)) {
+        lmk_valid = false;
+        break;
+      }
+    }
+    // Additional geometry checks for 5-point order: [LE, RE, Nose, LM, RM]
+    if (lmk_valid) {
+      auto dx = [](int x1, int y1, int x2, int y2) {
+        float dx = static_cast<float>(x2 - x1);
+        float dy = static_cast<float>(y2 - y1);
+        return std::sqrt(dx * dx + dy * dy);
+      };
+      int le_x = bbi.landmark[0], le_y = bbi.landmark[1];
+      int re_x = bbi.landmark[2], re_y = bbi.landmark[3];
+      int n_x  = bbi.landmark[4], n_y  = bbi.landmark[5];
+      int lm_x = bbi.landmark[6], lm_y = bbi.landmark[7];
+      int rm_x = bbi.landmark[8], rm_y = bbi.landmark[9];
+      float eye_dist = dx(le_x, le_y, re_x, re_y);
+      float box_diag = std::sqrt(bbi.width * bbi.width + bbi.height * bbi.height);
+      if (eye_dist < 0.05f * box_diag || eye_dist > 1.2f * box_diag) {
+        lmk_valid = false;
+      }
+      // Eyes should be roughly above mouth points
+      if (!(le_y < lm_y && re_y < rm_y)) {
+        lmk_valid = false;
+      }
+    }
+    if (!lmk_valid) {
+      continue;
+    }
 
     binfo.push_back(bbi);
   }

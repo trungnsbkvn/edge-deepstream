@@ -17,5 +17,6 @@ operate-on-class-ids=0
 #input-object-min-width=50
 #input-object-min-height=50
 
+# Disable alignment to avoid CUDA errors when landmarks are not consumed by plugin
 alignment-type=1
 #alignment-pics-path=/opt/nvidia/deepstream/deepstream/sources/face-recognition-deepstream/data/faces
