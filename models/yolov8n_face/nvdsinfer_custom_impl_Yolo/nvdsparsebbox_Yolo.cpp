@@ -135,23 +135,22 @@ convertBBox(const float& bx1, const float& by1, const float& bx2, const float& b
   b.top = y1;
   b.height = CLIP(y2 - y1, 0, netH);
 
-
-
   return b;
 }
 
-static void
+static bool
 addBBoxProposal(const float bx1, const float by1, const float bx2, const float by2, const uint& netW, const uint& netH,
     const int maxIndex, const float maxProb, NvDsInferObjectDetectionInfo& bbi)
 {
   bbi = convertBBox(bx1, by1, bx2, by2, netW, netH);
 
   if (bbi.width < 1 || bbi.height < 1) {
-      return;
+      return false;
   }
 
   bbi.detectionConfidence = maxProb;
   bbi.classId = maxIndex;
+  return true;
 }
 
 static std::vector<NvDsInferObjectDetectionInfo>
@@ -167,16 +166,6 @@ decodeTensorYoloFace(const float* boxes, const float* scores, const float* landm
       continue;
     }
 
-    // float bxc = boxes[b * 4 + 0];
-    // float byc = boxes[b * 4 + 1];
-    // float bw = boxes[b * 4 + 2];
-    // float bh = boxes[b * 4 + 3];
-
-    // float bx1 = bxc - bw / 2;
-    // float by1 = byc - bh / 2;
-    // float bx2 = bx1 + bw;
-    // float by2 = by1 + bh;
-
     float bx1 = boxes[b * 4 + 0];
     float by1 = boxes[b * 4 + 1];
     float bx2 = boxes[b * 4 + 2];
@@ -184,9 +173,10 @@ decodeTensorYoloFace(const float* boxes, const float* scores, const float* landm
 
     NvDsInferObjectDetectionInfo bbi;
 
-    addBBoxProposal(bx1, by1, bx2, by2, netW, netH, 0, maxProb, bbi);
-    // std::cout<<landmarks[b * 15]<<" "<<landmarks[b * 15 + 1]<<" "<<landmarks[b * 15 + 2]<<std::endl;
-    // addFaceProposal(landmarks, landmarksSize, netW, netH, b, bbi);
+    if (!addBBoxProposal(bx1, by1, bx2, by2, netW, netH, 0, maxProb, bbi)) {
+      continue;
+    }
+
     for (unsigned int i2=0; i2 < 5; i2++) {
       bbi.landmark[i2*2] = lround(CLIP(landmarks[b * 15 + i2 * 3], 0, netW));
       bbi.landmark[i2*2 + 1] = lround(CLIP(landmarks[b * 15 + i2 * 3 + 1], 0, netH));
@@ -194,7 +184,6 @@ decodeTensorYoloFace(const float* boxes, const float* scores, const float* landm
 
     bbi.numLmks = 10;
 
-    // std::cout<<bbi.top<<" "<<bbi.left<<" "<<bbi.width<<" "<<bbi.height<<" "<<bbi.detectionConfidence<<" "<<bbi.classId<<std::endl;
     binfo.push_back(bbi);
   }
 
