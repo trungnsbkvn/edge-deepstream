@@ -17,7 +17,7 @@ maintain-aspect-ratio=1
 symmetric-padding=1
 batch-size=1
 num-detected-classes=1
-output-tensor-meta=0
+output-tensor-meta=1
 
 # custom detection parser
 parse-bbox-func-name=NvDsInferParseYoloFace
