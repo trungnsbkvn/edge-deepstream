@@ -385,10 +385,28 @@ def main(cfg, run_duration=None):
     sgie_src_pad = sgie.get_static_pad("src")
     # Recognition settings
     try:
-        recog_thresh = cfg.get('recognition', {}).get('threshold', 0.3)
+        recog_cfg = cfg.get('recognition', {})
+        recog_thresh = recog_cfg.get('threshold', 0.3)
+        recog_save_dir = recog_cfg.get('save_dir', '')
+        recog_save_mode = str(recog_cfg.get('save_mode', 'all')).lower()
     except Exception:
         recog_thresh = 0.3
-    data = [known_face_features, save_feature, save_path, recog_thresh]
+        recog_save_dir = ''
+        recog_save_mode = 'all'
+    # Fetch alignment pics dir from SGIE property (set via config)
+    try:
+        alignment_pic_dir = sgie.get_property('alignment-pic-path') or ''
+    except Exception:
+        alignment_pic_dir = ''
+    data = [
+        known_face_features,  # 0
+        save_feature,         # 1
+        save_path,            # 2 (feature npy dir)
+        recog_thresh,         # 3
+        alignment_pic_dir,    # 4
+        recog_save_dir,       # 5 (recognized img dir)
+        recog_save_mode       # 6 (save mode: all|first|best)
+    ]
     sgie_src_pad.add_probe(Gst.PadProbeType.BUFFER, sgie_feature_extract_probe, data)
 
 

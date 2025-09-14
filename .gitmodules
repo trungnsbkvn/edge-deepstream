@@ -1,3 +1,0 @@
-[submodule "gst-nvinfer-custom"]
-	path = gst-nvinfer-custom
-	url = git@github.com:zhouyuchong/gst-nvinfer-custom.git

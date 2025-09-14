@@ -81,18 +81,37 @@ def sgie_feature_extract_probe(pad,info, data):
 
     batch_meta = pyds.gst_buffer_get_nvds_batch_meta(hash(gst_buffer))    
     l_frame = batch_meta.frame_meta_list
+
+    import cv2
+
+    # Save mode control
+    recog_save_dir = data[5] if len(data) > 5 and data[5] else ''
+    recog_save_mode = (data[6] if len(data) > 6 and data[6] else 'all').lower()
+    if recog_save_mode not in ('all','first','best'):
+        recog_save_mode = 'all'
+    # Ensure directories exist
+    try:
+        if recog_save_dir:
+            os.makedirs(recog_save_dir, exist_ok=True)
+    except Exception as _:
+        pass
+
+    # Track best/first saves per object id
+    # We stash state on the probe function object to persist across calls
+    if not hasattr(sgie_feature_extract_probe, '_track_state'):
+        sgie_feature_extract_probe._track_state = {}
+    track_state = sgie_feature_extract_probe._track_state
     while l_frame is not None:
         try:
             frame_meta = pyds.NvDsFrameMeta.cast(l_frame.data)
         except StopIteration:
             break
-        
-        l_obj=frame_meta.obj_meta_list
+
+        l_obj = frame_meta.obj_meta_list
         frame_number = frame_meta.frame_num
         while l_obj is not None:
             try:
-                obj_meta=pyds.NvDsObjectMeta.cast(l_obj.data)
-                
+                obj_meta = pyds.NvDsObjectMeta.cast(l_obj.data)
             except StopIteration:
                 break
 
@@ -121,18 +140,65 @@ def sgie_feature_extract_probe(pad,info, data):
                     py_nvosd_text_params.set_bg_clr = 1
                     py_nvosd_text_params.text_bg_clr.set(0.0, 0.0, 0.0, 1.0)
                     pyds.nvds_add_display_meta_to_frame(frame_meta, display_meta)
-                                  
-            try: 
-                l_obj=l_obj.next
 
+                    # --- Save recognized face image ---
+                    # Decide if we should save this frame based on mode
+                    try:
+                        align_dir = data[4] if len(data) > 4 and data[4] else None
+                        # Output dir: recognition.save_dir if provided, else fall back to features save_path
+                        out_dir = recog_save_dir if recog_save_dir else (data[2] if len(data) > 2 and data[2] else '.')
+                        os.makedirs(out_dir, exist_ok=True)
+
+                        oid = int(obj_meta.object_id)
+                        key = oid
+                        st = track_state.get(key)
+                        if st is None:
+                            st = {'saved_first': False, 'best_score': -1.0, 'best_path': None, 'best_name': None, 'best_frame': None}
+                            track_state[key] = st
+
+                        def copy_aligned(dst_dir):
+                            if not align_dir:
+                                return None
+                            src = os.path.join(align_dir, f"frame-{frame_number}_object-{oid}-aligned.png")
+                            if os.path.exists(src):
+                                import shutil
+                                # Use stable name for best mode, per-frame name for others
+                                if recog_save_mode == 'best':
+                                    dst = os.path.join(dst_dir, f"recog_{top_name}_track{oid}_best.png")
+                                else:
+                                    dst = os.path.join(dst_dir, f"recog_{top_name}_f{frame_number}_id{oid}.png")
+                                shutil.copy(src, dst)
+                                return dst
+                            return None
+
+                        if recog_save_mode == 'all':
+                            _ = copy_aligned(out_dir)
+                        elif recog_save_mode == 'first':
+                            if not st['saved_first']:
+                                dst = copy_aligned(out_dir)
+                                if dst:
+                                    st['saved_first'] = True
+                        else:  # best
+                            if top_score > st['best_score']:
+                                dst = copy_aligned(out_dir)
+                                if dst:
+                                    st['best_score'] = top_score
+                                    st['best_path'] = dst
+                                    st['best_name'] = top_name
+                                    st['best_frame'] = frame_number
+                    except Exception as e:
+                        print(f"[WARN] Could not save recognized face image: {e}")
+
+            try:
+                l_obj = l_obj.next
             except StopIteration:
-                break  
+                break
         try:
-            l_frame=l_frame.next
+            l_frame = l_frame.next
         except StopIteration:
             break
-            
-    return Gst.PadProbeReturn.OK	
+
+    return Gst.PadProbeReturn.OK
 
 
 def get_face_feature(obj_meta, frame_num, data):
