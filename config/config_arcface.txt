@@ -19,4 +19,4 @@ operate-on-class-ids=0
 
 # Re-enable alignment (handled by custom gst-nvinfer)
 alignment-type=1
-#alignment-pics-path=/opt/nvidia/deepstream/deepstream/sources/face-recognition-deepstream/data/faces
+alignment-pics-path=../data/faces
