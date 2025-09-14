@@ -140,9 +140,14 @@ class TensorRTInfer:
     
 def preprocess(input_path, netshape):
     raw_image = cv2.imread(input_path)
+    if raw_image is None:
+        raise FileNotFoundError(f"Failed to read image: {input_path}")
     assert raw_image.shape[0] == 112 and raw_image.shape[1] == 112
-    input_data = cv2.cvtColor(raw_image, cv2.COLOR_BGR2RGB)
-    image_data = np.array(image_data) / 255.0
+    rgb = cv2.cvtColor(raw_image, cv2.COLOR_BGR2RGB)
+    # ArcFace normalization: (img - 127.5) / 128.0, CHW
+    image_data = rgb.astype(np.float32)
+    image_data -= 127.5
+    image_data /= 128.0
     image_data = np.transpose(image_data, (2, 0, 1))  # Channel first
     image_data = np.expand_dims(image_data, axis=0).astype(np.float32)
     image = np.array(image_data, dtype=np.float32, order="C")
@@ -150,28 +155,44 @@ def preprocess(input_path, netshape):
 
 if __name__ == "__main__":
     model = TensorRTInfer("./models/arcface/arcface.engine", mode='min')
-    spec = model.input_spec()
+    _shape, _dtype = model.input_spec()
     path = "data/known_faces"
-    faces = os.listdir(path)
-    std = 128.0
-    offsets = np.array([127.5, 127.5, 127.5])
+    # Only process images; skip existing .npy files
+    exts = {".png", ".jpg", ".jpeg", ".bmp"}
+    faces = [f for f in os.listdir(path) if os.path.splitext(f)[1].lower() in exts]
+    if not faces:
+        print(f"No images found in {path}; expected one of {sorted(list(exts))}")
     for face in faces:
         image_path = os.path.join(path, face)
-        out_npy_path = os.path.join(path, face.replace("png", "npy"))
-        raw_image = cv2.imread(image_path)
-        assert raw_image.shape[0] == 112 and raw_image.shape[1] == 112
-        input_data = cv2.cvtColor(raw_image, cv2.COLOR_BGR2RGB)
-        # image_data = np.array(raw_image)
-        image_data = np.array(raw_image, dtype=np.float32)
-        image_data -= 127.5
-        image_data /= 128.0
-        image_data = np.transpose(image_data, (2, 0, 1))  # Channel first
-        image_data = np.expand_dims(image_data, axis=0).astype(np.float32)
-        image = np.array(image_data, dtype=np.float32, order="C")
-        preds = model.infer(image)[0]
-        res = np.reshape(preds,(1,-1))
-        norm=np.linalg.norm(res)                    
-        normal_array = res / norm
-        normal_array = np.reshape(normal_array,(-1,1))
-        np.save(out_npy_path, normal_array)
+        try:
+            # Preprocess with RGB + ArcFace normalization
+            raw = cv2.imread(image_path)
+            if raw is None:
+                print(f"Skip unreadable file: {image_path}")
+                continue
+            if raw.shape[0] != 112 or raw.shape[1] != 112:
+                print(f"Skip non-112x112 image: {image_path} (got {raw.shape[1]}x{raw.shape[0]})")
+                continue
+            rgb = cv2.cvtColor(raw, cv2.COLOR_BGR2RGB)
+            img = rgb.astype(np.float32)
+            img -= 127.5
+            img /= 128.0
+            img = np.transpose(img, (2, 0, 1))
+            img = np.expand_dims(img, axis=0).astype(np.float32)
+            inp = np.array(img, dtype=np.float32, order="C")
+
+            preds = model.infer(inp)[0]
+            res = np.reshape(preds, (1, -1))
+            # L2 normalize
+            norm = np.linalg.norm(res)
+            if norm == 0:
+                print(f"Zero norm embedding for {image_path}; skipping save")
+                continue
+            normal_array = (res / norm).reshape(-1, 1)
+
+            out_npy_path = os.path.join(path, os.path.splitext(face)[0] + ".npy")
+            np.save(out_npy_path, normal_array)
+            print(f"Saved embedding: {out_npy_path} shape={normal_array.shape}")
+        except Exception as e:
+            print(f"Failed on {image_path}: {e}")
 

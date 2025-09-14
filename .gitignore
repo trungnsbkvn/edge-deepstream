@@ -9,3 +9,6 @@ __pycache__
 *.o
 *.onnx
 data/features/*
+data/aligned_faces/*
+data/known_faces/*
+logs/*

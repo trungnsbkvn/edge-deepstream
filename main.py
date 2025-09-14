@@ -90,7 +90,7 @@ def create_source_bin(index,uri):
         return None
     return nbin
 
-def main(cfg):
+def main(cfg, run_duration=None):
     print(cfg)
     print("Load known faces features \n")
     known_face_features = load_faces(cfg['pipeline']['known_face_dir'])
@@ -110,6 +110,7 @@ def main(cfg):
 
     Gst.init(None)
     print("Creating Pipeline \n ")
+    pipeline = None
     pipeline = Gst.Pipeline()
     if not pipeline:
         sys.stderr.write(" Unable to create Pipeline \n")
@@ -188,25 +189,106 @@ def main(cfg):
     if not nvosd:
         sys.stderr.write(" Unable to create nvosd \n")
 
-    if not cfg['pipeline']['display']:
-        print("Creating Fakesink \n")
-        sink = Gst.ElementFactory.make("fakesink", "fakesink")
-        sink.set_property('enable-last-sample', 0)
-        sink.set_property('sync', 0)
-    else:
-        if cfg['pipeline']['is_aarch64']:
-            print("Creating nv3dsink \n")
-            sink = Gst.ElementFactory.make("nv3dsink", "nv3d-sink")
-            if not sink:
-                sys.stderr.write(" Unable to create nv3dsink \n")
-        else:
-            print("Creating EGLSink \n")
-            sink = Gst.ElementFactory.make("nveglglessink", "nvvideo-renderer")
-            if not sink:
-                sys.stderr.write(" Unable to create egl sink \n")
+    # Remote streaming configuration
+    remote_cfg = cfg.get('remote', {}) if isinstance(cfg, dict) else {}
+    remote_enable = bool(remote_cfg.get('enable', 0))
+    remote_host = remote_cfg.get('host', '127.0.0.1')
+    remote_port = int(remote_cfg.get('port', 5600))
+    remote_codec = str(remote_cfg.get('codec', 'h264')).lower()
 
-    if not sink:
-        sys.stderr.write(" Unable to create sink element \n")
+    sink = None
+    encoder = None
+    parser = None
+    mux = None
+    udpsink = None
+    postconv = None
+    postcaps = None
+
+    if remote_enable:
+        print("Creating UDP streaming sink (MPEG-TS over UDP)\n")
+        # Choose encoder per platform and codec
+        if remote_codec == 'h265':
+            enc_name_aarch64 = 'nvv4l2h265enc'
+            enc_name_dgpu = 'nvh265enc'
+            parser_name = 'h265parse'
+        else:
+            enc_name_aarch64 = 'nvv4l2h264enc'
+            enc_name_dgpu = 'nvh264enc'
+            parser_name = 'h264parse'
+
+        enc_name = enc_name_aarch64 if cfg['pipeline']['is_aarch64'] else enc_name_dgpu
+        encoder = Gst.ElementFactory.make(enc_name, 'encoder')
+        # Fallback to software x264/x265 if HW encoder not available
+        if not encoder and remote_codec == 'h264':
+            encoder = Gst.ElementFactory.make('x264enc', 'encoder')
+            if encoder:
+                encoder.set_property('tune', 'zerolatency')
+                encoder.set_property('speed-preset', 'superfast')
+        if not encoder and remote_codec == 'h265':
+            encoder = Gst.ElementFactory.make('x265enc', 'encoder')
+            if encoder:
+                encoder.set_property('tune', 'zerolatency')
+
+        if not encoder:
+            sys.stderr.write(" Unable to create encoder for remote streaming; falling back to fakesink\n")
+        else:
+            # Reasonable defaults
+            if enc_name.startswith('nvv4l2'):
+                encoder.set_property('bitrate', 4000000)  # ~4 Mbps
+                if remote_codec == 'h264':
+                    encoder.set_property('insert-sps-pps', 1)
+                encoder.set_property('iframeinterval', 30)
+                # 1 = VBR, 2 = CBR
+                encoder.set_property('control-rate', 1)
+            elif enc_name.startswith('nvh'):
+                # nvh264enc/nvh265enc properties
+                if encoder.find_property('bitrate'):
+                    encoder.set_property('bitrate', 4000)  # in kbps
+                if encoder.find_property('preset'):
+                    encoder.set_property('preset', 'low-latency-hq')
+
+            parser = Gst.ElementFactory.make(parser_name, 'parser')
+            mux = Gst.ElementFactory.make('mpegtsmux', 'tsmux')
+            udpsink = Gst.ElementFactory.make('udpsink', 'udpsink')
+            if udpsink:
+                udpsink.set_property('host', remote_host)
+                udpsink.set_property('port', remote_port)
+                udpsink.set_property('sync', 0)
+                udpsink.set_property('async', 0)
+
+            # Add post-OSD converter and caps to feed encoder NV12
+            postconv = Gst.ElementFactory.make('nvvideoconvert', 'postconvert')
+            postcaps = Gst.ElementFactory.make('capsfilter', 'postcaps')
+            if postcaps:
+                from gi.repository import Gst as _Gst
+                caps_str = 'video/x-raw(memory:NVMM), format=NV12' if cfg['pipeline']['is_aarch64'] else 'video/x-raw, format=NV12'
+                postcaps.set_property('caps', _Gst.Caps.from_string(caps_str))
+
+            if not (parser and mux and udpsink and postconv and postcaps):
+                sys.stderr.write(" Unable to create streaming elements; falling back to fakesink\n")
+                encoder = None
+
+    if not remote_enable or encoder is None:
+        # Use local display or fakesink
+        if not cfg['pipeline']['display']:
+            print("Creating Fakesink \n")
+            sink = Gst.ElementFactory.make("fakesink", "fakesink")
+            sink.set_property('enable-last-sample', 0)
+            sink.set_property('sync', 0)
+        else:
+            if cfg['pipeline']['is_aarch64']:
+                print("Creating nv3dsink \n")
+                sink = Gst.ElementFactory.make("nv3dsink", "nv3d-sink")
+                if not sink:
+                    sys.stderr.write(" Unable to create nv3dsink \n")
+            else:
+                print("Creating EGLSink \n")
+                sink = Gst.ElementFactory.make("nveglglessink", "nvvideo-renderer")
+                if not sink:
+                    sys.stderr.write(" Unable to create egl sink \n")
+
+        if not sink:
+            sys.stderr.write(" Unable to create sink element \n")
 
     if is_live:
         print("At least one of the sources is live \n")
@@ -217,7 +299,9 @@ def main(cfg):
     set_property(cfg, sgie, "sgie")
     set_property(cfg, nvosd, "nvosd")
     set_property(cfg, tiler, "tiler")
-    set_property(cfg, sink, "sink")
+    # Apply sink properties only for local sink path
+    if not (remote_enable and encoder is not None):
+        set_property(cfg, sink, "sink")
     set_tracker_properties(tracker, cfg['tracker']['config-file-path'])
 
     tiler_rows=int(math.sqrt(number_sources))
@@ -232,7 +316,15 @@ def main(cfg):
     pipeline.add(tiler)
     pipeline.add(nvvidconv)
     pipeline.add(nvosd)
-    pipeline.add(sink)
+    if remote_enable and encoder is not None:
+        pipeline.add(postconv)
+        pipeline.add(postcaps)
+        pipeline.add(encoder)
+        pipeline.add(parser)
+        pipeline.add(mux)
+        pipeline.add(udpsink)
+    else:
+        pipeline.add(sink)
 
     print("Linking elements in the Pipeline \n")
     streammux.link(queue1)
@@ -248,7 +340,22 @@ def main(cfg):
     nvvidconv.link(queue6)
     queue6.link(nvosd)
     nvosd.link(queue7)
-    queue7.link(sink)   
+    if remote_enable and encoder is not None:
+        # nvosd -> queue7 -> nvvideoconvert -> caps -> encoder -> parser -> mpegtsmux -> udpsink
+        if not queue7.link(postconv):
+            sys.stderr.write(" Failed to link postconvert \n")
+        if not postconv.link(postcaps):
+            sys.stderr.write(" Failed to link postcaps \n")
+        if not postcaps.link(encoder):
+            sys.stderr.write(" Failed to link encoder \n")
+        if not encoder.link(parser):
+            sys.stderr.write(" Failed to link parser \n")
+        if not parser.link(mux):
+            sys.stderr.write(" Failed to link mpegtsmux \n")
+        if not mux.link(udpsink):
+            sys.stderr.write(" Failed to link udpsink \n")
+    else:
+        queue7.link(sink)
 
     # create an event loop and feed gstreamer bus mesages to it
     loop = GLib.MainLoop()
@@ -256,12 +363,32 @@ def main(cfg):
     bus.add_signal_watch()
     bus.connect ("message", bus_call, loop)
 
+    # Optional timed stop for testing: quit loop after run_duration seconds
+    if run_duration is not None:
+        try:
+            duration_ms = int(float(run_duration) * 1000)
+        except Exception:
+            duration_ms = None
+        if duration_ms and duration_ms > 0:
+            def _stop_loop():
+                try:
+                    loop.quit()
+                except Exception:
+                    pass
+                return False  # do not repeat
+            GLib.timeout_add(duration_ms, _stop_loop)
+
     print("Attach probes")
     pgie_src_pad = pgie.get_static_pad("src")
     pgie_src_pad.add_probe(Gst.PadProbeType.BUFFER, pgie_src_filter_probe, 0)
 
     sgie_src_pad = sgie.get_static_pad("src")
-    data = [known_face_features, save_feature, save_path]
+    # Recognition settings
+    try:
+        recog_thresh = cfg.get('recognition', {}).get('threshold', 0.3)
+    except Exception:
+        recog_thresh = 0.3
+    data = [known_face_features, save_feature, save_path, recog_thresh]
     sgie_src_pad.add_probe(Gst.PadProbeType.BUFFER, sgie_feature_extract_probe, data)
 
 
@@ -280,7 +407,11 @@ def main(cfg):
         pass
     # cleanup
     print("Exiting app\n")
-    pipeline.set_state(Gst.State.NULL)
+    try:
+        if pipeline is not None:
+            pipeline.set_state(Gst.State.NULL)
+    except Exception:
+        pass
 
 if __name__ == '__main__':
     cfg = parse_args(cfg_path="config/config_pipeline.toml")
