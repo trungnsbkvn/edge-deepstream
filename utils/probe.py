@@ -87,7 +87,7 @@ def sgie_feature_extract_probe(pad,info, data):
     # Save mode control
     recog_save_dir = data[5] if len(data) > 5 and data[5] else ''
     recog_save_mode = (data[6] if len(data) > 6 and data[6] else 'all').lower()
-    if recog_save_mode not in ('all','first','best'):
+    if recog_save_mode not in ('all','first','best','none'):
         recog_save_mode = 'all'
     # Ensure directories exist
     try:
@@ -101,6 +101,15 @@ def sgie_feature_extract_probe(pad,info, data):
     if not hasattr(sgie_feature_extract_probe, '_track_state'):
         sgie_feature_extract_probe._track_state = {}
     track_state = sgie_feature_extract_probe._track_state
+    # Verbosity and saving controls (from main -> data vector)
+    verbose = False
+    try:
+        # index 7 reserved for verbose flag (bool)
+        if isinstance(data, (list, tuple)) and len(data) > 7:
+            verbose = bool(data[7])
+    except Exception:
+        verbose = False
+
     while l_frame is not None:
         try:
             frame_meta = pyds.NvDsFrameMeta.cast(l_frame.data)
@@ -127,7 +136,8 @@ def sgie_feature_extract_probe(pad,info, data):
                         top_name = key
                 # Print and overlay only if above threshold
                 if top_score >= threshold and top_name is not None:
-                    print(f"frame-{frame_number}, face-{obj_meta.object_id} match: {top_name} score: {top_score:.3f}")
+                    if verbose:
+                        print(f"frame-{frame_number}, face-{obj_meta.object_id} match: {top_name} score: {top_score:.3f}")
                     display_meta = pyds.nvds_acquire_display_meta_from_pool(batch_meta)
                     display_meta.num_labels = 1
                     py_nvosd_text_params = display_meta.text_params[0]
@@ -171,7 +181,9 @@ def sgie_feature_extract_probe(pad,info, data):
                                 return dst
                             return None
 
-                        if recog_save_mode == 'all':
+                        if recog_save_mode == 'none':
+                            pass
+                        elif recog_save_mode == 'all':
                             _ = copy_aligned(out_dir)
                         elif recog_save_mode == 'first':
                             if not st['saved_first']:
@@ -187,7 +199,8 @@ def sgie_feature_extract_probe(pad,info, data):
                                     st['best_name'] = top_name
                                     st['best_frame'] = frame_number
                     except Exception as e:
-                        print(f"[WARN] Could not save recognized face image: {e}")
+                        if verbose:
+                            print(f"[WARN] Could not save recognized face image: {e}")
 
             try:
                 l_obj = l_obj.next
@@ -228,10 +241,13 @@ def get_face_feature(obj_meta, frame_num, data):
             res = np.reshape(output,(1,-1))
             norm=np.linalg.norm(res)                    
             normal_array = res / norm
-            if data[1]:
-                # print(data[1], data[2])
-                save_p = os.path.join(data[2], f"{obj_meta.object_id}-{frame_num}.npy")
-                np.save(save_p, normal_array)
+            # Save feature .npy only if enabled
+            try:
+                if data[1]:
+                    save_p = os.path.join(data[2], f"{obj_meta.object_id}-{frame_num}.npy")
+                    np.save(save_p, normal_array)
+            except Exception:
+                pass
             return normal_array
 
         try:

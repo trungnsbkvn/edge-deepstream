@@ -12,7 +12,7 @@ network-mode=2
 # 1: Primary, 2: Secondary
 process-mode=2
 # 0: Detector, 1: Classifier, 2: Segmentation, 3: Instance Segmentation 100:Other
-network-type=1
+network-type=100
 output-tensor-meta=1
 symmetric-padding=1
 classifier-async-mode=0

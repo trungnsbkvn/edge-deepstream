@@ -17,6 +17,7 @@
 # limitations under the License.
 ################################################################################
 import sys
+import os
 import math
 
 from utils.probe import *
@@ -73,6 +74,11 @@ def create_source_bin(index,uri):
         sys.stderr.write(" Unable to create uri decode bin \n")
     # We set the input uri to the source element
     uri_decode_bin.set_property("uri",uri)
+    # Prefer NVMM video surfaces and avoid exposing non-video streams to keep pipeline lean
+    try:
+        uri_decode_bin.set_property("caps", Gst.Caps.from_string("video/x-raw(memory:NVMM)"))
+    except Exception:
+        pass
     # Connect to the "pad-added" signal of the decodebin which generates a
     # callback once a new pad for raw data has beed created by the decodebin
     uri_decode_bin.connect("pad-added",cb_newpad,nbin)
@@ -133,14 +139,17 @@ def main(cfg, run_duration=None):
         
         if not source_bin:
             sys.stderr.write("Unable to create source bin \n")
+            continue
         pipeline.add(source_bin)
         padname="sink_%u" % source_idx
-        sinkpad= streammux.get_request_pad(padname) 
+        sinkpad = streammux.get_request_pad(padname)
         if not sinkpad:
             sys.stderr.write("Unable to create sink pad bin \n")
-        srcpad=source_bin.get_static_pad("src")
+            continue
+        srcpad = source_bin.get_static_pad("src")
         if not srcpad:
             sys.stderr.write("Unable to create src pad bin \n")
+            continue
         srcpad.link(sinkpad)
         source_idx += 1
 
@@ -191,7 +200,13 @@ def main(cfg, run_duration=None):
 
     # Local sink only (remote streaming removed)
     sink = None
-    if not cfg['pipeline']['display']:
+    # Detect display availability; fallback to fakesink on headless/TTY sessions
+    has_display = bool(os.environ.get('DISPLAY') or os.environ.get('WAYLAND_DISPLAY'))
+    headless = not has_display
+
+    if not cfg['pipeline']['display'] or headless:
+        if headless and cfg['pipeline']['display']:
+            print("No GUI display detected (DISPLAY/WAYLAND_DISPLAY unset). Falling back to fakesink for headless run.\n")
         print("Creating Fakesink \n")
         sink = Gst.ElementFactory.make("fakesink", "fakesink")
         sink.set_property('enable-last-sample', 0)
@@ -219,6 +234,12 @@ def main(cfg, run_duration=None):
     set_property(cfg, pgie, "pgie")
     set_property(cfg, sgie, "sgie")
     set_property(cfg, nvosd, "nvosd")
+    # If headless, turn off text drawing to save cycles (can still attach meta if needed)
+    try:
+        if not cfg['pipeline']['display']:
+            nvosd.set_property('display-text', 0)
+    except Exception:
+        pass
     set_property(cfg, tiler, "tiler")
     # Apply sink properties
     set_property(cfg, sink, "sink")
@@ -250,9 +271,13 @@ def main(cfg, run_duration=None):
     tiler.link(queue5)
     queue5.link(nvvidconv)
     nvvidconv.link(queue6)
-    queue6.link(nvosd)
-    nvosd.link(queue7)
-    queue7.link(sink)
+    if cfg['pipeline']['display']:
+        queue6.link(nvosd)
+        nvosd.link(queue7)
+        queue7.link(sink)
+    else:
+        # Bypass OSD in headless mode for better throughput
+        queue6.link(sink)
 
     # create an event loop and feed gstreamer bus mesages to it
     loop = GLib.MainLoop()
@@ -295,6 +320,13 @@ def main(cfg, run_duration=None):
         alignment_pic_dir = sgie.get_property('alignment-pic-path') or ''
     except Exception:
         alignment_pic_dir = ''
+    # Debug/verbosity
+    try:
+        debug_cfg = cfg.get('debug', {})
+        verbose = bool(debug_cfg.get('verbose', 0))
+    except Exception:
+        verbose = False
+
     data = [
         known_face_features,  # 0
         save_feature,         # 1
@@ -302,7 +334,8 @@ def main(cfg, run_duration=None):
         recog_thresh,         # 3
         alignment_pic_dir,    # 4
         recog_save_dir,       # 5 (recognized img dir)
-        recog_save_mode       # 6 (save mode: all|first|best)
+        recog_save_mode,      # 6 (save mode: all|first|best)
+        verbose               # 7 (debug prints)
     ]
     sgie_src_pad.add_probe(Gst.PadProbeType.BUFFER, sgie_feature_extract_probe, data)
 
