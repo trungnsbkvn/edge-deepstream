@@ -8,6 +8,7 @@ __pycache__
 .vscode/
 *.o
 *.onnx
+*.log
 data/features/*
 data/aligned_faces/*
 data/known_faces/*
