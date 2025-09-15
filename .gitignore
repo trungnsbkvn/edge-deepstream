@@ -14,3 +14,6 @@ data/known_faces/*
 data/recognized/*
 logs/*
 data/faces/*
+gst-nvinfer-custom/**/lib*.so
+gst-nvinfer-custom/**/**/*.o
+gst-nvinfer-custom/**/**/test_align_compare
