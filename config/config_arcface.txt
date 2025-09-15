@@ -21,7 +21,9 @@ operate-on-class-ids=0
 #input-object-min-width=50
 #input-object-min-height=50
 
-# Re-enable alignment (handled by custom gst-nvinfer)
+# Alignment by custom gst-nvinfer
 alignment-type=1
-# Path to save pre/post-alignment crops (parser expects 'alignment-pics-path')
-alignment-pics-path=data/faces/aligned
+# Path to save pre/post-alignment crops
+#alignment-pics-path=data/faces/aligned
+# Skip frame to keep up real-time when syncing display
+interval=1

@@ -28,31 +28,74 @@ def pgie_src_filter_probe(pad,info,u_data):
     batch_meta = pyds.gst_buffer_get_nvds_batch_meta(hash(gst_buffer))
     l_frame = batch_meta.frame_meta_list
     
+    # Tuning knobs: tighten to reduce noisy crops
+    MIN_CONF = float(os.getenv('PGIE_MIN_CONF', '0.65'))   # raise if still noisy
+    MIN_W = int(os.getenv('PGIE_MIN_W', '20'))            # min face width in pixels
+    MIN_H = int(os.getenv('PGIE_MIN_H', '20'))            # min face height in pixels
+    MIN_AR = float(os.getenv('PGIE_MIN_AR', '0.6'))       # w/h lower bound
+    MAX_AR = float(os.getenv('PGIE_MAX_AR', '1.8'))       # w/h upper bound
+    TOPK = int(os.getenv('PGIE_TOPK', '30'))              # keep top-K by conf per frame (0 disables)
+
     while l_frame is not None:
         try:
             frame_meta = pyds.NvDsFrameMeta.cast(l_frame.data)
         except StopIteration:
             break
         
-        l_obj=frame_meta.obj_meta_list
+        # Collect objects first to rank by confidence
+        objs = []
+        l_obj = frame_meta.obj_meta_list
         while l_obj is not None:
             try:
-
-                obj_meta=pyds.NvDsObjectMeta.cast(l_obj.data)
+                obj_meta = pyds.NvDsObjectMeta.cast(l_obj.data)
             except StopIteration:
                 break
-            
-            drop_signal = True
-            if obj_meta.confidence > 0.6:
-                drop_signal = False
-
-            try: 
-                l_obj=l_obj.next
-                if drop_signal is True:
-                    pyds.nvds_remove_obj_meta_from_frame(frame_meta, obj_meta)
-                
+            objs.append(obj_meta)
+            try:
+                l_obj = l_obj.next
             except StopIteration:
                 break
+
+        # Sort by confidence desc and keep top-K
+        if objs:
+            objs.sort(key=lambda o: float(getattr(o, 'confidence', 0.0)), reverse=True)
+            keep_set = set(objs[:TOPK] if TOPK > 0 else objs)
+        else:
+            keep_set = set()
+
+        # Second pass: remove low-conf, tiny, bad aspect, and extra beyond top-K
+        l_obj = frame_meta.obj_meta_list
+        while l_obj is not None:
+            try:
+                obj_meta = pyds.NvDsObjectMeta.cast(l_obj.data)
+            except StopIteration:
+                break
+
+            drop = False
+            conf = float(getattr(obj_meta, 'confidence', 0.0))
+            rp = obj_meta.rect_params
+            w = float(getattr(rp, 'width', 0.0))
+            h = float(getattr(rp, 'height', 0.0))
+            ar = (w / h) if h > 1e-3 else 999.0
+
+            if TOPK > 0 and obj_meta not in keep_set:
+                drop = True
+            elif conf < MIN_CONF:
+                drop = True
+            elif w < MIN_W or h < MIN_H:
+                drop = True
+            elif not (MIN_AR <= ar <= MAX_AR):
+                drop = True
+
+            try:
+                next_obj = l_obj.next
+            except StopIteration:
+                next_obj = None
+
+            if drop:
+                pyds.nvds_remove_obj_meta_from_frame(frame_meta, obj_meta)
+
+            l_obj = next_obj
 
         try:
             l_frame=l_frame.next
