@@ -40,7 +40,7 @@ qos=0
 [recognition]
 # Cosine similarity threshold for accepting a match (higher = stricter)
 threshold=0.4
-# Directory to save recognized face images (separate from feature npy files)
+# Directory to save recognized face images
 save_dir="data/faces/recognized"
 # Save mode for recognized images: "all" (every frame), "first" (first per track), "best" (best score per track)
 save_mode="first"

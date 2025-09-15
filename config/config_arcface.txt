@@ -5,10 +5,14 @@ model-engine-file=../models/arcface/arcface.engine
 net-scale-factor=0.0078125
 offsets=127.5;127.5;127.5
 batch-size=4
+#0=RGB, 1=BGR
 model-color-format=0
+## 0=FP32, 1=INT8, 2=FP16 mode
 network-mode=2
+# 1: Primary, 2: Secondary
 process-mode=2
-network-type=100
+# 0: Detector, 1: Classifier, 2: Segmentation, 3: Instance Segmentation 100:Other
+network-type=1
 output-tensor-meta=1
 symmetric-padding=1
 classifier-async-mode=0
@@ -20,4 +24,4 @@ operate-on-class-ids=0
 # Re-enable alignment (handled by custom gst-nvinfer)
 alignment-type=1
 # Path to save pre/post-alignment crops (parser expects 'alignment-pics-path')
-#alignment-pics-path=data/faces/aligned
+alignment-pics-path=data/faces/aligned

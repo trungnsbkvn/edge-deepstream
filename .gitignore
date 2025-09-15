@@ -13,3 +13,4 @@ data/aligned_faces/*
 data/known_faces/*
 data/recognized/*
 logs/*
+data/faces/*
