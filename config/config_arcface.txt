@@ -20,4 +20,4 @@ operate-on-class-ids=0
 # Re-enable alignment (handled by custom gst-nvinfer)
 alignment-type=1
 # Path to save pre/post-alignment crops (parser expects 'alignment-pics-path')
-alignment-pics-path=data/aligned_faces
+#alignment-pics-path=data/faces/aligned
