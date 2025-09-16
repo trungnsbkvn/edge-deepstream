@@ -19,3 +19,4 @@ gst-nvinfer-custom/**/lib*.so
 gst-nvinfer-custom/**/**/*.o
 gst-nvinfer-custom/**/**/test_align_compare
 third_party/faiss*
+third_party/faiss
