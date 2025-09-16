@@ -1,17 +1,5 @@
-# Core runtime
-numpy
+numpy==1.24.4
 toml
-gi
-opencv-python-headless
-
-# DeepStream Python bindings come from the NVIDIA SDK (pyds), not pip.
-# Ensure DeepStream is installed and PYTHONPATH is configured.
-
-# Vector index (choose one based on environment):
-# For CUDA GPU (x86_64): install appropriate faiss-gpu wheel from conda-forge or PyPI if available
-# faiss-gpu
-# For CPU-only fallback:
-# faiss-cpu
-
-# Optional cuVS (RAPIDS) for vector search acceleration (advanced; requires RAPIDS setup)
-# cuvs
+opencv-python
+tensorrt==8.5.3.1
+cuda-python==12.1.0

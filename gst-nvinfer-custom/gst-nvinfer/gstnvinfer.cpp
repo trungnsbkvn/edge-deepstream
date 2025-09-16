@@ -3002,5 +3002,5 @@ nvinfer_plugin_init (GstPlugin * plugin)
 }
 
 GST_PLUGIN_DEFINE (GST_VERSION_MAJOR, GST_VERSION_MINOR, nvdsgst_infer,
-    DESCRIPTION, nvinfer_plugin_init, "6.1", LICENSE, BINARY_PACKAGE, URL)
+    DESCRIPTION, nvinfer_plugin_init, "6.3", LICENSE, BINARY_PACKAGE, URL)
 

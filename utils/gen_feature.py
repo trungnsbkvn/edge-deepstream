@@ -10,6 +10,9 @@ import math
 import cv2
 import tensorrt as trt
 import numpy as np
+# Compatibility for NumPy>=1.24 where np.bool alias was removed; TensorRT<=8.x uses np.bool in nptype()
+if not hasattr(np, "bool"):
+    np.bool = np.bool_
 from cuda import cuda, cudart
 
 def check_cuda_err(err):

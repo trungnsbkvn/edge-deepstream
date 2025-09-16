@@ -50,7 +50,7 @@ save_mode="first"
 backend="faiss"
 # If your known_face_dir has images instead of .npy embeddings, you can point to a folder of .npy features
 # to build the index from. If empty or not set, will use known_face_dir.
-feature_dir="data/features"
+feature_dir="data/known_faces"
 # Vector index configuration
 # Use FAISS-based index for matching (1 to enable, 0 to disable)
 use_index=1
@@ -59,7 +59,7 @@ metric="cosine"
 # FAISS index type: "flat" (exact), "ivf" (coarse quantizer), or "ivfpq" (compressed)
 index_type="flat"
 # GPU acceleration (requires faiss-gpu); falls back to CPU if unavailable
-use_gpu=1
+use_gpu=0
 gpu_id=0
 # IVF lists (only for ivf/ivfpq); if 0, auto sqrt(N)
 nlist=0
