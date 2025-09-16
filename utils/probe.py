@@ -153,6 +153,18 @@ def sgie_feature_extract_probe(pad,info, data):
     except Exception:
         verbose = False
 
+    # Vector index (FAISS) and metric
+    vector_index = None
+    recog_metric = 'cosine'
+    try:
+        if isinstance(data, (list, tuple)) and len(data) > 8:
+            vector_index = data[8]
+        if isinstance(data, (list, tuple)) and len(data) > 9:
+            recog_metric = str(data[9]).lower()
+    except Exception:
+        vector_index = None
+        recog_metric = 'cosine'
+
     while l_frame is not None:
         try:
             frame_meta = pyds.NvDsFrameMeta.cast(l_frame.data)
@@ -168,19 +180,55 @@ def sgie_feature_extract_probe(pad,info, data):
                 break
 
             face_feature = get_face_feature(obj_meta, frame_number, data)
-            if face_feature is not None and loaded_faces:
-                # Find top-1 match
+            if face_feature is not None:
                 top_name = None
-                top_score = -1.0
-                for key, value in loaded_faces.items():
-                    score = float(np.dot(face_feature, value)[0])
-                    if score > top_score:
-                        top_score = score
-                        top_name = key
-                # Print and overlay only if above threshold
-                if top_score >= threshold and top_name is not None:
+                top_sim = -1.0  # higher is better similarity proxy
+                top_dist = None # for l2 only
+                # Prefer FAISS index if available
+                if vector_index is not None and vector_index.size() > 0:
+                    try:
+                        name, score = vector_index.search_top1(face_feature.reshape(-1))
+                        if recog_metric == 'l2':
+                            top_name = name
+                            top_dist = float(score)
+                            top_sim = -top_dist
+                        else:
+                            top_name = name
+                            top_sim = float(score)
+                    except Exception:
+                        top_name, top_sim, top_dist = None, -1.0, None
+                elif loaded_faces:
+                    emb = face_feature.reshape(-1)
+                    if recog_metric == 'l2':
+                        best = (None, float('inf'))
+                        for key, value in loaded_faces.items():
+                            diff = emb - value.reshape(-1)
+                            dist = float(np.dot(diff, diff))
+                            if dist < best[1]:
+                                best = (key, dist)
+                        if best[0] is not None:
+                            top_name = best[0]
+                            top_dist = best[1]
+                            top_sim = -top_dist
+                    else:
+                        for key, value in loaded_faces.items():
+                            score = float(np.dot(emb, value.reshape(-1)))
+                            if score > top_sim:
+                                top_sim = score
+                                top_name = key
+                # Decide match based on metric-specific threshold
+                match_ok = False
+                if top_name is not None:
+                    if recog_metric == 'l2':
+                        if top_dist is not None and top_dist <= threshold:
+                            match_ok = True
+                    else:
+                        if top_sim >= threshold:
+                            match_ok = True
+                if match_ok:
                     if verbose:
-                        print(f"frame-{frame_number}, face-{obj_meta.object_id} match: {top_name} score: {top_score:.3f}")
+                        disp = top_dist if recog_metric == 'l2' else top_sim
+                        print(f"frame-{frame_number}, face-{obj_meta.object_id} match: {top_name} score: {disp:.3f}")
                     display_meta = pyds.nvds_acquire_display_meta_from_pool(batch_meta)
                     display_meta.num_labels = 1
                     py_nvosd_text_params = display_meta.text_params[0]
@@ -234,10 +282,10 @@ def sgie_feature_extract_probe(pad,info, data):
                                 if dst:
                                     st['saved_first'] = True
                         else:  # best
-                            if top_score > st['best_score']:
+                            if top_sim > st['best_score']:
                                 dst = copy_aligned(out_dir)
                                 if dst:
-                                    st['best_score'] = top_score
+                                    st['best_score'] = top_sim
                                     st['best_path'] = dst
                                     st['best_name'] = top_name
                                     st['best_frame'] = frame_number

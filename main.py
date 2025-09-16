@@ -137,6 +137,20 @@ def main(cfg, run_duration=None):
     print(cfg)
     print("Load known faces features \n")
     known_face_features = load_faces(cfg['pipeline']['known_face_dir'])
+    # Build/load vector index (FAISS) if available and enabled
+    try:
+        recog_cfg = cfg.get('recognition', {})
+    except Exception:
+        recog_cfg = {}
+    try:
+        vector_index = build_or_load_index(cfg['pipeline']['known_face_dir'], recog_cfg)
+        if vector_index is not None:
+            print(f"Vector index ready: {vector_index.size()} entries\n")
+        else:
+            print("Vector index disabled or not available; using Python matching.\n")
+    except Exception as e:
+        vector_index = None
+        print(f"Vector index unavailable ({e}); fallback to Python matching.\n")
 
     save_feature = cfg['pipeline']['save_feature']
     save_path = None
@@ -387,10 +401,12 @@ def main(cfg, run_duration=None):
         recog_thresh = recog_cfg.get('threshold', 0.3)
         recog_save_dir = recog_cfg.get('save_dir', '')
         recog_save_mode = str(recog_cfg.get('save_mode', 'all')).lower()
+        recog_metric = str(recog_cfg.get('metric', 'cosine')).lower()
     except Exception:
         recog_thresh = 0.3
         recog_save_dir = ''
         recog_save_mode = 'all'
+        recog_metric = 'cosine'
     # Fetch alignment pics dir from SGIE property (set via config)
     try:
         alignment_pic_dir = sgie.get_property('alignment-pic-path') or ''
@@ -411,7 +427,9 @@ def main(cfg, run_duration=None):
         alignment_pic_dir,    # 4
         recog_save_dir,       # 5 (recognized img dir)
         recog_save_mode,      # 6 (save mode: all|first|best)
-        verbose               # 7 (debug prints)
+        verbose,              # 7 (debug prints)
+        vector_index,         # 8 (FAISS index or None)
+        recog_metric          # 9 (metric: cosine|l2)
     ]
     sgie_src_pad.add_probe(Gst.PadProbeType.BUFFER, sgie_feature_extract_probe, data)
 

@@ -46,6 +46,29 @@ threshold=0.4
 save_dir="data/faces/recognized"
 # Save mode for recognized images: "all" (every frame), "first" (first per track), "best" (best score per track)
 save_mode="first"
+# Backend: "faiss" (default), "cuvs" (experimental; requires RAPIDS cuVS), or "auto"
+backend="faiss"
+# If your known_face_dir has images instead of .npy embeddings, you can point to a folder of .npy features
+# to build the index from. If empty or not set, will use known_face_dir.
+feature_dir="data/features"
+# Vector index configuration
+# Use FAISS-based index for matching (1 to enable, 0 to disable)
+use_index=1
+# Metric for matching: "cosine" (inner product) or "l2"
+metric="cosine"
+# FAISS index type: "flat" (exact), "ivf" (coarse quantizer), or "ivfpq" (compressed)
+index_type="flat"
+# GPU acceleration (requires faiss-gpu); falls back to CPU if unavailable
+use_gpu=1
+gpu_id=0
+# IVF lists (only for ivf/ivfpq); if 0, auto sqrt(N)
+nlist=0
+# PQ sub-vectors (only for ivfpq); if 0, auto dim/8
+m_pq=0
+nbits_pq=8
+# Persisted index paths (optional); if present, will attempt to load; else build and save
+index_path="data/index/faiss.index"
+labels_path="data/index/labels.json"
 
 [debug]
 # Verbose console prints (matching per-frame)
