@@ -78,9 +78,22 @@ def decodebin_child_added(child_proxy, Object, name, user_data):
         Object.connect("child-added", decodebin_child_added, user_data)
 
     if "source" in name:
-        source_element = child_proxy.get_by_name("source")
-        if source_element.find_property('drop-on-latency') != None:
-            Object.set_property("drop-on-latency", True)
+        # Low-latency tuning for RTSP source (rtspsrc)
+        try:
+            # rtspsrc exposes these and forwards to its internal jitterbuffer
+            if Object.find_property('latency') is not None:
+                # Keep latency small but non-zero to avoid jitter; tune as needed
+                Object.set_property('latency', 50)
+            if Object.find_property('drop-on-latency') is not None:
+                Object.set_property('drop-on-latency', True)
+            if Object.find_property('do-retransmission') is not None:
+                # Disable retransmission to avoid stalling on packet loss
+                Object.set_property('do-retransmission', False)
+            if Object.find_property('ntp-sync') is not None:
+                # Don't reorder based on NTP; favor minimal latency
+                Object.set_property('ntp-sync', False)
+        except Exception:
+            pass
     # Configure NVIDIA decoder for realtime dropping if enabled
     try:
         if REALTIME_DROP and ("nvv4l2decoder" in name or "nvh264dec" in name or "nvh265dec" in name):
@@ -232,10 +245,10 @@ def main(cfg, run_duration=None):
     pipeline.add(queue5)
     pipeline.add(queue6)
     pipeline.add(queue7)
-    # Leaky queues to avoid backlog when syncing to clock; drop oldest buffers
+    # Leaky queues to avoid backlog; drop oldest buffers to prevent visual repeats
     for q in (queue1, queue2, queue3, queue4, queue5, queue6, queue7):
         try:
-            q.set_property('leaky', 2)  # downstream
+            q.set_property('leaky', 2)  # downstream: drop oldest when downstream is slow
             q.set_property('max-size-buffers', 10)
             q.set_property('max-size-bytes', 0)
             q.set_property('max-size-time', 0)

@@ -1,4 +1,5 @@
 import os
+import time
 import numpy as np
 
 import gi
@@ -264,33 +265,105 @@ def sgie_feature_extract_probe(pad,info, data):
                             st = {'saved_first': False, 'best_score': -1.0, 'best_path': None, 'best_name': None, 'best_frame': None}
                             track_state[key] = st
 
-                        def copy_aligned(dst_dir):
+                        def _filename(dst_dir, best=False):
+                            if best:
+                                return os.path.join(dst_dir, f"recog_{top_name}_track{oid}_best.png")
+                            return os.path.join(dst_dir, f"recog_{top_name}_f{frame_number}_id{oid}.png")
+
+                        def copy_aligned(dst_dir, best=False):
                             if not align_dir:
                                 return None
                             src = os.path.join(align_dir, f"frame-{frame_number}_object-{oid}-aligned.png")
                             if os.path.exists(src):
                                 import shutil
-                                # Use stable name for best mode, per-frame name for others
-                                if recog_save_mode == 'best':
-                                    dst = os.path.join(dst_dir, f"recog_{top_name}_track{oid}_best.png")
-                                else:
-                                    dst = os.path.join(dst_dir, f"recog_{top_name}_f{frame_number}_id{oid}.png")
+                                dst = _filename(dst_dir, best=best)
                                 shutil.copy(src, dst)
+                                # Remove temp aligned file to avoid persisting alignment pictures
+                                try:
+                                    os.remove(src)
+                                except Exception:
+                                    pass
                                 return dst
+                            return None
+
+                        # Periodic cleanup of stale temp aligned files in tmpfs
+                        if align_dir:
+                            tnow = time.time()
+                            last = getattr(sgie_feature_extract_probe, '_last_align_cleanup', 0.0)
+                            if tnow - last > 1.5:  # cleanup roughly every 1.5s
+                                try:
+                                    for fn in os.listdir(align_dir):
+                                        if not fn.lower().endswith('.png'):
+                                            continue
+                                        path = os.path.join(align_dir, fn)
+                                        try:
+                                            if tnow - os.path.getmtime(path) > 2.0:
+                                                os.remove(path)
+                                        except Exception:
+                                            pass
+                                except Exception:
+                                    pass
+                                sgie_feature_extract_probe._last_align_cleanup = tnow
+
+                        def save_crop_from_frame(dst_dir, best=False):
+                            # Fallback: extract ROI from NvBufSurface mapped to CPU and convert to BGR
+                            try:
+                                surface = pyds.get_nvds_buf_surface(hash(gst_buffer), frame_meta.batch_id)
+                                frame_np = np.array(surface, copy=True, order='C')
+                                Hm = int(getattr(frame_meta, 'source_frame_height', 0) or 0)
+                                Wm = int(getattr(frame_meta, 'source_frame_width', 0) or 0)
+                                # Ensure shape is (H,W,C)
+                                if frame_np.ndim == 1 and Hm > 0 and Wm > 0:
+                                    frame_np = frame_np.reshape(Hm, Wm, -1)
+                                elif frame_np.ndim == 2 and Hm > 0 and Wm > 0:
+                                    ch = int(frame_np.size // (Hm * Wm))
+                                    if ch in (3, 4):
+                                        frame_np = frame_np.reshape(Hm, Wm, ch)
+                                # Convert to BGR if needed
+                                if frame_np.ndim != 3 or frame_np.shape[2] not in (3, 4):
+                                    raise RuntimeError(f"Unexpected frame shape: {frame_np.shape}")
+                                if frame_np.shape[2] == 4:
+                                    frame_bgr = cv2.cvtColor(frame_np, cv2.COLOR_RGBA2BGR)
+                                else:
+                                    frame_bgr = frame_np
+                                r = obj_meta.rect_params
+                                left = max(int(r.left), 0)
+                                top = max(int(r.top), 0)
+                                width = max(int(r.width), 0)
+                                height = max(int(r.height), 0)
+                                H, W = frame_bgr.shape[:2]
+                                right = min(left + width, W)
+                                bottom = min(top + height, H)
+                                if right > left and bottom > top:
+                                    crop = frame_bgr[top:bottom, left:right]
+                                    if crop.size > 0:
+                                        dst = _filename(dst_dir, best=best)
+                                        cv2.imwrite(dst, crop)
+                                        return dst
+                            except Exception as _e:
+                                if verbose:
+                                    print(f"[WARN] save_crop_from_frame failed: {_e}", flush=True)
                             return None
 
                         if recog_save_mode == 'none':
                             pass
                         elif recog_save_mode == 'all':
-                            _ = copy_aligned(out_dir)
+                            # Try aligned copy, else save crop from frame
+                            dst = copy_aligned(out_dir)
+                            if not dst:
+                                _ = save_crop_from_frame(out_dir)
                         elif recog_save_mode == 'first':
                             if not st['saved_first']:
                                 dst = copy_aligned(out_dir)
+                                if not dst:
+                                    dst = save_crop_from_frame(out_dir)
                                 if dst:
                                     st['saved_first'] = True
                         else:  # best
                             if top_sim > st['best_score']:
-                                dst = copy_aligned(out_dir)
+                                dst = copy_aligned(out_dir, best=True)
+                                if not dst:
+                                    dst = save_crop_from_frame(out_dir, best=True)
                                 if dst:
                                     st['best_score'] = top_sim
                                     st['best_path'] = dst
