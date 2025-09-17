@@ -561,6 +561,53 @@ def sgie_feature_extract_probe(pad,info, data):
                         if verbose:
                             print(f"[WARN] Could not save recognized face image: {e}", flush=True)
 
+                    # --- Emit event via Unix socket ---
+                    try:
+                        # data indices: 16 map, 17 sender, 18 send_images
+                        cam_map = data[16] if len(data) > 16 else {}
+                        sender = data[17] if len(data) > 17 else None
+                        send_img = bool(data[18]) if len(data) > 18 else True
+                        if sender is not None:
+                            # Build event string: camera_id;event_type;timestamp;user_id;bbox_string;name
+                            cam_id = str(cam_map.get(frame_meta.source_id, frame_meta.source_id))
+                            event_type = 'face_recognized'
+                            ts = str(int(time.time()))
+                            user_id = str(top_name or '')
+                            r = obj_meta.rect_params
+                            bbox = f"{int(r.left)},{int(r.top)},{int(r.width)},{int(r.height)}"
+                            # Last fields separated by ';': name ; score (cosine: similarity, l2: distance), 3 decimals
+                            name_txt = str(display_name or user_id)
+                            val = top_dist if recog_metric == 'l2' else top_sim
+                            try:
+                                score_txt = f"{val:.3f}" if val is not None else ""
+                            except Exception:
+                                score_txt = ""
+                            event_text = f"{cam_id};{event_type};{ts};{user_id};{bbox};{name_txt};{score_txt}"
+                            # Include image bytes if requested: use last saved crop if any
+                            img_bytes = None
+                            if send_img:
+                                # Try best saved path
+                                st = track_state.get(int(obj_meta.object_id), {})
+                                img_path = st.get('best_path', None)
+                                if not img_path:
+                                    img_path = st.get('last_path', None)
+                                if not img_path:
+                                    # Fall back to copy_aligned or crop this frame quickly
+                                    pass
+                                if img_path and os.path.exists(img_path):
+                                    try:
+                                        with open(img_path, 'rb') as f:
+                                            img_bytes = f.read()
+                                    except Exception:
+                                        img_bytes = None
+                            # Send
+                            ok = sender.send(event_text, img_bytes)
+                            if verbose and not ok:
+                                print(f"[EVENT] send failed: {event_text}", flush=True)
+                    except Exception as e:
+                        if verbose:
+                            print(f"[EVENT] error: {e}", flush=True)
+
                 # --- Live Indexing: add embeddings to index according to mode ---
                 try:
                     if idx_enable and vector_index is not None:

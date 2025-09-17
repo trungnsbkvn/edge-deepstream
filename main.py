@@ -24,6 +24,7 @@ import time
 from utils.probe import *
 from utils.parser_cfg import *
 from utils.bus_call import bus_call
+from utils.event_sender import EventSender
 
 # Global realtime flag to allow decoder frame dropping
 REALTIME_DROP = False
@@ -208,6 +209,8 @@ def main(cfg, run_duration=None):
     source_idx = 0
     is_live = False
     # for i in range(number_sources):
+    # Build a deterministic mapping from batch index to cameraId using [source] keys directly
+    source_index_to_cam = {}
     for k, v in sources.items():
         print("Creating source_bin ", source_idx, " \n ")
         uri_name = v
@@ -229,6 +232,11 @@ def main(cfg, run_duration=None):
             sys.stderr.write("Unable to create src pad bin \n")
             continue
         srcpad.link(sinkpad)
+        # Record mapping (k is camera id string from config)
+        try:
+            source_index_to_cam[source_idx] = str(k)
+        except Exception:
+            source_index_to_cam[source_idx] = str(source_idx)
         source_idx += 1
 
     queue1 = Gst.ElementFactory.make("queue", "queue1")
@@ -497,6 +505,16 @@ def main(cfg, run_duration=None):
     except Exception:
         recognize_once = True
 
+    # Event sink via Unix domain socket (optional)
+    try:
+        evt_cfg = cfg.get('events', {})
+        socket_path = str(evt_cfg.get('unix_socket', '/tmp/my_socket')).strip()
+        send_images = int(evt_cfg.get('send_image', 1)) == 1
+        enabled_evt = int(evt_cfg.get('enable', 1)) == 1
+    except Exception:
+        socket_path, send_images, enabled_evt = '/tmp/my_socket', True, True
+    event_sender = EventSender(socket_path) if enabled_evt and socket_path else None
+
     data = [
         known_face_features,  # 0
         save_feature,         # 1
@@ -512,8 +530,11 @@ def main(cfg, run_duration=None):
         idx_mode,             # 11 indexing mode: per_track|per_frame
         idx_label,            # 12 index label mode: track|name
         idx_path,             # 13 index save path
-    lbl_path,             # 14 labels save path
-    recognize_once        # 15 recognize once per track
+        lbl_path,             # 14 labels save path
+        recognize_once,       # 15 recognize once per track
+        source_index_to_cam,  # 16 map: mux batch index -> cameraId
+        event_sender,         # 17 EventSender or None
+        send_images           # 18 send image bytes flag
     ]
     sgie_src_pad.add_probe(Gst.PadProbeType.BUFFER, sgie_feature_extract_probe, data)
 
