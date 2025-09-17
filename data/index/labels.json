@@ -28,15 +28,6 @@
         "data/known_faces/Phoebe.png"
       ]
     },
-    "dien": {
-      "user_id": "dien",
-      "name": "Dien WS",
-      "start_time": 1758099919,
-      "end_time": 1758099919,
-      "aligned_paths": [
-        "data/known_faces/DienWS.png"
-      ]
-    },
     "xxx-yyy": {
       "user_id": "xxx-yyy",
       "name": "Monica",
@@ -63,15 +54,26 @@
       "aligned_paths": [
         "data/known_faces/Chandler_1.png"
       ]
+    },
+    "dien": {
+      "user_id": "dien",
+      "name": "Dien WS",
+      "start_time": 1758101365,
+      "end_time": 1758101652,
+      "aligned_paths": [
+        "data/known_faces/DienWS_1.png",
+        "data/known_faces/DienWS_2.png"
+      ]
     }
   },
   "labels": [
     "ross",
     "rachel",
     "phoebe",
-    "dien",
     "xxx-yyy",
     "6dd9c3f5-b429-4080-a344-2b6c33470f05",
-    "chandler"
+    "chandler",
+    "dien",
+    "dien"
   ]
 }
