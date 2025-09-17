@@ -3,7 +3,7 @@ gpu-id=0
 #0=RGB, 1=BGR
 model-color-format=0
 onnx-file=../models/yolov8n_face/yolov8n-face.onnx
-model-engine-file=../models/yolov8n_face/yolov8n-face.onnx_b8_gpu0_fp16.engine
+model-engine-file=../models/yolov8n_face/yolov8n-face.onnx_b4_gpu0_fp16.engine
 labelfile-path=../models/yolov8n_face/labels.txt
 # 1: Primary, 2: Secondary
 process-mode=1
@@ -17,7 +17,7 @@ output-blob-names=boxes;scores;landmarks
 cluster-mode=4
 maintain-aspect-ratio=1
 symmetric-padding=1
-batch-size=8
+batch-size=4
 num-detected-classes=1
 output-tensor-meta=1
 

@@ -90,6 +90,10 @@ def parse_args():
     p.add_argument('--crop-margin', type=float, default=0.10, help='Relative margin around detected face (0 tight, 0.1 = 10% per side)')
     # Person identity: required when adding image (index labels will be user_id)
     p.add_argument('--user-id', type=str, default=None, help='Unique user id (GUID). Required with --add-image')
+    # Delete mode
+    p.add_argument('--delete-user', type=str, default=None, help='Delete a person by user_id: remove vectors from index, metadata from labels.json, and aligned images from known_faces')
+    # Repair/sync labels.json fields
+    p.add_argument('--sync-labels', action='store_true', help='Sync labels (per-vector mapping) with the current FAISS index')
     return p.parse_args()
 
 
@@ -289,17 +293,130 @@ def add_portrait_image_to_index(image_path: str, label: str, user_id: str, index
         idx = FaceIndex(dim=len(emb), cfg=cfg)
         # Use user_id as FAISS label; allow multiple vectors per person
         idx.build(np.asarray(emb, dtype=np.float32).reshape(1, -1), [user_id])
-        idx.save(index_path, labels_path)
-        # Update person metadata with computed aligned path and display name
+        # Update person metadata first so save() can mirror persons -> labels
         _upsert_person_auto(labels_path, user_id=user_id, name=display_name, aligned_abs_path=png_path)
+        idx.save(index_path, labels_path)
         print(f"Created new index at {index_path} with first entry '{user_id}'")
         return
     # Append
     idx.add([user_id], np.asarray(emb, dtype=np.float32).reshape(1, -1))
-    idx.save(index_path, labels_path)
     # Update person metadata with computed aligned path and display name (overwrite existing name)
     _upsert_person_auto(labels_path, user_id=user_id, name=display_name, aligned_abs_path=png_path)
+    idx.save(index_path, labels_path)
     print(f"Appended '{user_id}' to index. Size now: {idx.size()}")
+
+
+def sync_labels(index_path: str, labels_path: str) -> None:
+    """Sync labels.json fields:
+    - labels: mirror persons keys (user_ids)
+    - vector_labels: per-vector mapping from FAISS index if available
+    """
+    meta = {}
+    if os.path.exists(labels_path):
+        try:
+            with open(labels_path, 'r', encoding='utf-8') as f:
+                meta = json.load(f) or {}
+        except Exception:
+            meta = {}
+    persons = meta.get('persons', {}) if isinstance(meta, dict) else {}
+    # Update per-vector labels from index when available; otherwise keep existing
+    if os.path.exists(index_path) and os.path.exists(labels_path):
+        try:
+            idx = FaceIndex.load(index_path, labels_path, use_gpu=False, gpu_id=0)
+            meta['labels'] = list(getattr(idx, '_labels', []))
+        except Exception:
+            pass
+    # Remove legacy vector_labels field
+    try:
+        if 'vector_labels' in meta:
+            meta.pop('vector_labels', None)
+    except Exception:
+        pass
+    with open(labels_path, 'w', encoding='utf-8') as f:
+        json.dump(meta, f, ensure_ascii=False, indent=2)
+
+
+def delete_person_by_user(user_id: str, index_path: str, labels_path: str) -> int:
+    """Delete a person by user_id from index, labels.json, and remove aligned images.
+    Returns count of vectors removed from the index.
+    """
+    if not user_id:
+        raise ValueError('user_id is required')
+    # Load labels.json
+    meta = {}
+    if os.path.exists(labels_path):
+        try:
+            with open(labels_path, 'r', encoding='utf-8') as f:
+                meta = json.load(f) or {}
+        except Exception:
+            meta = {}
+    persons = meta.get('persons', {})
+    # Normalize to dict keyed by user_id
+    if isinstance(persons, list):
+        d = {}
+        for p in persons:
+            try:
+                uid = str(p.get('user_id', '')).strip()
+                if uid:
+                    d[uid] = p
+            except Exception:
+                continue
+        persons = d
+    rec = persons.get(user_id)
+    # Remove aligned images
+    if isinstance(rec, dict):
+        for rel in list(rec.get('aligned_paths', [])):
+            try:
+                path = rel if os.path.isabs(rel) else os.path.join(REPO_ROOT, rel)
+                if os.path.exists(path):
+                    os.remove(path)
+            except Exception:
+                pass
+        # Drop person record
+        try:
+            persons.pop(user_id, None)
+        except Exception:
+            pass
+        meta['persons'] = persons
+    # Load index and remove vectors
+    removed = 0
+    index_loaded = False
+    if os.path.exists(index_path) and os.path.exists(labels_path):
+        try:
+            idx = FaceIndex.load(index_path, labels_path, use_gpu=True, gpu_id=0)
+            index_loaded = True
+            removed = idx.remove_label(user_id)
+            # Save index and update labels file with new per-vector labels
+            idx.save(index_path, labels_path)
+            # Sync updated labels into meta before we persist persons update
+            try:
+                meta['labels'] = list(getattr(idx, '_labels', []))
+            except Exception:
+                pass
+        except Exception:
+            removed = 0
+            index_loaded = False
+    # If index couldn't be loaded or remove didn't change anything, ensure labels list in meta drops the user_id anyway
+    if not index_loaded or removed == 0:
+        try:
+            lbls = list(meta.get('labels', []))
+            if user_id in lbls:
+                meta['labels'] = [l for l in lbls if l != user_id]
+        except Exception:
+            pass
+    # Remove legacy vector_labels if present
+    try:
+        if 'vector_labels' in meta:
+            meta.pop('vector_labels', None)
+    except Exception:
+        pass
+    # Persist updated labels.json (persons + labels)
+    try:
+        with open(labels_path, 'w', encoding='utf-8') as f:
+            json.dump(meta, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+    return removed
 
 
 def _upsert_person_auto(labels_path: str, user_id: str, name: str, aligned_abs_path: str) -> None:
@@ -393,6 +510,26 @@ def main():
             )
         except Exception as e:
             print(f"Failed to add image: {e}", file=sys.stderr)
+            sys.exit(1)
+        return
+
+    # Branch: delete a person by user_id
+    if args.delete_user:
+        try:
+            removed = delete_person_by_user(args.delete_user, index_path=index_path, labels_path=labels_path)
+            print(f"Deleted user '{args.delete_user}': removed {removed} vectors")
+        except Exception as e:
+            print(f"Failed to delete user '{args.delete_user}': {e}", file=sys.stderr)
+            sys.exit(1)
+        return
+
+    # Branch: sync labels/metadata
+    if args.sync_labels:
+        try:
+            sync_labels(index_path=index_path, labels_path=labels_path)
+            print("Synced labels from FAISS index")
+        except Exception as e:
+            print(f"Failed to sync labels: {e}", file=sys.stderr)
             sys.exit(1)
         return
 

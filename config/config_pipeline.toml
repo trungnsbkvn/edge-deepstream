@@ -84,7 +84,7 @@ stream_index_path="data/index/live.index"
 stream_labels_path="data/index/live_labels.json"
 
 # Recognize once per track to reduce per-frame matching cost (1 enable, 0 disable)
-recognize_once_per_track=0
+recognize_once_per_track=1
 
 [debug]
 # Verbose console prints (matching per-frame)

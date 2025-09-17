@@ -241,7 +241,8 @@ class FaceIndex:
         if cpu_index is None:
             raise RuntimeError("No index to save")
         _faiss.write_index(cpu_index, index_path)
-        # Preserve existing metadata (e.g., persons, version) and update labels only
+        # Preserve existing metadata (e.g., persons, version). Persist per-vector labels under
+        # 'labels' to stay in sync with FAISS index order (one label per vector).
         meta = {}
         try:
             if os.path.exists(labels_path):
@@ -249,9 +250,82 @@ class FaceIndex:
                     meta = json.load(rf) or {}
         except Exception:
             meta = {}
+        # Write per-vector mapping
         meta["labels"] = list(self._labels)
+        # Drop legacy vector_labels to avoid confusion
+        try:
+            if "vector_labels" in meta:
+                meta.pop("vector_labels", None)
+        except Exception:
+            pass
         with open(labels_path, "w", encoding="utf-8") as f:
-            json.dump(meta, f, ensure_ascii=False)
+            json.dump(meta, f, ensure_ascii=False, indent=2)
+
+    # ---------- maintenance ----------
+    def _reconstruct_all(self) -> np.ndarray:
+        """Return all vectors from the CPU index as float32 array shape (N, D).
+        Uses reconstruct_n when available; falls back to reconstruct per id.
+        """
+        if self._cpu_index is None:
+            return np.zeros((0, self.dim), dtype=np.float32)
+        idx = self._cpu_index
+        n = int(getattr(idx, 'ntotal', 0) or 0)
+        if n <= 0:
+            return np.zeros((0, self.dim), dtype=np.float32)
+        # Try reconstruct_n
+        try:
+            if hasattr(idx, 'reconstruct_n'):
+                X = idx.reconstruct_n(0, n)
+                return _f32c(np.asarray(X, dtype=np.float32))
+        except Exception:
+            pass
+        # Fallback: reconstruct one-by-one
+        vecs = []
+        for i in range(n):
+            try:
+                v = idx.reconstruct(i)
+                vecs.append(np.asarray(v, dtype=np.float32))
+            except Exception:
+                # If reconstruct fails, skip
+                continue
+        if not vecs:
+            return np.zeros((0, self.dim), dtype=np.float32)
+        return _f32c(np.vstack(vecs))
+
+    def remove_label(self, label: str) -> int:
+        """Remove all entries with the given label by rebuilding the index; return number removed.
+        """
+        if not self._labels:
+            return 0
+        labels = list(self._labels)
+        X = self._reconstruct_all()
+        if X.shape[0] != len(labels):
+            # If mismatch, best effort: cannot reliably filter
+            keep_idx = [i for i, lb in enumerate(labels) if lb != label]
+        else:
+            keep_idx = [i for i, lb in enumerate(labels) if lb != label]
+        removed = len(labels) - len(keep_idx)
+        if removed <= 0:
+            return 0
+        # Rebuild with kept entries
+        if keep_idx:
+            new_labels = [labels[i] for i in keep_idx]
+            new_X = X[keep_idx] if X.shape[0] == len(labels) else None
+        else:
+            new_labels = []
+            new_X = None
+        # Reset indices and rebuild
+        self._cpu_index = None
+        self._gpu_index = None
+        if new_labels and new_X is not None and new_X.shape[0] == len(new_labels):
+            self.build(new_X, new_labels)
+        else:
+            # Build empty index of same dim
+            cpu_index, _ = self._make_faiss_index(0)
+            self._cpu_index = cpu_index
+            self._gpu_index = self._to_gpu(cpu_index)
+            self._labels = []
+        return removed
 
     @staticmethod
     def load(index_path: str, labels_path: str, use_gpu: bool = True, gpu_id: int = 0) -> "FaceIndex":
@@ -269,6 +343,7 @@ class FaceIndex:
         idx._gpu_index = idx._to_gpu(cpu_index)
         with open(labels_path, "r", encoding="utf-8") as f:
             meta = json.load(f)
+        # Use 'labels' as per-vector mapping (legacy files already used this field)
         idx._labels = list(meta.get("labels", []))
         return idx
 
