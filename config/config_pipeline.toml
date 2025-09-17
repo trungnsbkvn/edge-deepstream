@@ -47,7 +47,7 @@ threshold=0.4
 # Directory to save recognized face images
 save_dir="data/faces/recognized"
 # Save mode for recognized images: "all" (every frame), "first" (first per track), "best" (best score per track)
-save_mode="first"
+save_mode="all"
 # Backend: "faiss" (default), "cuvs" (experimental; requires RAPIDS cuVS), or "auto"
 backend="faiss"
 # If your known_face_dir has images instead of .npy embeddings, you can point to a folder of .npy features

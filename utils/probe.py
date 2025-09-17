@@ -1,5 +1,6 @@
 import os
 import time
+import ctypes
 import numpy as np
 
 import gi
@@ -7,6 +8,42 @@ gi.require_version('Gst', '1.0')
 from gi.repository import GLib, Gst
 
 import pyds
+
+# Lazy-load the ROI helper shared library for robust crops from NvBufSurface
+_roi_lib = None
+def _load_roi_lib():
+    global _roi_lib
+    if _roi_lib is not None:
+        return _roi_lib
+    candidates = []
+    try:
+        root = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+        candidates.append(os.path.join(root, 'libroi_helper.so'))
+        candidates.append(os.path.join(root, 'cpp', 'roi_helper', 'build', 'libroi_helper.so'))
+    except Exception:
+        pass
+    for path in candidates:
+        if path and os.path.exists(path):
+            try:
+                lib = ctypes.CDLL(path)
+                # Set argtypes/restype
+                lib.roi_crop_bgr.argtypes = [ctypes.c_uint64, ctypes.c_int,
+                                             ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int,
+                                             ctypes.c_int, ctypes.c_int,
+                                             ctypes.POINTER(ctypes.POINTER(ctypes.c_uint8)),
+                                             ctypes.POINTER(ctypes.c_int)]
+                lib.roi_crop_bgr.restype = ctypes.c_int
+                lib.roi_free.argtypes = [ctypes.POINTER(ctypes.c_uint8)]
+                lib.roi_free.restype = None
+                _roi_lib = lib
+                try:
+                    print(f"[ROI_LIB] loaded {path}", flush=True)
+                except Exception:
+                    pass
+                return _roi_lib
+            except Exception:
+                continue
+    return None
 
 def pgie_src_filter_probe(pad,info,u_data):
     """
@@ -306,7 +343,47 @@ def sgie_feature_extract_probe(pad,info, data):
                                 sgie_feature_extract_probe._last_align_cleanup = tnow
 
                         def save_crop_from_frame(dst_dir, best=False):
-                            # Fallback: extract ROI from NvBufSurface mapped to CPU and convert to BGR
+                            # Try fast C++ ROI crop from NvBufSurface first; fallback to Python
+                            # Returns saved path or None
+                            # 1) C++ path
+                            try:
+                                lib = _load_roi_lib()
+                                if lib is not None:
+                                    r = obj_meta.rect_params
+                                    left = max(int(r.left), 0)
+                                    top = max(int(r.top), 0)
+                                    width = max(int(r.width), 0)
+                                    height = max(int(r.height), 0)
+                                    if width > 0 and height > 0:
+                                        dst = _filename(dst_dir, best=best)
+                                        # Call C function
+                                        out_ptr = ctypes.POINTER(ctypes.c_uint8)()
+                                        out_size = ctypes.c_int(0)
+                                        ret = lib.roi_crop_bgr(ctypes.c_uint64(hash(gst_buffer)),
+                                                               ctypes.c_int(frame_meta.batch_id),
+                                                               ctypes.c_int(left), ctypes.c_int(top), ctypes.c_int(width), ctypes.c_int(height),
+                                                               ctypes.c_int(width), ctypes.c_int(height),
+                                                               ctypes.byref(out_ptr), ctypes.byref(out_size))
+                                        if ret == 0 and out_ptr and out_size.value > 0:
+                                            try:
+                                                # Build numpy array and save
+                                                size = int(out_size.value)
+                                                arr = np.ctypeslib.as_array((ctypes.c_uint8 * size).from_address(ctypes.addressof(out_ptr.contents))).copy()
+                                                img = arr.reshape(height, width, 3)
+                                                import cv2
+                                                if cv2.imwrite(dst, img):
+                                                    lib.roi_free(out_ptr)
+                                                    return dst
+                                            finally:
+                                                try:
+                                                    lib.roi_free(out_ptr)
+                                                except Exception:
+                                                    pass
+                            except Exception as _e:
+                                if verbose:
+                                    print(f"[WARN] C++ roi_crop_bgr failed: {_e}", flush=True)
+                            
+                            # 2) Python fallback: extract from NvBufSurface mapped to CPU
                             try:
                                 surface = pyds.get_nvds_buf_surface(hash(gst_buffer), frame_meta.batch_id)
                                 frame_np = np.array(surface, copy=True, order='C')
