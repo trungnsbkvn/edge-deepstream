@@ -465,6 +465,29 @@ def main(cfg, run_duration=None):
     except Exception:
         verbose = False
 
+    # Indexing options for live updates
+    try:
+        idx_enable = int(recog_cfg.get('index_stream', 0)) == 1
+    except Exception:
+        idx_enable = False
+    try:
+        idx_mode = str(recog_cfg.get('index_mode', 'per_track')).lower()
+    except Exception:
+        idx_mode = 'per_track'
+    try:
+        idx_label = str(recog_cfg.get('index_label', 'track')).lower()
+    except Exception:
+        idx_label = 'track'
+    try:
+        idx_path = str(recog_cfg.get('stream_index_path', '')).strip() or str(recog_cfg.get('index_path', '')).strip()
+        lbl_path = str(recog_cfg.get('stream_labels_path', '')).strip() or str(recog_cfg.get('labels_path', '')).strip()
+    except Exception:
+        idx_path, lbl_path = '', ''
+    try:
+        recognize_once = int(recog_cfg.get('recognize_once_per_track', 1)) == 1
+    except Exception:
+        recognize_once = True
+
     data = [
         known_face_features,  # 0
         save_feature,         # 1
@@ -475,7 +498,13 @@ def main(cfg, run_duration=None):
         recog_save_mode,      # 6 (save mode: all|first|best)
         verbose,              # 7 (debug prints)
         vector_index,         # 8 (FAISS index or None)
-        recog_metric          # 9 (metric: cosine|l2)
+        recog_metric,         # 9 (metric: cosine|l2)
+        idx_enable,           # 10 live indexing enabled
+        idx_mode,             # 11 indexing mode: per_track|per_frame
+        idx_label,            # 12 index label mode: track|name
+        idx_path,             # 13 index save path
+    lbl_path,             # 14 labels save path
+    recognize_once        # 15 recognize once per track
     ]
     sgie_src_pad.add_probe(Gst.PadProbeType.BUFFER, sgie_feature_extract_probe, data)
 

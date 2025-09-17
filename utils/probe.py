@@ -164,6 +164,10 @@ def sgie_feature_extract_probe(pad,info, data):
     if not hasattr(sgie_feature_extract_probe, '_track_state'):
         sgie_feature_extract_probe._track_state = {}
     track_state = sgie_feature_extract_probe._track_state
+    # Cache recognized name per track to avoid per-frame matching when enabled
+    if not hasattr(sgie_feature_extract_probe, '_recognize_cache'):
+        sgie_feature_extract_probe._recognize_cache = {}
+    recognize_cache = sgie_feature_extract_probe._recognize_cache
     # Verbosity and saving controls (from main -> data vector)
     verbose = False
     try:
@@ -184,6 +188,33 @@ def sgie_feature_extract_probe(pad,info, data):
     except Exception:
         vector_index = None
         recog_metric = 'cosine'
+
+    # Live indexing options
+    idx_enable = False
+    # Recognize-once-per-track flag (index 15)
+    recognize_once = False
+    try:
+        if isinstance(data, (list, tuple)) and len(data) > 15:
+            recognize_once = bool(data[15])
+    except Exception:
+        recognize_once = False
+    idx_mode = 'per_track'   # or 'per_frame'
+    idx_label = 'track'      # or 'name'
+    idx_path = ''
+    lbl_path = ''
+    try:
+        if isinstance(data, (list, tuple)):
+            idx_enable = bool(len(data) > 10 and data[10])
+            idx_mode = str(data[11]).lower() if len(data) > 11 else 'per_track'
+            idx_label = str(data[12]).lower() if len(data) > 12 else 'track'
+            idx_path = str(data[13]) if len(data) > 13 else ''
+            lbl_path = str(data[14]) if len(data) > 14 else ''
+    except Exception:
+        idx_enable, idx_mode, idx_label, idx_path, lbl_path = False, 'per_track', 'track', '', ''
+
+    # Track which tracks have been indexed (when mode per_track)
+    if not hasattr(sgie_feature_extract_probe, '_indexed_tracks'):
+        sgie_feature_extract_probe._indexed_tracks = set()
 
     # One-time debug to confirm SGIE probe wiring and key params
     if not hasattr(sgie_feature_extract_probe, '_dbg_once'):
@@ -229,47 +260,63 @@ def sgie_feature_extract_probe(pad,info, data):
                 top_name = None
                 top_sim = -1.0  # higher is better similarity proxy
                 top_dist = None # for l2 only
-                # Prefer FAISS index if available
-                if vector_index is not None and vector_index.size() > 0:
-                    try:
-                        name, score = vector_index.search_top1(face_feature.reshape(-1))
+                # Fast path: reuse cached recognition for this track id
+                oid = int(obj_meta.object_id)
+                if recognize_once and oid in recognize_cache:
+                    cached = recognize_cache.get(oid)
+                    if cached is not None:
+                        top_name = cached.get('name')
+                        # We don't need top_sim/top_dist for display label reuse; keep defaults
+                        match_ok = top_name is not None
+                    else:
+                        match_ok = False
+                else:
+                    match_ok = False
+                # If not cached, perform matching once
+                if not match_ok:
+                    # Prefer FAISS index if available
+                    if vector_index is not None and vector_index.size() > 0:
+                        try:
+                            name, score = vector_index.search_top1(face_feature.reshape(-1))
+                            if recog_metric == 'l2':
+                                top_name = name
+                                top_dist = float(score)
+                                top_sim = -top_dist
+                            else:
+                                top_name = name
+                                top_sim = float(score)
+                        except Exception:
+                            top_name, top_sim, top_dist = None, -1.0, None
+                    elif loaded_faces:
+                        emb = face_feature.reshape(-1)
                         if recog_metric == 'l2':
-                            top_name = name
-                            top_dist = float(score)
-                            top_sim = -top_dist
+                            best = (None, float('inf'))
+                            for key, value in loaded_faces.items():
+                                diff = emb - value.reshape(-1)
+                                dist = float(np.dot(diff, diff))
+                                if dist < best[1]:
+                                    best = (key, dist)
+                            if best[0] is not None:
+                                top_name = best[0]
+                                top_dist = best[1]
+                                top_sim = -top_dist
                         else:
-                            top_name = name
-                            top_sim = float(score)
-                    except Exception:
-                        top_name, top_sim, top_dist = None, -1.0, None
-                elif loaded_faces:
-                    emb = face_feature.reshape(-1)
-                    if recog_metric == 'l2':
-                        best = (None, float('inf'))
-                        for key, value in loaded_faces.items():
-                            diff = emb - value.reshape(-1)
-                            dist = float(np.dot(diff, diff))
-                            if dist < best[1]:
-                                best = (key, dist)
-                        if best[0] is not None:
-                            top_name = best[0]
-                            top_dist = best[1]
-                            top_sim = -top_dist
-                    else:
-                        for key, value in loaded_faces.items():
-                            score = float(np.dot(emb, value.reshape(-1)))
-                            if score > top_sim:
-                                top_sim = score
-                                top_name = key
-                # Decide match based on metric-specific threshold
-                match_ok = False
-                if top_name is not None:
-                    if recog_metric == 'l2':
-                        if top_dist is not None and top_dist <= threshold:
-                            match_ok = True
-                    else:
-                        if top_sim >= threshold:
-                            match_ok = True
+                            for key, value in loaded_faces.items():
+                                score = float(np.dot(emb, value.reshape(-1)))
+                                if score > top_sim:
+                                    top_sim = score
+                                    top_name = key
+                    # Decide match based on metric-specific threshold
+                    if top_name is not None:
+                        if recog_metric == 'l2':
+                            if top_dist is not None and top_dist <= threshold:
+                                match_ok = True
+                        else:
+                            if top_sim >= threshold:
+                                match_ok = True
+                    # Cache result for this track if enabled and we got a match
+                    if recognize_once:
+                        recognize_cache[oid] = {'name': top_name if match_ok else None}
                 if match_ok:
                     if verbose:
                         disp = top_dist if recog_metric == 'l2' else top_sim
@@ -449,6 +496,40 @@ def sgie_feature_extract_probe(pad,info, data):
                     except Exception as e:
                         if verbose:
                             print(f"[WARN] Could not save recognized face image: {e}", flush=True)
+
+                # --- Live Indexing: add embeddings to index according to mode ---
+                try:
+                    if idx_enable and vector_index is not None:
+                        oid = int(obj_meta.object_id)
+                        add_now = (idx_mode == 'per_frame') or (idx_mode == 'per_track' and oid not in sgie_feature_extract_probe._indexed_tracks)
+                        if add_now:
+                            # Derive label
+                            if idx_label == 'name' and match_ok and top_name:
+                                label = str(top_name)
+                            else:
+                                label = f"track-{oid}"
+                            # Add to index
+                            try:
+                                vector_index.add([label], face_feature.reshape(1, -1))
+                                if verbose:
+                                    print(f"[INDEX] Added {label} (mode={idx_mode})", flush=True)
+                                if idx_mode == 'per_track':
+                                    sgie_feature_extract_probe._indexed_tracks.add(oid)
+                                # Persist if paths provided
+                                if idx_path and lbl_path:
+                                    try:
+                                        # vector_index is our FaceIndex wrapper; call save
+                                        vector_index.save(idx_path, lbl_path)
+                                        if verbose:
+                                            print(f"[INDEX] Saved -> {idx_path} / {lbl_path}", flush=True)
+                                    except Exception as _se:
+                                        if verbose:
+                                            print(f"[WARN] Index save failed: {_se}", flush=True)
+                            except Exception as _ae:
+                                if verbose:
+                                    print(f"[WARN] Index add failed: {_ae}", flush=True)
+                except Exception:
+                    pass
 
             try:
                 l_obj = l_obj.next

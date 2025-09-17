@@ -72,6 +72,20 @@ nbits_pq=8
 index_path="data/index/faiss.index"
 labels_path="data/index/labels.json"
 
+# --- Live indexing options ---
+# Enable adding embeddings from the live stream into the index
+index_stream=0
+# Indexing mode: "per_track" (add once per NVTracker track id) or "per_frame" (add every frame)
+index_mode="per_track"
+# Labeling for indexed entries: "track" (label as track-<id>) or "name" (use recognized name when available)
+index_label="name"
+# Optional alternate paths to save the live-updated index; if empty, reuse index_path/labels_path
+stream_index_path=""
+stream_labels_path=""
+
+# Recognize once per track to reduce per-frame matching cost (1 enable, 0 disable)
+recognize_once_per_track=1
+
 [debug]
 # Verbose console prints (matching per-frame)
 verbose=1
