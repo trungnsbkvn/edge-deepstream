@@ -241,8 +241,17 @@ class FaceIndex:
         if cpu_index is None:
             raise RuntimeError("No index to save")
         _faiss.write_index(cpu_index, index_path)
+        # Preserve existing metadata (e.g., persons, version) and update labels only
+        meta = {}
+        try:
+            if os.path.exists(labels_path):
+                with open(labels_path, "r", encoding="utf-8") as rf:
+                    meta = json.load(rf) or {}
+        except Exception:
+            meta = {}
+        meta["labels"] = list(self._labels)
         with open(labels_path, "w", encoding="utf-8") as f:
-            json.dump({"labels": self._labels}, f, ensure_ascii=False)
+            json.dump(meta, f, ensure_ascii=False)
 
     @staticmethod
     def load(index_path: str, labels_path: str, use_gpu: bool = True, gpu_id: int = 0) -> "FaceIndex":

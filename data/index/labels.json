@@ -1,1 +1,69 @@
-{"labels": ["Chandler", "Monica", "Phoebe", "Rachel", "Ross", "Daniel Nguyễn"]}
+{
+  "labels": [
+    "chandler",
+    "8b84e6b4-4b7a-49d8-8c61-7a7a6dc7f1ff",
+    "8b84e6b4-4b7a-49d8-8c61-7a7a6dc7f1ff",
+    "monica",
+    "phoebe",
+    "rachel",
+    "ross"
+  ],
+  "version": 2,
+  "persons": {
+    "chandler": {
+      "user_id": "chandler",
+      "name": "Chandler",
+      "start_time": 1758096617,
+      "end_time": 1758096617,
+      "aligned_paths": [
+        "data/known_faces/Chandler.png"
+      ]
+    },
+    "8b84e6b4-4b7a-49d8-8c61-7a7a6dc7f1ff": {
+      "user_id": "8b84e6b4-4b7a-49d8-8c61-7a7a6dc7f1ff",
+      "name": "Daniel Nguyễn",
+      "start_time": 1758096625,
+      "end_time": 1758096640,
+      "aligned_paths": [
+        "data/known_faces/DanielNguyễn.png",
+        "data/known_faces/DanielNguyễn_1.png"
+      ]
+    },
+    "monica": {
+      "user_id": "monica",
+      "name": "Monica",
+      "start_time": 1758096670,
+      "end_time": 1758096670,
+      "aligned_paths": [
+        "data/known_faces/Monica.png"
+      ]
+    },
+    "phoebe": {
+      "user_id": "phoebe",
+      "name": "Phoebe",
+      "start_time": 1758096681,
+      "end_time": 1758096681,
+      "aligned_paths": [
+        "data/known_faces/Phoebe.png"
+      ]
+    },
+    "rachel": {
+      "user_id": "rachel",
+      "name": "Rachel",
+      "start_time": 1758096695,
+      "end_time": 1758096695,
+      "aligned_paths": [
+        "data/known_faces/Rachel.png"
+      ]
+    },
+    "ross": {
+      "user_id": "ross",
+      "name": "Ross",
+      "start_time": 1758096728,
+      "end_time": 1758096728,
+      "aligned_paths": [
+        "data/known_faces/Ross.png"
+      ]
+    }
+  }
+}

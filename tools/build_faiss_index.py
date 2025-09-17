@@ -22,6 +22,10 @@ import cv2
 import numpy as np
 import configparser
 from typing import Optional, Tuple
+import json
+import uuid
+import time
+from typing import List
 
 # Ensure imports work when running this script from any working directory
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -83,6 +87,9 @@ def parse_args():
     p.add_argument('--add-image', type=str, default=None, help='Path to a portrait image (not 112x112). Detects, aligns, embeds and appends to index.')
     p.add_argument('--label', type=str, default=None, help='Label/name for the appended entry (default: filename stem)')
     p.add_argument('--engine', type=str, default=None, help='Optional TensorRT ArcFace engine path; if omitted, will resolve from pipeline config')
+    p.add_argument('--crop-margin', type=float, default=0.10, help='Relative margin around detected face (0 tight, 0.1 = 10% per side)')
+    # Person identity: required when adding image (index labels will be user_id)
+    p.add_argument('--user-id', type=str, default=None, help='Unique user id (GUID). Required with --add-image')
     return p.parse_args()
 
 
@@ -158,7 +165,7 @@ def _detect_face_bbox_haar(bgr: np.ndarray) -> Optional[Tuple[int, int, int, int
     return int(x), int(y), int(w), int(h)
 
 
-def _crop_align_to_112(bgr: np.ndarray) -> np.ndarray:
+def _crop_align_to_112(bgr: np.ndarray, margin: float = 0.10) -> np.ndarray:
     """Crop detected face region (largest) with some padding and resize to 112x112 BGR.
     If no face is detected, center-crop the largest centered square.
     """
@@ -173,11 +180,11 @@ def _crop_align_to_112(bgr: np.ndarray) -> np.ndarray:
         crop = bgr[y0:y0+side, x0:x0+side]
     else:
         x, y, w, h = box
-        # expand box to include some context and make square
-        pad = int(0.2 * max(w, h))
+        # Expand box by configurable margin and make square
+        side0 = max(w, h)
+        side = int((1.0 + 2.0 * max(0.0, margin)) * side0)
         cx = x + w // 2
         cy = y + h // 2
-        side = int(1.2 * max(w, h)) + 2*pad
         x0 = max(0, cx - side // 2)
         y0 = max(0, cy - side // 2)
         x1 = min(W, x0 + side)
@@ -212,9 +219,26 @@ def _arcface_embed_from_bgr(bgr_112: np.ndarray, engine_path: str) -> np.ndarray
     return emb
 
 
-def add_portrait_image_to_index(image_path: str, label: str, index_path: str, labels_path: str,
+def _resolve_known_face_dir(cfg_path: str) -> str:
+    """Resolve known_face_dir from pipeline config with repo-root resolution.
+    Fallback to data/known_faces.
+    """
+    try:
+        cfg_full = cfg_path if os.path.isabs(cfg_path) else os.path.join(REPO_ROOT, cfg_path)
+        cfg = toml.load(cfg_full)
+        kdir = cfg.get('pipeline', {}).get('known_face_dir', 'data/known_faces')
+    except Exception:
+        kdir = 'data/known_faces'
+    if not os.path.isabs(kdir):
+        kdir = os.path.join(REPO_ROOT, kdir)
+    os.makedirs(kdir, exist_ok=True)
+    return kdir
+
+
+def add_portrait_image_to_index(image_path: str, label: str, user_id: str, index_path: str, labels_path: str,
                                 metric: str = 'cosine', index_type: str = 'flat', use_gpu: bool = True, gpu_id: int = 0,
-                                nlist: int = 0, m: int = 0, nbits: int = 8, engine_path: Optional[str] = None):
+                                nlist: int = 0, m: int = 0, nbits: int = 8, engine_path: Optional[str] = None,
+                                crop_margin: float = 0.10):
     """Detect, align and embed a portrait image, then append to FAISS index (creating it if needed)."""
     if not os.path.exists(image_path):
         raise FileNotFoundError(image_path)
@@ -224,8 +248,29 @@ def add_portrait_image_to_index(image_path: str, label: str, index_path: str, la
     bgr = cv2.imread(image_path)
     if bgr is None:
         raise RuntimeError(f'Failed to read image: {image_path}')
-    face112 = _crop_align_to_112(bgr)
+    face112 = _crop_align_to_112(bgr, margin=crop_margin)
     emb = _arcface_embed_from_bgr(face112, engine_path)
+
+    # Save aligned image and vector into known_faces
+    known_dir = _resolve_known_face_dir('config/config_pipeline.toml')
+    # Keep display name as provided label (may include unicode); sanitize only for filenames
+    display_name = label
+    person_name = ''.join(c for c in label if (c.isalnum() or c in ('-', '_'))).strip('_') or 'face'
+    # File base may need a suffix to avoid overwriting
+    file_base = person_name
+    png_path = os.path.join(known_dir, f"{file_base}.png")
+    npy_path = os.path.join(known_dir, f"{file_base}.npy")
+    counter = 1
+    while os.path.exists(png_path) or os.path.exists(npy_path):
+        file_base = f"{person_name}_{counter}"
+        png_path = os.path.join(known_dir, f"{file_base}.png")
+        npy_path = os.path.join(known_dir, f"{file_base}.npy")
+        counter += 1
+    # Write normalized 112x112 and vector
+    cv2.imwrite(png_path, face112)
+    np.save(npy_path, emb.astype(np.float32))
+    print(f"Saved aligned image: {png_path}")
+    print(f"Saved embedding: {npy_path}")
     # Prepare index config
     cfg = FaceIndexConfig(
         metric=metric,
@@ -242,14 +287,74 @@ def add_portrait_image_to_index(image_path: str, label: str, index_path: str, la
         # Dim check will happen inside add
     else:
         idx = FaceIndex(dim=len(emb), cfg=cfg)
-        idx.build(np.asarray(emb, dtype=np.float32).reshape(1, -1), [label])
+        # Use user_id as FAISS label; allow multiple vectors per person
+        idx.build(np.asarray(emb, dtype=np.float32).reshape(1, -1), [user_id])
         idx.save(index_path, labels_path)
-        print(f"Created new index at {index_path} with first entry '{label}'")
+        # Update person metadata with computed aligned path and display name
+        _upsert_person_auto(labels_path, user_id=user_id, name=display_name, aligned_abs_path=png_path)
+        print(f"Created new index at {index_path} with first entry '{user_id}'")
         return
     # Append
-    idx.add([label], np.asarray(emb, dtype=np.float32).reshape(1, -1))
+    idx.add([user_id], np.asarray(emb, dtype=np.float32).reshape(1, -1))
     idx.save(index_path, labels_path)
-    print(f"Appended '{label}' to index. Size now: {idx.size()}")
+    # Update person metadata with computed aligned path and display name (overwrite existing name)
+    _upsert_person_auto(labels_path, user_id=user_id, name=display_name, aligned_abs_path=png_path)
+    print(f"Appended '{user_id}' to index. Size now: {idx.size()}")
+
+
+def _upsert_person_auto(labels_path: str, user_id: str, name: str, aligned_abs_path: str) -> None:
+    """Insert or update a person record with the computed aligned image path.
+    - Uses user_id as primary key, name as display.
+    - Updates end_time to now and initializes start_time if new.
+    - Adds aligned path (relative to repo root) if missing.
+    """
+    meta = {}
+    if os.path.exists(labels_path):
+        try:
+            with open(labels_path, 'r', encoding='utf-8') as f:
+                meta = json.load(f)
+        except Exception:
+            meta = {}
+    persons = meta.get('persons', {})
+    # Migrate older list format to dict keyed by user_id
+    if isinstance(persons, list):
+        d = {}
+        for p in persons:
+            try:
+                uid = str(p.get('user_id', '')).strip()
+                if uid:
+                    d[uid] = p
+            except Exception:
+                continue
+        persons = d
+    now = int(time.time())
+    rel_path = os.path.relpath(aligned_abs_path, REPO_ROOT)
+    rec = persons.get(user_id)
+    if not isinstance(rec, dict):
+        rec = {
+            'user_id': user_id,
+            'name': name,
+            'start_time': now,
+            'end_time': now,
+            'aligned_paths': [rel_path],
+        }
+    else:
+        rec['name'] = name
+        # Initialize times if missing
+        rec['start_time'] = int(rec.get('start_time', now))
+        rec['end_time'] = now
+        aps = list(rec.get('aligned_paths', []))
+        if rel_path not in aps:
+            aps.append(rel_path)
+        rec['aligned_paths'] = aps
+    persons[user_id] = rec
+    meta['version'] = 2
+    meta['persons'] = persons
+    # Preserve labels list written by FaceIndex.save
+    if 'labels' not in meta:
+        meta['labels'] = []
+    with open(labels_path, 'w', encoding='utf-8') as f:
+        json.dump(meta, f, ensure_ascii=False, indent=2)
 
 
 def main():
@@ -262,6 +367,9 @@ def main():
     # Branch: add a portrait image
     if args.add_image:
         label = args.label or os.path.splitext(os.path.basename(args.add_image))[0]
+        if not args.user_id:
+            print("--user-id is required with --add-image (used as FAISS label and person key)", file=sys.stderr)
+            sys.exit(2)
         try:
             # Normalize engine path argument (may be None)
             engine_path_arg: Optional[str] = None
@@ -270,6 +378,7 @@ def main():
             add_portrait_image_to_index(
                 image_path=args.add_image if os.path.isabs(args.add_image) else os.path.join(REPO_ROOT, args.add_image),
                 label=label,
+                user_id=args.user_id,
                 index_path=index_path,
                 labels_path=labels_path,
                 metric=args.metric,
@@ -280,6 +389,7 @@ def main():
                 m=int(args.m),
                 nbits=int(args.nbits),
                 engine_path=engine_path_arg,
+                crop_margin=float(args.crop_margin),
             )
         except Exception as e:
             print(f"Failed to add image: {e}", file=sys.stderr)

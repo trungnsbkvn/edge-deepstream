@@ -2,6 +2,7 @@ import os
 import time
 import ctypes
 import numpy as np
+import json
 
 import gi
 gi.require_version('Gst', '1.0')
@@ -44,6 +45,59 @@ def _load_roi_lib():
             except Exception:
                 continue
     return None
+
+# Cache for mapping FAISS labels (user_id) to display names from labels.json
+_NAME_MAP_CACHE = {
+    'path': None,
+    'mtime': 0.0,
+    'map': {}
+}
+
+def _get_display_name(label: str, labels_path: str) -> str:
+    if not label or not labels_path:
+        return label
+    try:
+        key = str(label).strip()
+        st = os.stat(labels_path)
+        mtime = float(getattr(st, 'st_mtime', 0.0))
+        if _NAME_MAP_CACHE['path'] != labels_path or _NAME_MAP_CACHE['mtime'] != mtime:
+            name_map = {}
+            with open(labels_path, 'r', encoding='utf-8') as f:
+                meta = json.load(f) or {}
+            # Prefer persons mapping: user_id -> name
+            persons = meta.get('persons', {}) if isinstance(meta, dict) else {}
+            if isinstance(persons, dict):
+                for uid, p in persons.items():
+                    try:
+                        uid_s = str(uid).strip()
+                        nm = str((p or {}).get('name', uid_s))
+                        if uid_s:
+                            name_map[uid_s] = nm
+                    except Exception:
+                        continue
+            elif isinstance(persons, list):
+                # Backward compatibility with older array format
+                for p in persons:
+                    try:
+                        uid = str(p.get('user_id', '')).strip()
+                        nm = str(p.get('name', uid))
+                        if uid:
+                            name_map[uid] = nm
+                    except Exception:
+                        continue
+            # Fallback: if only labels exist, map label to itself
+            labels = meta.get('labels', []) if isinstance(meta, dict) else []
+            if isinstance(labels, list):
+                for lb in labels:
+                    s = str(lb)
+                    if s not in name_map:
+                        name_map[s] = s
+            _NAME_MAP_CACHE['path'] = labels_path
+            _NAME_MAP_CACHE['mtime'] = mtime
+            _NAME_MAP_CACHE['map'] = name_map
+        return _NAME_MAP_CACHE['map'].get(key, key)
+    except Exception:
+        return label
 
 def pgie_src_filter_probe(pad,info,u_data):
     """
@@ -318,13 +372,15 @@ def sgie_feature_extract_probe(pad,info, data):
                     if recognize_once:
                         recognize_cache[oid] = {'name': top_name if match_ok else None}
                 if match_ok:
+                    # Map FAISS label (user_id or name) to display name via labels.json
+                    display_name = _get_display_name(top_name, lbl_path) if top_name else None
                     if verbose:
                         disp = top_dist if recog_metric == 'l2' else top_sim
-                        print(f"[SGIE_PROBE] frame-{frame_number} id-{obj_meta.object_id} match: {top_name} score: {disp:.3f}", flush=True)
+                        print(f"[SGIE_PROBE] frame-{frame_number} id-{obj_meta.object_id} match: {display_name} score: {disp:.3f}", flush=True)
                     display_meta = pyds.nvds_acquire_display_meta_from_pool(batch_meta)
                     display_meta.num_labels = 1
                     py_nvosd_text_params = display_meta.text_params[0]
-                    py_nvosd_text_params.display_text = top_name
+                    py_nvosd_text_params.display_text = display_name or top_name or ''
                     py_nvosd_text_params.x_offset = int(obj_meta.rect_params.left)
                     py_nvosd_text_params.y_offset = int(obj_meta.rect_params.top + obj_meta.rect_params.height)
                     py_nvosd_text_params.font_params.font_name = "Serif"
@@ -351,8 +407,8 @@ def sgie_feature_extract_probe(pad,info, data):
 
                         def _filename(dst_dir, best=False):
                             if best:
-                                return os.path.join(dst_dir, f"recog_{top_name}_track{oid}_best.png")
-                            return os.path.join(dst_dir, f"recog_{top_name}_f{frame_number}_id{oid}.png")
+                                return os.path.join(dst_dir, f"recog_{display_name}_track{oid}_best.png")
+                            return os.path.join(dst_dir, f"recog_{display_name}_f{frame_number}_id{oid}.png")
 
                         def copy_aligned(dst_dir, best=False):
                             if not align_dir:
@@ -499,7 +555,7 @@ def sgie_feature_extract_probe(pad,info, data):
                                 if dst:
                                     st['best_score'] = top_sim
                                     st['best_path'] = dst
-                                    st['best_name'] = top_name
+                                    st['best_name'] = display_name
                                     st['best_frame'] = frame_number
                     except Exception as e:
                         if verbose:

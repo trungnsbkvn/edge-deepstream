@@ -479,8 +479,17 @@ def main(cfg, run_duration=None):
     except Exception:
         idx_label = 'track'
     try:
-        idx_path = str(recog_cfg.get('stream_index_path', '')).strip() or str(recog_cfg.get('index_path', '')).strip()
-        lbl_path = str(recog_cfg.get('stream_labels_path', '')).strip() or str(recog_cfg.get('labels_path', '')).strip()
+        index_path_cfg = str(recog_cfg.get('index_path', '')).strip()
+        labels_path_cfg = str(recog_cfg.get('labels_path', '')).strip()
+        stream_index_path_cfg = str(recog_cfg.get('stream_index_path', '')).strip()
+        stream_labels_path_cfg = str(recog_cfg.get('stream_labels_path', '')).strip()
+        if idx_enable:
+            idx_path = stream_index_path_cfg or index_path_cfg
+            lbl_path = stream_labels_path_cfg or labels_path_cfg
+        else:
+            # When live indexing is disabled, ensure we read the main labels.json for name mapping
+            idx_path = index_path_cfg
+            lbl_path = labels_path_cfg
     except Exception:
         idx_path, lbl_path = '', ''
     try:
