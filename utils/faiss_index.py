@@ -20,9 +20,31 @@ import os
 import json
 import math
 from dataclasses import dataclass
-from typing import List, Tuple, Optional, Sequence
+from typing import List, Tuple, Optional, Sequence, Any
 
 import numpy as np
+
+# Enforce NumPy 1.x runtime (project targets numpy==1.24.4); avoid accidental NumPy 2.x
+try:
+    _NP_VER = str(np.__version__)
+    _NP_MAJOR = int(_NP_VER.split('.')[0])
+    if _NP_MAJOR >= 2:
+        raise RuntimeError(
+            f"NumPy {_NP_VER} detected. This build is pinned to NumPy 1.24.4. "
+            "Please install numpy==1.24.4 (and rebuild FAISS if built from source)."
+        )
+except Exception:
+    # If version parse fails, proceed; FAISS calls will still validate dtypes
+    pass
+
+
+def _f32c(x: np.ndarray) -> np.ndarray:
+    """Return a C-contiguous float32 view/copy of x.
+
+    FAISS expects float32 C-contiguous memory. Normalization and reshape can
+    produce non-contiguous arrays, so we standardize before passing to FAISS.
+    """
+    return np.ascontiguousarray(x, dtype=np.float32)
 
 
 def _try_import_faiss():
@@ -42,8 +64,8 @@ def _try_import_cuvs():
         return None
 
 
-_faiss = _try_import_faiss()
-_cuvs = _try_import_cuvs()
+_faiss: Any = _try_import_faiss()
+_cuvs: Any = _try_import_cuvs()
 
 
 def _ensure_2d(arr: np.ndarray) -> np.ndarray:
@@ -77,6 +99,7 @@ class FaceIndex:
             raise RuntimeError("FAISS is not installed. Please install faiss-cpu or faiss-gpu.")
         self.dim = int(dim)
         self.cfg = cfg or FaceIndexConfig()
+        # Internal handles; CPU index is the persisted source of truth
         self._cpu_index = None
         self._gpu_index = None
         self._gpu_res = None
@@ -103,10 +126,10 @@ class FaceIndex:
                 continue
         if not vecs:
             raise ValueError(f"No valid vectors loaded from {dir_path}")
-        X = np.vstack(vecs).astype(np.float32)
+        X = _f32c(np.vstack(vecs))
         # For cosine metric we want normalized embeddings (ArcFace already normalized, but ensure anyway)
         if (cfg.metric if cfg else "cosine") == "cosine":
-            X = _normalize_rows(X)
+            X = _f32c(_normalize_rows(X))
         idx = FaceIndex(dim=X.shape[1], cfg=cfg)
         idx.build(X, labels)
         return idx
@@ -154,11 +177,11 @@ class FaceIndex:
             return None
 
     def build(self, X: np.ndarray, labels: Sequence[str]):
-        X = np.asarray(X, dtype=np.float32)
+        X = _f32c(np.asarray(X, dtype=np.float32))
         if X.ndim != 2:
             X = X.reshape(len(X), -1)
         if self.cfg.metric.lower() == "cosine":
-            X = _normalize_rows(X)
+            X = _f32c(_normalize_rows(X))
         n, d = X.shape
         if d != self.dim:
             raise ValueError(f"Dim mismatch: got {d}, expected {self.dim}")
@@ -172,9 +195,9 @@ class FaceIndex:
 
     # ---------- mutation ----------
     def add(self, names: Sequence[str], vectors: np.ndarray):
-        V = _ensure_2d(np.asarray(vectors, dtype=np.float32))
+        V = _f32c(_ensure_2d(np.asarray(vectors, dtype=np.float32)))
         if self.cfg.metric.lower() == "cosine":
-            V = _normalize_rows(V)
+            V = _f32c(_normalize_rows(V))
         if V.shape[1] != self.dim:
             raise ValueError("Vector dim mismatch")
         # Always add to CPU index for persistence; refresh GPU from CPU
@@ -191,9 +214,9 @@ class FaceIndex:
 
     # ---------- query ----------
     def search(self, vectors: np.ndarray, k: int = 5) -> Tuple[List[List[str]], np.ndarray]:
-        V = _ensure_2d(np.asarray(vectors, dtype=np.float32))
+        V = _f32c(_ensure_2d(np.asarray(vectors, dtype=np.float32)))
         if self.cfg.metric.lower() == "cosine":
-            V = _normalize_rows(V)
+            V = _f32c(_normalize_rows(V))
         index = self._gpu_index or self._cpu_index
         if index is None:
             raise RuntimeError("Index is empty; build or load before search.")

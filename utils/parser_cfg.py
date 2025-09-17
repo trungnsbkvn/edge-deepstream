@@ -83,9 +83,9 @@ def safe_load_index(recog_cfg: dict):
             try:
                 # Lazy import to avoid import-time hangs when FAISS is not healthy
                 from utils.faiss_index import FaceIndex as _FaceIndex  # type: ignore
-            except Exception:
+            except Exception as e:
                 if dbg:
-                    print('[FAISS] import failed; skipping')
+                    print(f'[FAISS] import failed; skipping: {e}')
                 return None
             try:
                 idx = _FaceIndex.load(index_path, labels_path, use_gpu=use_gpu, gpu_id=gpu_id)
@@ -102,9 +102,9 @@ def safe_load_index(recog_cfg: dict):
                     except Exception:
                         pass
                 return idx
-            except Exception:
+            except Exception as e:
                 if dbg:
-                    print('[FAISS] load failed; skipping')
+                    print(f'[FAISS] load failed; skipping: {e}')
                 return None
         else:
             if dbg:

@@ -59,7 +59,7 @@ metric="cosine"
 # FAISS index type: "flat" (exact), "ivf" (coarse quantizer), or "ivfpq" (compressed)
 index_type="flat"
 # GPU acceleration (requires faiss-gpu); falls back to CPU if unavailable
-use_gpu=0
+use_gpu=1
 gpu_id=0
 # IVF lists (only for ivf/ivfpq); if 0, auto sqrt(N)
 nlist=0
