@@ -426,12 +426,20 @@ def sgie_feature_extract_probe(pad,info, data):
                                                     lib.roi_free(out_ptr)
                                                 except Exception:
                                                     pass
+                                        else:
+                                            if verbose:
+                                                print(f"[WARN] C++ roi_crop_bgr ret={ret}, size={out_size.value}", flush=True)
+                                            # When C++ helper is present but failed this ROI, do not fallback to Python to avoid RGBA-only errors
+                                            return None
                             except Exception as _e:
                                 if verbose:
                                     print(f"[WARN] C++ roi_crop_bgr failed: {_e}", flush=True)
                             
-                            # 2) Python fallback: extract from NvBufSurface mapped to CPU
+                            # 2) Python fallback (only when C++ helper is not available): extract from NvBufSurface mapped to CPU
                             try:
+                                if _load_roi_lib() is not None:
+                                    # If C++ lib is available but crop failed, skip Python fallback to avoid RGBA-only issues
+                                    return None
                                 surface = pyds.get_nvds_buf_surface(hash(gst_buffer), frame_meta.batch_id)
                                 frame_np = np.array(surface, copy=True, order='C')
                                 Hm = int(getattr(frame_meta, 'source_frame_height', 0) or 0)

@@ -1551,7 +1551,7 @@ align_preprocess(GstNvInfer *nvinfer, NvBufSurface * frame_surface, NvBufSurface
     float lmks[NUM_LMKS/2][2] = {0};
     int data_valid = 1;
     if (landmarkInfos.empty()) {
-      GST_WARNING_OBJECT(nvinfer, "No landmark info for this crop; skipping alignment");
+      GST_DEBUG_OBJECT(nvinfer, "No landmark info for this crop; skipping alignment (likely due to interval)");
       continue;
     }
     LandmarkInfo lmkinfo = landmarkInfos.front();
@@ -1562,7 +1562,7 @@ align_preprocess(GstNvInfer *nvinfer, NvBufSurface * frame_surface, NvBufSurface
     for (unsigned int i=0;i<NUM_LMKS;i++) {
       lmks[i/2][i%2] = lmkinfo.landmarks[i];
       if (lmks[i/2][i%2] <= 0 || lmks[i/2][i%2] >= 10000){
-        GST_WARNING_OBJECT(nvinfer, "Landmark info is invalid, skip alignment");
+        GST_DEBUG_OBJECT(nvinfer, "Landmark info is invalid, skip alignment");
         data_valid = 0;
         break;
       }

@@ -27,4 +27,4 @@ alignment-type=1
 # Path to save pre/post-alignment crops
 alignment-pics-path=/dev/shm/edge-deepstream/aligned
 # Skip frame to keep up real-time when syncing display
-interval=0
+interval=5

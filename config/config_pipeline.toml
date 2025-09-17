@@ -43,11 +43,11 @@ sync=0
 
 [recognition]
 # Cosine similarity threshold for accepting a match (higher = stricter)
-threshold=0.4
+threshold=0.6
 # Directory to save recognized face images
 save_dir="data/faces/recognized"
 # Save mode for recognized images: "all" (every frame), "first" (first per track), "best" (best score per track)
-save_mode="all"
+save_mode="first"
 # Backend: "faiss" (default), "cuvs" (experimental; requires RAPIDS cuVS), or "auto"
 backend="faiss"
 # If your known_face_dir has images instead of .npy embeddings, you can point to a folder of .npy features
@@ -80,11 +80,11 @@ index_mode="per_track"
 # Labeling for indexed entries: "track" (label as track-<id>) or "name" (use recognized name when available)
 index_label="name"
 # Optional alternate paths to save the live-updated index; if empty, reuse index_path/labels_path
-stream_index_path=""
-stream_labels_path=""
+stream_index_path="data/index/live.index"
+stream_labels_path="data/index/live_labels.json"
 
 # Recognize once per track to reduce per-frame matching cost (1 enable, 0 disable)
-recognize_once_per_track=1
+recognize_once_per_track=0
 
 [debug]
 # Verbose console prints (matching per-frame)
