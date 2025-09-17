@@ -40,6 +40,6 @@ pre-cluster-threshold=0.55
 topk=50
 # Use NMS clustering with a slightly stricter IOU to reduce duplicates
 cluster-mode=2
-nms-iou-threshold=0.45
+nms-iou-threshold=0.55
 # Optionally require a minimum score after NMS (usually same as pre)
 post-cluster-threshold=0.55
