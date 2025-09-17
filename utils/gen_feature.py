@@ -1,11 +1,6 @@
-'''
-Author: zhouyuchong
-Date: 2024-09-13 13:44:16
-Description: 
-LastEditors: zhouyuchong
-LastEditTime: 2024-09-19 14:16:43
-'''
 import os
+import configparser
+import toml
 import math
 import cv2
 import tensorrt as trt
@@ -157,7 +152,26 @@ def preprocess(input_path, netshape):
     return image, raw_image
 
 if __name__ == "__main__":
-    model = TensorRTInfer("./models/arcface/arcface.engine", mode='min')
+    # Resolve SGIE engine path from the pipeline TOML -> SGIE config -> model-engine-file
+    engine_path = None
+    try:
+        cfg = toml.load("config/config_pipeline.toml")
+        sgie_cfg_path = cfg.get('sgie', {}).get('config-file-path', '').strip()
+        if sgie_cfg_path and os.path.exists(sgie_cfg_path):
+            cp = configparser.ConfigParser()
+            cp.read(sgie_cfg_path)
+            if cp.has_option('property', 'model-engine-file'):
+                engine_path = cp.get('property', 'model-engine-file')
+        # Resolve relative path to workspace root if needed
+        if engine_path and not os.path.isabs(engine_path):
+            engine_path = os.path.normpath(os.path.join(os.path.dirname(sgie_cfg_path), engine_path))
+    except Exception:
+        engine_path = None
+    # Fallbacks
+    if not engine_path or not os.path.exists(engine_path):
+        cand = "./models/arcface/glintr100.onnx_b4_gpu0_fp16.engine"
+        engine_path = cand if os.path.exists(cand) else "./models/arcface/arcface.engine"
+    model = TensorRTInfer(engine_path, mode='min')
     _shape, _dtype = model.input_spec()
     path = "data/known_faces"
     # Only process images; skip existing .npy files

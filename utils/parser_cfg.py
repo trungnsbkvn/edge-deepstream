@@ -1,10 +1,3 @@
-'''
-Author: zhouyuchong
-Date: 2024-08-19 14:54:53
-Description: 
-LastEditors: zhouyuchong
-LastEditTime: 2024-08-20 10:03:25
-'''
 import os
 import configparser
 import toml

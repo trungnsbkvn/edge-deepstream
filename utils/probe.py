@@ -1,10 +1,3 @@
-'''
-Author: zhouyuchong
-Date: 2024-08-19 14:35:17
-Description: 
-LastEditors: zhouyuchong
-LastEditTime: 2024-09-19 14:36:41
-'''
 import os
 import numpy as np
 
@@ -28,13 +21,29 @@ def pgie_src_filter_probe(pad,info,u_data):
     batch_meta = pyds.gst_buffer_get_nvds_batch_meta(hash(gst_buffer))
     l_frame = batch_meta.frame_meta_list
     
-    # Simple threshold from env (fallback 0.6 like original)
-    MIN_CONF = float(os.getenv('PGIE_MIN_CONF', '0.6'))
+    # Threshold from config with env override
+    cfg_min = None
+    try:
+        if isinstance(u_data, dict):
+            cfg_min = u_data.get('thresholds', {}).get('pgie_min_conf', None)
+    except Exception:
+        cfg_min = None
+    env_min = os.getenv('PGIE_MIN_CONF')
+    try:
+        if env_min is not None:
+            MIN_CONF = float(env_min)
+        elif cfg_min is not None:
+            MIN_CONF = float(cfg_min)
+        else:
+            MIN_CONF = 0.6
+    except Exception:
+        MIN_CONF = 0.6
     # One-time debug to confirm probe is attached and env is read
     if not hasattr(pgie_src_filter_probe, '_dbg_once'):
         pgie_src_filter_probe._dbg_once = True
         try:
-            print(f"[PGIE_PROBE] attached. MIN_CONF={MIN_CONF} (ENV PGIE_MIN_CONF={os.getenv('PGIE_MIN_CONF')})", flush=True)
+            src = 'ENV' if env_min is not None else ('CFG' if cfg_min is not None else 'DEFAULT')
+            print(f"[PGIE_PROBE] attached. MIN_CONF={MIN_CONF} (src={src})", flush=True)
         except Exception:
             pass
 

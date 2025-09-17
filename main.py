@@ -403,16 +403,24 @@ def main(cfg, run_duration=None):
 
     print("Attach probes")
     pgie_src_pad = pgie.get_static_pad("src")
-    # Note: pgie_src_filter_probe honors env vars to tune noise filtering without code change:
-    #   PGIE_MIN_CONF (default 0.65), PGIE_MIN_W (20), PGIE_MIN_H (20),
-    #   PGIE_MIN_AR (0.6), PGIE_MAX_AR (1.8), PGIE_TOPK (30)
-    pgie_src_pad.add_probe(Gst.PadProbeType.BUFFER, pgie_src_filter_probe, 0)
+    # Build probe data with cfg for thresholds; env can still override in probe
+    pgie_probe_data = {
+        'thresholds': cfg.get('thresholds', {})
+    }
+    pgie_src_pad.add_probe(Gst.PadProbeType.BUFFER, pgie_src_filter_probe, pgie_probe_data)
 
     sgie_src_pad = sgie.get_static_pad("src")
     # Recognition settings
     try:
         recog_cfg = cfg.get('recognition', {})
         recog_thresh = recog_cfg.get('threshold', 0.3)
+        # Env override for quick debug without editing config
+        _rt_env = os.getenv('RECOG_THRESH')
+        if _rt_env is not None:
+            try:
+                recog_thresh = float(_rt_env)
+            except Exception:
+                pass
         recog_save_dir = recog_cfg.get('save_dir', '')
         recog_save_mode = str(recog_cfg.get('save_mode', 'all')).lower()
         recog_metric = str(recog_cfg.get('metric', 'cosine')).lower()
@@ -422,8 +430,19 @@ def main(cfg, run_duration=None):
         recog_save_mode = 'all'
         recog_metric = 'cosine'
     # Fetch alignment pics dir from SGIE property (set via config)
+    # Note: custom property name is 'alignment-pics-path' (plural). Keep a fallback to singular.
     try:
-        alignment_pic_dir = sgie.get_property('alignment-pic-path') or ''
+        alignment_pic_dir = ''
+        try:
+            alignment_pic_dir = sgie.get_property('alignment-pics-path') or ''
+        except Exception:
+            alignment_pic_dir = ''
+        if not alignment_pic_dir:
+            # Fallback for older builds using singular form
+            try:
+                alignment_pic_dir = sgie.get_property('alignment-pic-path') or ''
+            except Exception:
+                alignment_pic_dir = ''
     except Exception:
         alignment_pic_dir = ''
     # Debug/verbosity

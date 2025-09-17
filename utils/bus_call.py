@@ -1,10 +1,3 @@
-'''
-Author: zhouyuchong
-Date: 2024-08-19 15:40:01
-Description: 
-LastEditors: zhouyuchong
-LastEditTime: 2024-08-19 15:40:06
-'''
 import gi
 import sys
 gi.require_version('Gst', '1.0')
