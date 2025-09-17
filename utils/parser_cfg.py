@@ -10,12 +10,6 @@ import configparser
 import toml
 import numpy as np
 
-# Optional FAISS index
-try:
-    from utils.faiss_index import FaceIndex, FaceIndexConfig
-except Exception:
-    FaceIndex = None
-    FaceIndexConfig = None
 def parse_args(cfg_path):
     cfg = toml.load(cfg_path)
     return cfg
@@ -60,56 +54,70 @@ def load_faces(path):
     return loaded_faces
 
 
-def build_or_load_index(known_face_dir: str, recog_cfg: dict):
-    """Build or load a FAISS-based index from known faces directory using config.
+def safe_load_index(recog_cfg: dict):
+    """Load a persisted FAISS index if available; do NOT build at runtime.
 
-    Returns None if FAISS not available or use_index is disabled.
+    Returns None when disabled, files missing, or FAISS unavailable.
     """
-    use_index = int(recog_cfg.get('use_index', 1)) if isinstance(recog_cfg, dict) else 1
-    if not use_index:
-        return None
-    if FaceIndex is None or FaceIndexConfig is None:
-        # FAISS not installed; fallback to Python matching
-        return None
-
-    metric = str(recog_cfg.get('metric', 'cosine'))
-    index_type = str(recog_cfg.get('index_type', 'flat'))
-    use_gpu = bool(recog_cfg.get('use_gpu', 1))
-    gpu_id = int(recog_cfg.get('gpu_id', 0))
-    nlist = int(recog_cfg.get('nlist', 0)) or None
-    m_pq = int(recog_cfg.get('m_pq', 0)) or None
-    nbits_pq = int(recog_cfg.get('nbits_pq', 8))
-    index_path = str(recog_cfg.get('index_path', ''))
-    labels_path = str(recog_cfg.get('labels_path', ''))
-    feature_dir = str(recog_cfg.get('feature_dir', '')).strip() or known_face_dir
-
-    cfg = FaceIndexConfig(
-        metric=metric,
-        index_type=index_type,
-        use_gpu=use_gpu,
-        gpu_id=gpu_id,
-        nlist=nlist,
-        m_pq=m_pq,
-        nbits_pq=nbits_pq,
-    )
-
-    # Try load existing index if both files exist
-    if index_path and labels_path and os.path.exists(index_path) and os.path.exists(labels_path):
-        try:
-            return FaceIndex.load(index_path, labels_path, use_gpu=use_gpu, gpu_id=gpu_id)
-        except Exception:
-            pass
-
-    # Else build from directory and save
     try:
-        idx = FaceIndex.from_dir(feature_dir, cfg)
-        if index_path and labels_path:
+        dbg = os.getenv('DS_FAISS_DEBUG', '0') == '1'
+        t0 = None
+        if dbg:
             try:
-                os.makedirs(os.path.dirname(index_path), exist_ok=True)
-                os.makedirs(os.path.dirname(labels_path), exist_ok=True)
-                idx.save(index_path, labels_path)
+                import time as _t
+                t0 = _t.time()
+                print('[FAISS] safe_load_index: start')
             except Exception:
                 pass
-        return idx
+        if not isinstance(recog_cfg, dict):
+            return None
+        # Allow hard-disable via env to bypass any FAISS work
+        if os.getenv('DS_DISABLE_FAISS', '0') == '1':
+            if dbg:
+                print('[FAISS] disabled by env DS_DISABLE_FAISS=1')
+            return None
+        use_index = int(recog_cfg.get('use_index', 1))
+        if use_index != 1:
+            if dbg:
+                print('[FAISS] disabled by recognition.use_index!=1')
+            return None
+        index_path = str(recog_cfg.get('index_path', '')).strip()
+        labels_path = str(recog_cfg.get('labels_path', '')).strip()
+        use_gpu = bool(int(recog_cfg.get('use_gpu', 0)))
+        gpu_id = int(recog_cfg.get('gpu_id', 0))
+        # Only attempt import if files exist to avoid unnecessary module import
+        if index_path and labels_path and os.path.exists(index_path) and os.path.exists(labels_path):
+            try:
+                # Lazy import to avoid import-time hangs when FAISS is not healthy
+                from utils.faiss_index import FaceIndex as _FaceIndex  # type: ignore
+            except Exception:
+                if dbg:
+                    print('[FAISS] import failed; skipping')
+                return None
+            try:
+                idx = _FaceIndex.load(index_path, labels_path, use_gpu=use_gpu, gpu_id=gpu_id)
+                if dbg:
+                    try:
+                        import time as _t
+                        dt = (_t.time() - t0) if t0 else -1
+                        sz = -1
+                        try:
+                            sz = idx.size()
+                        except Exception:
+                            pass
+                        print(f'[FAISS] loaded ok: size={sz}, gpu={int(use_gpu)}, dt={dt:.3f}s')
+                    except Exception:
+                        pass
+                return idx
+            except Exception:
+                if dbg:
+                    print('[FAISS] load failed; skipping')
+                return None
+        else:
+            if dbg:
+                print('[FAISS] files missing; skipping')
+        return None
     except Exception:
+        if os.getenv('DS_FAISS_DEBUG', '0') == '1':
+            print('[FAISS] exception; skipping')
         return None

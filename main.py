@@ -137,17 +137,31 @@ def main(cfg, run_duration=None):
     print(cfg)
     print("Load known faces features \n")
     known_face_features = load_faces(cfg['pipeline']['known_face_dir'])
-    # Build/load vector index (FAISS) if available and enabled
+    # Load prebuilt vector index (FAISS) if available and enabled (no building at runtime)
     try:
         recog_cfg = cfg.get('recognition', {})
     except Exception:
         recog_cfg = {}
     try:
-        vector_index = build_or_load_index(cfg['pipeline']['known_face_dir'], recog_cfg)
+        vector_index = safe_load_index(recog_cfg)
         if vector_index is not None:
-            print(f"Vector index ready: {vector_index.size()} entries\n")
+            try:
+                print(f"Vector index ready: {vector_index.size()} entries\n")
+            except Exception:
+                print("Vector index loaded.\n")
         else:
-            print("Vector index disabled or not available; using Python matching.\n")
+            reason = []
+            try:
+                if os.getenv('DS_DISABLE_FAISS', '0') == '1':
+                    reason.append('env DS_DISABLE_FAISS=1')
+                if not os.path.exists(str(recog_cfg.get('index_path', '')).strip()):
+                    reason.append('missing index_path')
+                if not os.path.exists(str(recog_cfg.get('labels_path', '')).strip()):
+                    reason.append('missing labels_path')
+            except Exception:
+                pass
+            rs = (', '.join(reason) or 'not configured or unavailable')
+            print(f"FAISS disabled: {rs}. Using Python matching.\n")
     except Exception as e:
         vector_index = None
         print(f"Vector index unavailable ({e}); fallback to Python matching.\n")
@@ -458,5 +472,13 @@ def main(cfg, run_duration=None):
 
 if __name__ == '__main__':
     cfg = parse_args(cfg_path="config/config_pipeline.toml")
-    main(cfg)
+    # Optional runtime cap to avoid indefinite hangs (env: DS_RUN_DURATION_SEC)
+    run_dur = None
+    try:
+        _rd = os.getenv('DS_RUN_DURATION_SEC')
+        if _rd:
+            run_dur = float(_rd)
+    except Exception:
+        run_dur = None
+    main(cfg, run_duration=run_dur)
 

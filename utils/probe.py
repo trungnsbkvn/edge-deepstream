@@ -28,13 +28,15 @@ def pgie_src_filter_probe(pad,info,u_data):
     batch_meta = pyds.gst_buffer_get_nvds_batch_meta(hash(gst_buffer))
     l_frame = batch_meta.frame_meta_list
     
-    # Tuning knobs: tighten to reduce noisy crops
-    MIN_CONF = float(os.getenv('PGIE_MIN_CONF', '0.65'))   # raise if still noisy
-    MIN_W = int(os.getenv('PGIE_MIN_W', '20'))            # min face width in pixels
-    MIN_H = int(os.getenv('PGIE_MIN_H', '20'))            # min face height in pixels
-    MIN_AR = float(os.getenv('PGIE_MIN_AR', '0.6'))       # w/h lower bound
-    MAX_AR = float(os.getenv('PGIE_MAX_AR', '1.8'))       # w/h upper bound
-    TOPK = int(os.getenv('PGIE_TOPK', '30'))              # keep top-K by conf per frame (0 disables)
+    # Simple threshold from env (fallback 0.6 like original)
+    MIN_CONF = float(os.getenv('PGIE_MIN_CONF', '0.6'))
+    # One-time debug to confirm probe is attached and env is read
+    if not hasattr(pgie_src_filter_probe, '_dbg_once'):
+        pgie_src_filter_probe._dbg_once = True
+        try:
+            print(f"[PGIE_PROBE] attached. MIN_CONF={MIN_CONF} (ENV PGIE_MIN_CONF={os.getenv('PGIE_MIN_CONF')})", flush=True)
+        except Exception:
+            pass
 
     while l_frame is not None:
         try:
@@ -42,28 +44,7 @@ def pgie_src_filter_probe(pad,info,u_data):
         except StopIteration:
             break
         
-        # Collect objects first to rank by confidence
-        objs = []
-        l_obj = frame_meta.obj_meta_list
-        while l_obj is not None:
-            try:
-                obj_meta = pyds.NvDsObjectMeta.cast(l_obj.data)
-            except StopIteration:
-                break
-            objs.append(obj_meta)
-            try:
-                l_obj = l_obj.next
-            except StopIteration:
-                break
-
-        # Sort by confidence desc and keep top-K
-        if objs:
-            objs.sort(key=lambda o: float(getattr(o, 'confidence', 0.0)), reverse=True)
-            keep_set = set(objs[:TOPK] if TOPK > 0 else objs)
-        else:
-            keep_set = set()
-
-        # Second pass: remove low-conf, tiny, bad aspect, and extra beyond top-K
+        # Original simple per-object filtering based on confidence only
         l_obj = frame_meta.obj_meta_list
         while l_obj is not None:
             try:
@@ -71,34 +52,26 @@ def pgie_src_filter_probe(pad,info,u_data):
             except StopIteration:
                 break
 
-            drop = False
-            conf = float(getattr(obj_meta, 'confidence', 0.0))
-            rp = obj_meta.rect_params
-            w = float(getattr(rp, 'width', 0.0))
-            h = float(getattr(rp, 'height', 0.0))
-            ar = (w / h) if h > 1e-3 else 999.0
-
-            if TOPK > 0 and obj_meta not in keep_set:
-                drop = True
-            elif conf < MIN_CONF:
-                drop = True
-            elif w < MIN_W or h < MIN_H:
-                drop = True
-            elif not (MIN_AR <= ar <= MAX_AR):
-                drop = True
+            drop_signal = True
+            try:
+                conf = float(getattr(obj_meta, 'confidence', 0.0))
+            except Exception:
+                conf = 0.0
+            if conf > MIN_CONF:
+                drop_signal = False
 
             try:
                 next_obj = l_obj.next
             except StopIteration:
                 next_obj = None
 
-            if drop:
+            if drop_signal is True:
                 pyds.nvds_remove_obj_meta_from_frame(frame_meta, obj_meta)
 
             l_obj = next_obj
 
         try:
-            l_frame=l_frame.next
+            l_frame = l_frame.next
         except StopIteration:
             break
 
@@ -165,6 +138,31 @@ def sgie_feature_extract_probe(pad,info, data):
         vector_index = None
         recog_metric = 'cosine'
 
+    # One-time debug to confirm SGIE probe wiring and key params
+    if not hasattr(sgie_feature_extract_probe, '_dbg_once'):
+        sgie_feature_extract_probe._dbg_once = True
+        try:
+            vi = None
+            metric = None
+            if isinstance(data, (list, tuple)):
+                vi = data[8] if len(data) > 8 else None
+                metric = (data[9] if len(data) > 9 else 'cosine')
+            visz = -1
+            try:
+                visz = vi.size() if vi is not None else 0
+            except Exception:
+                visz = 0
+            print(
+                "[SGIE_PROBE] attached. threshold=" + str(threshold) +
+                ", save_dir=" + str(recog_save_dir) +
+                ", save_mode=" + str(recog_save_mode) +
+                ", vector_index_size=" + str(visz) +
+                ", metric=" + str(metric),
+                flush=True
+            )
+        except Exception:
+            pass
+
     while l_frame is not None:
         try:
             frame_meta = pyds.NvDsFrameMeta.cast(l_frame.data)
@@ -228,7 +226,7 @@ def sgie_feature_extract_probe(pad,info, data):
                 if match_ok:
                     if verbose:
                         disp = top_dist if recog_metric == 'l2' else top_sim
-                        print(f"frame-{frame_number}, face-{obj_meta.object_id} match: {top_name} score: {disp:.3f}")
+                        print(f"[SGIE_PROBE] frame-{frame_number} id-{obj_meta.object_id} match: {top_name} score: {disp:.3f}", flush=True)
                     display_meta = pyds.nvds_acquire_display_meta_from_pool(batch_meta)
                     display_meta.num_labels = 1
                     py_nvosd_text_params = display_meta.text_params[0]
@@ -291,7 +289,7 @@ def sgie_feature_extract_probe(pad,info, data):
                                     st['best_frame'] = frame_number
                     except Exception as e:
                         if verbose:
-                            print(f"[WARN] Could not save recognized face image: {e}")
+                            print(f"[WARN] Could not save recognized face image: {e}", flush=True)
 
             try:
                 l_obj = l_obj.next
@@ -337,6 +335,10 @@ def get_face_feature(obj_meta, frame_num, data):
                 if data[1]:
                     save_p = os.path.join(data[2], f"{obj_meta.object_id}-{frame_num}.npy")
                     np.save(save_p, normal_array)
+                    try:
+                        print(f"[SGIE_PROBE] saved feature: {save_p}", flush=True)
+                    except Exception:
+                        pass
             except Exception:
                 pass
             return normal_array
