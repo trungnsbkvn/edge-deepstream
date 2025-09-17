@@ -63,6 +63,14 @@ int roi_crop_bgr(uint64_t gst_buffer_ptr,
     return -6;
   }
 
+  // On some platforms, source surfaces need to be registered as EGLImage before transform
+  bool src_mapped_egl = false;
+  if (surf->memType == NVBUF_MEM_SURFACE_ARRAY) {
+    if (NvBufSurfaceMapEglImage(surf, batch_id) == 0) {
+      src_mapped_egl = true;
+    }
+  }
+
   NvBufSurfTransformParams tparams;
   memset(&tparams, 0, sizeof(tparams));
   tparams.transform_flag = NVBUFSURF_TRANSFORM_FILTER;
@@ -77,8 +85,15 @@ int roi_crop_bgr(uint64_t gst_buffer_ptr,
   NvBufSurfTransformSetSessionParams(&cfg_params);
 
   if (NvBufSurfTransform(surf, dst_surf, &tparams) != 0) {
+    if (src_mapped_egl) {
+      NvBufSurfaceUnMapEglImage(surf, batch_id);
+    }
     NvBufSurfaceDestroy(dst_surf);
     return -8;
+  }
+
+  if (src_mapped_egl) {
+    NvBufSurfaceUnMapEglImage(surf, batch_id);
   }
 
   if (NvBufSurfaceMap(dst_surf, 0, 0, NVBUF_MAP_READ) != 0) {

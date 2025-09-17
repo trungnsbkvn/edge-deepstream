@@ -496,6 +496,7 @@ def sgie_feature_extract_probe(pad,info, data):
                                 if _load_roi_lib() is not None:
                                     # If C++ lib is available but crop failed, skip Python fallback to avoid RGBA-only issues
                                     return None
+                                # CPU mapping may fail on some mem types; catch and return None silently
                                 surface = pyds.get_nvds_buf_surface(hash(gst_buffer), frame_meta.batch_id)
                                 frame_np = np.array(surface, copy=True, order='C')
                                 Hm = int(getattr(frame_meta, 'source_frame_height', 0) or 0)
