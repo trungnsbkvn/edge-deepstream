@@ -19,6 +19,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 FAISS_DIR="$ROOT_DIR/third_party/faiss"
+BUILD_DIR="$ROOT_DIR/third_party/_faiss_build"
 CUDA_HOME="${CUDA_HOME:-/usr/local/cuda}"
 SM_ARCH="${SM:-72}"
 PYBIN="${PYBIN:-$(command -v python3)}"
@@ -59,15 +60,14 @@ fi
 echo "CUDA: $(nvcc --version | sed -n 's/.*release \([0-9.]*\).*/\1/p' | head -n1) at $CUDA_HOME"
 echo "Target GPU SM arch: $SM_ARCH"
 
-cd "$FAISS_DIR"
-
 if [[ "${CLEAN:-0}" == "1" ]]; then
-  rm -rf build
+  rm -rf "$BUILD_DIR"
 fi
 
 # Configure
+mkdir -p "$BUILD_DIR"
 echo "Configuring FAISS (GPU=ON, Python=ON)" >&2
-cmake -B build . \
+cmake -B "$BUILD_DIR" -S "$FAISS_DIR" \
   -DFAISS_ENABLE_GPU=ON \
   -DFAISS_ENABLE_PYTHON=ON \
   -DBUILD_SHARED_LIBS=ON \
@@ -78,11 +78,11 @@ cmake -B build . \
 
 # Build Python bindings (swigfaiss) and core libs
 echo "Building swigfaiss (Python module)" >&2
-make -C build -j "$(nproc)" swigfaiss
+make -C "$BUILD_DIR" -j "$(nproc)" swigfaiss
 
 # Install Python module from build tree
 echo "Installing Python package from build tree" >&2
-cd build/faiss/python
+cd "$BUILD_DIR/faiss/python"
 "$PYBIN" -m pip install --user .
 
 # Verify GPU API and a simple GPU index roundtrip

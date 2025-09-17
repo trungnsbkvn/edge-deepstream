@@ -6,6 +6,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 FAISS_DIR="$ROOT_DIR/third_party/faiss"
+BUILD_DIR="$ROOT_DIR/third_party/_faiss_build"
 
 if [[ ! -d "$FAISS_DIR" ]]; then
   echo "FAISS source not found at $FAISS_DIR" >&2
@@ -23,10 +24,9 @@ if maj >= 2:
   raise SystemExit('ERROR: NumPy {} detected. Please use numpy==1.24.4 before building FAISS.'.format(numpy.__version__))
 PY
 
-cd "$FAISS_DIR"
-
+mkdir -p "$BUILD_DIR"
 echo "Configuring FAISS (CPU-only, Python bindings ON)" >&2
-cmake -B build . \
+cmake -B "$BUILD_DIR" -S "$FAISS_DIR" \
   -DFAISS_ENABLE_GPU=OFF \
   -DFAISS_ENABLE_PYTHON=ON \
   -DBUILD_SHARED_LIBS=ON \
@@ -34,10 +34,10 @@ cmake -B build . \
   -DPython_EXECUTABLE="$PYBIN"
 
 echo "Building swigfaiss (Python module)" >&2
-make -C build -j "$(nproc)" swigfaiss
+make -C "$BUILD_DIR" -j "$(nproc)" swigfaiss
 
 echo "Installing Python package from build tree" >&2
-cd build/faiss/python
+cd "$BUILD_DIR/faiss/python"
 "$PYBIN" -m pip install --user .
 
 echo "Verifying import" >&2
