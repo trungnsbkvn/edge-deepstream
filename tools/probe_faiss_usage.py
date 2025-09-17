@@ -1,5 +1,19 @@
 import os, glob
 import numpy as np
+
+# GPU capability check
+try:
+    import faiss
+    has_gpu_api = hasattr(faiss, 'StandardGpuResources')
+    num_gpus = None
+    try:
+        num_gpus = faiss.get_num_gpus() if has_gpu_api else None
+    except Exception:
+        num_gpus = None
+    print('[probe] faiss_has_gpu_api =', bool(has_gpu_api), 'num_gpus =', num_gpus)
+except Exception as e:
+    print('[probe] faiss import failed:', e)
+
 from utils.parser_cfg import parse_args, safe_load_index
 
 cfg = parse_args('config/config_pipeline.toml')
@@ -10,6 +24,9 @@ if idx is None:
     print('[probe] faiss_in_use = False (index not loaded)')
 else:
     print('[probe] faiss_in_use = True')
+    # peek at internal GPU handle
+    using_gpu = getattr(idx, '_gpu_index', None) is not None
+    print('[probe] using_gpu =', using_gpu)
     try:
         print('[probe] index_size =', idx.size())
     except Exception:
