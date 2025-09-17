@@ -1,7 +1,8 @@
 [property]
 gpu-id=0
 gie-unique-id=2
-model-engine-file=../models/arcface/arcface.engine
+onnx-file=../models/arcface/glintr100.onnx
+model-engine-file=../models/arcface/glintr100.onnx_b4_gpu0_fp16.engine
 net-scale-factor=0.0078125
 offsets=127.5;127.5;127.5
 batch-size=4
