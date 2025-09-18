@@ -8,7 +8,7 @@ realtime=1
 
 [streammux]
 gpu_id=0
-batch-size=4
+batch-size=0
 width=1920
 height=1080
 batched-push-timeout=1000
@@ -20,11 +20,6 @@ process-mode=0
 display-text=1
 
 [source]
-"f5c4a7a1-1b2c-4d3e-8f90-111111111111" = "file:///home/m2n/edge-deepstream/data/media/friends_s1e1_cut.mp4"
-"a2b3c4d5-6e7f-8901-2345-222222222222" = "rtsp://admin:wesmart!@192.168.0.243:554/Streaming/Channels/101"
-"b3c4d5e6-f701-2345-6789-333333333333" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/301"
-"c4d5e6f7-0123-4567-89ab-444444444444" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/401"
-
 [pgie]
 #config-file-path="config/config_retinaface.txt"
 config-file-path="config/config_yolov8n_face.txt"
@@ -44,7 +39,7 @@ qos=1
 sync=0
 
 [recognition]
-# Cosine similarity threshold for accepting a match (higher = stricter)
+# Cosine similarity (higher = stricter)
 threshold=0.5
 # Directory to save recognized face images
 save_dir="data/faces/recognized"
@@ -110,3 +105,4 @@ host = "localhost"
 port = 1883
 # Topics
 request_topic = "/local/core/v2/ai/request"
+response_topic = "/local/core/v2/ai/response"
