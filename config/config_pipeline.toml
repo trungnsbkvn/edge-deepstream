@@ -103,3 +103,10 @@ enable=1
 unix_socket="/tmp/my_socket"
 # Include image bytes in the packet (PNG/JPEG). 1=yes, 0=no
 send_image=1
+
+[mqtt]
+# Local MQTT broker settings (core_v2 style)
+host = "localhost"
+port = 1883
+# Topics
+request_topic = "/local/core/v2/ai/request"

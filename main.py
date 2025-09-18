@@ -20,11 +20,17 @@ import sys
 import os
 import math
 import time
+import json
 
 from utils.probe import *
 from utils.parser_cfg import *
 from utils.bus_call import bus_call
 from utils.event_sender import EventSender
+from utils.mqtt_listener import MQTTListener
+from utils.faiss_index import FaceIndex, FaceIndexConfig
+from utils.gen_feature import TensorRTInfer
+from typing import Any, Dict, Optional
+import configparser
 
 # Global realtime flag to allow decoder frame dropping
 REALTIME_DROP = False
@@ -211,6 +217,283 @@ def main(cfg, run_duration=None):
     # for i in range(number_sources):
     # Build a deterministic mapping from batch index to cameraId using [source] keys directly
     source_index_to_cam = {}
+    # Registry for dynamic management: cam_id -> { 'bin', 'sinkpad', 'index', 'uri' }
+    source_registry = {}
+
+    # Helper to (re)compute tiler layout when number of sources changes
+    def _update_tiler_layout(total_sources: int):
+        try:
+            if total_sources < 1:
+                total_sources = 1
+            rows = int(math.sqrt(total_sources))
+            cols = int(math.ceil((1.0 * total_sources) / rows))
+            try:
+                tiler.set_property("rows", rows)
+                tiler.set_property("columns", cols)
+            except Exception:
+                pass
+        except Exception:
+            pass
+
+    # Compute batch-size as (max index + 1) to preserve source_id mapping when indices have holes
+    def _active_batch_size() -> int:
+        try:
+            if not source_registry:
+                return 0
+            max_idx = max(int(e.get('index', -1)) for e in source_registry.values())
+            return max_idx + 1
+        except Exception:
+            return len(source_registry)
+
+    # Comment out a source entry in the TOML [source] table (best-effort)
+    def _comment_source_in_config(cam_id: str):
+        try:
+            cfg_path = os.getenv('DS_CONFIG_PATH', 'config/config_pipeline.toml')
+            if not os.path.exists(cfg_path):
+                return
+            with open(cfg_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+            in_source = False
+            key_prefix = f'"{cam_id}"'
+            changed = False
+            new_lines = []
+            for ln in lines:
+                s = ln.strip()
+                if s.startswith('[source]'):
+                    in_source = True
+                    new_lines.append(ln)
+                    continue
+                if in_source and s.startswith('[') and s.endswith(']'):
+                    in_source = False
+                    new_lines.append(ln)
+                    continue
+                if in_source and s.startswith(key_prefix) and not s.startswith('#'):
+                    new_lines.append('# ' + ln)
+                    changed = True
+                    continue
+                new_lines.append(ln)
+            if changed:
+                with open(cfg_path, 'w', encoding='utf-8') as f:
+                    f.writelines(new_lines)
+        except Exception:
+            pass
+
+    # Thread-safe add/update of a source while pipeline is running
+    def _add_or_update_source(cam_id: str, uri: str, resp_meta: Optional[dict] = None):
+        nonlocal source_idx, is_live
+        try:
+            cid = str(cam_id)
+            if not cid:
+                return False
+            if uri and uri.startswith('rtsp://'):
+                is_live = True
+            # Update existing
+            if cid in source_registry:
+                entry = source_registry[cid]
+                if entry.get('uri') == uri:
+                    if resp_meta:
+                        try:
+                            _publish_response(resp_meta.get('cmd',0), cid, resp_meta.get('user_id',''), resp_meta.get('cmd_id',''), resp_meta.get('status',0))
+                        except Exception:
+                            pass
+                    return False
+                print(f"[MQTT] Updating source for cam {cid}")
+                # Tear down old bin
+                try:
+                    old_bin = entry.get('bin')
+                    old_pad = entry.get('sinkpad')
+                    if old_pad:
+                        try:
+                            old_pad.send_event(Gst.Event.new_eos())
+                        except Exception:
+                            pass
+                        try:
+                            streammux.release_request_pad(old_pad)
+                        except Exception:
+                            pass
+                    if old_bin:
+                        try:
+                            old_bin.set_state(Gst.State.NULL)
+                        except Exception:
+                            pass
+                        try:
+                            pipeline.remove(old_bin)
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
+                # Recreate with same index
+                idx = int(entry.get('index', source_idx))
+                new_bin = create_source_bin(idx, uri)
+                if not new_bin:
+                    print(f"[MQTT] Failed to create source bin for {cid}")
+                    return False
+                pipeline.add(new_bin)
+                padname = f"sink_{idx}"
+                sinkpad = streammux.get_request_pad(padname)
+                if not sinkpad:
+                    print(f"[MQTT] Failed to get streammux pad {padname}")
+                    try:
+                        pipeline.remove(new_bin)
+                    except Exception:
+                        pass
+                    return False
+                srcpad = new_bin.get_static_pad("src")
+                if not srcpad:
+                    print("[MQTT] Failed to get src pad from new source bin")
+                    try:
+                        streammux.release_request_pad(sinkpad)
+                    except Exception:
+                        pass
+                    try:
+                        pipeline.remove(new_bin)
+                    except Exception:
+                        pass
+                    return False
+                srcpad.link(sinkpad)
+                try:
+                    new_bin.sync_state_with_parent()
+                except Exception:
+                    try:
+                        new_bin.set_state(Gst.State.PLAYING)
+                    except Exception:
+                        pass
+                # Update registry and mapping
+                entry.update({'bin': new_bin, 'sinkpad': sinkpad, 'uri': uri})
+                # Adjust batch-size (preserve mapping)
+                try:
+                    streammux.set_property('batch-size', _active_batch_size())
+                except Exception:
+                    pass
+                _update_tiler_layout(len(source_registry))
+                if resp_meta:
+                    try:
+                        _publish_response(resp_meta.get('cmd',0), cid, resp_meta.get('user_id',''), resp_meta.get('cmd_id',''), resp_meta.get('status',0))
+                    except Exception:
+                        pass
+                return False
+
+            # Add new
+            print(f"[MQTT] Adding new source cam {cid}")
+            idx = int(source_idx)
+            new_bin = create_source_bin(idx, uri)
+            if not new_bin:
+                print(f"[MQTT] Failed to create source bin for {cid}")
+                return False
+            pipeline.add(new_bin)
+            padname = f"sink_{idx}"
+            sinkpad = streammux.get_request_pad(padname)
+            if not sinkpad:
+                print(f"[MQTT] Failed to get streammux pad {padname}")
+                try:
+                    pipeline.remove(new_bin)
+                except Exception:
+                    pass
+                return False
+            srcpad = new_bin.get_static_pad("src")
+            if not srcpad:
+                print("[MQTT] Failed to get src pad from source bin")
+                try:
+                    streammux.release_request_pad(sinkpad)
+                except Exception:
+                    pass
+                try:
+                    pipeline.remove(new_bin)
+                except Exception:
+                    pass
+                return False
+            srcpad.link(sinkpad)
+            try:
+                new_bin.sync_state_with_parent()
+            except Exception:
+                try:
+                    new_bin.set_state(Gst.State.PLAYING)
+                except Exception:
+                    pass
+            # Update maps
+            source_index_to_cam[idx] = cid
+            source_registry[cid] = {'bin': new_bin, 'sinkpad': sinkpad, 'index': idx, 'uri': uri}
+            source_idx += 1
+            # Adjust batch-size (preserve mapping)
+            try:
+                streammux.set_property('batch-size', _active_batch_size())
+            except Exception:
+                pass
+            _update_tiler_layout(len(source_registry))
+            if resp_meta:
+                try:
+                    _publish_response(resp_meta.get('cmd',0), cid, resp_meta.get('user_id',''), resp_meta.get('cmd_id',''), resp_meta.get('status',0))
+                except Exception:
+                    pass
+        except Exception as e:
+            try:
+                print(f"[MQTT] add/update error: {e}")
+            except Exception:
+                pass
+        return False
+
+    def _remove_source(cam_id: str, resp_meta: Optional[dict] = None):
+        try:
+            cid = str(cam_id)
+            if cid not in source_registry:
+                return False
+            print(f"[MQTT] Removing source cam {cid}")
+            entry = source_registry.pop(cid, None)
+            if not entry:
+                return False
+            # Release streammux pad and remove bin
+            try:
+                pad = entry.get('sinkpad')
+                if pad:
+                    try:
+                        pad.send_event(Gst.Event.new_eos())
+                    except Exception:
+                        pass
+                    try:
+                        streammux.release_request_pad(pad)
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+            try:
+                bin_ = entry.get('bin')
+                if bin_:
+                    try:
+                        bin_.set_state(Gst.State.NULL)
+                    except Exception:
+                        pass
+                    try:
+                        pipeline.remove(bin_)
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+            # Clear index mapping for removed slot
+            try:
+                idx = int(entry.get('index', -1))
+                if idx in source_index_to_cam:
+                    source_index_to_cam.pop(idx, None)
+            except Exception:
+                pass
+            # Update batch-size to remaining sources (preserve mapping)
+            try:
+                streammux.set_property('batch-size', _active_batch_size())
+            except Exception:
+                pass
+            _update_tiler_layout(len(source_registry))
+            # Comment the source in config for persistence
+            _comment_source_in_config(cid)
+            if resp_meta:
+                try:
+                    _publish_response(resp_meta.get('cmd',0), cid, resp_meta.get('user_id',''), resp_meta.get('cmd_id',''), resp_meta.get('status',0))
+                except Exception:
+                    pass
+        except Exception as e:
+            try:
+                print(f"[MQTT] remove error: {e}")
+            except Exception:
+                pass
+        return False
     for k, v in sources.items():
         print("Creating source_bin ", source_idx, " \n ")
         uri_name = v
@@ -237,6 +520,13 @@ def main(cfg, run_duration=None):
             source_index_to_cam[source_idx] = str(k)
         except Exception:
             source_index_to_cam[source_idx] = str(source_idx)
+        # Track registry for dynamic mgmt
+        source_registry[str(k)] = {
+            'bin': source_bin,
+            'sinkpad': sinkpad,
+            'index': int(source_idx),
+            'uri': uri_name
+        }
         source_idx += 1
 
     queue1 = Gst.ElementFactory.make("queue", "queue1")
@@ -546,6 +836,394 @@ def main(cfg, run_duration=None):
     print("Starting pipeline \n")
     # start play back and listed to events		
     pipeline.set_state(Gst.State.PLAYING)
+
+    # --- Helper: load SGIE engine for enrollment (lazy) ---
+    _trt_model: Dict[str, Any] = {'inst': None}
+    def _get_trt_model():
+        if _trt_model['inst'] is not None:
+            return _trt_model['inst']
+        try:
+            # Resolve engine from SGIE config
+            sgie_cfg_path = cfg.get('sgie', {}).get('config-file-path', '').strip()
+            eng = None
+            if sgie_cfg_path and os.path.exists(sgie_cfg_path):
+                cp = configparser.ConfigParser()
+                cp.read(sgie_cfg_path)
+                if cp.has_option('property', 'model-engine-file'):
+                    eng = cp.get('property', 'model-engine-file')
+                    if eng and not os.path.isabs(eng):
+                        eng = os.path.normpath(os.path.join(os.path.dirname(sgie_cfg_path), eng))
+            if not eng or not os.path.exists(eng):
+                # Fallbacks
+                cand = os.path.join('models', 'arcface', 'arcface.engine')
+                eng = cand
+            inst = TensorRTInfer(eng, mode='min')
+            _trt_model['inst'] = inst
+            return inst
+        except Exception as e:
+            print(f"[ENROLL] TRT engine load failed: {e}")
+            return None
+
+    # --- Helper: simple face alignment to ArcFace 112x112 ---
+    def _align_arcface_from_image_path(img_path: str):
+        import cv2
+        bgr = cv2.imread(img_path)
+        if bgr is None:
+            return None
+        h, w = bgr.shape[:2]
+        # If already 112x112, just convert to RGB
+        if h == 112 and w == 112:
+            return cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
+        # Detect face using Haar cascade (fallback: center crop)
+        try:
+            cascade_dir = getattr(cv2, 'data', None)
+            cascade_path = None
+            if cascade_dir is not None and hasattr(cascade_dir, 'haarcascades'):
+                cascade_path = os.path.join(cascade_dir.haarcascades, 'haarcascade_frontalface_default.xml')
+            else:
+                # Fallback common locations
+                for p in [
+                    '/usr/share/opencv/haarcascades/haarcascade_frontalface_default.xml',
+                    '/usr/share/opencv4/haarcascades/haarcascade_frontalface_default.xml',
+                ]:
+                    if os.path.exists(p):
+                        cascade_path = p
+                        break
+            face_cascade = cv2.CascadeClassifier(cascade_path) if cascade_path else cv2.CascadeClassifier()
+            gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
+            faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(40, 40))
+            if faces is not None and len(faces) > 0:
+                # Pick largest face
+                x, y, fw, fh = max(faces, key=lambda r: r[2] * r[3])
+                # Expand and make square
+                cx = x + fw / 2.0
+                cy = y + fh / 2.0
+                side = int(max(fw, fh) * 1.25)
+                sx = int(max(0, cx - side / 2))
+                sy = int(max(0, cy - side / 2))
+                ex = int(min(w, sx + side))
+                ey = int(min(h, sy + side))
+                crop = bgr[sy:ey, sx:ex]
+            else:
+                # Center square crop
+                side = min(h, w)
+                sx = (w - side) // 2
+                sy = (h - side) // 2
+                crop = bgr[sy:sy+side, sx:sx+side]
+        except Exception:
+            side = min(h, w)
+            sx = (w - side) // 2
+            sy = (h - side) // 2
+            crop = bgr[sy:sy+side, sx:sx+side]
+        # Resize to 112x112 and convert to RGB
+        try:
+            resized = cv2.resize(crop, (112, 112), interpolation=cv2.INTER_AREA)
+        except Exception:
+            resized = cv2.resize(crop, (112, 112))
+        return cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
+
+    # --- Helper: ensure a mutable FaceIndex (build from existing or new) ---
+    def _ensure_index() -> FaceIndex:
+        nonlocal vector_index
+        # Update the probe data reference (index 8) after creation/load so recognition uses latest
+        try:
+            if vector_index is not None:
+                try:
+                    if isinstance(data, list) and len(data) > 8:
+                        data[8] = vector_index
+                except Exception:
+                    pass
+                return vector_index
+        except Exception:
+            pass
+        # Try to load from disk
+        vi = safe_load_index(recog_cfg)
+        if vi is not None:
+            vector_index = vi
+            try:
+                if isinstance(data, list) and len(data) > 8:
+                    data[8] = vector_index
+            except Exception:
+                pass
+            return vector_index
+        # Else, create empty index with default dim 512 for ArcFace
+        try:
+            cfg_idx = FaceIndexConfig(metric=recog_metric, index_type=recog_cfg.get('index_type', 'flat'), use_gpu=bool(int(recog_cfg.get('use_gpu', 0))), gpu_id=int(recog_cfg.get('gpu_id', 0)))
+        except Exception:
+            cfg_idx = FaceIndexConfig(metric='cosine', index_type='flat', use_gpu=False, gpu_id=0)
+        idx = FaceIndex(dim=512, cfg=cfg_idx)
+        # Build empty CPU/GPU handles
+        cpu_index, _ = idx._make_faiss_index(0)
+        idx._cpu_index = cpu_index
+        idx._gpu_index = idx._to_gpu(cpu_index)
+        idx._labels = []
+        vector_index = idx
+        try:
+            if isinstance(data, list) and len(data) > 8:
+                data[8] = vector_index
+        except Exception:
+            pass
+        return vector_index
+
+    # --- Enrollment: add/update/remove person ---
+    def _handle_put_person(user_id: str, user_name: str, user_image: str, resp_meta: Optional[dict] = None):
+        try:
+            uid = str(user_id).strip()
+            uname = str(user_name).strip() if user_name is not None else ''
+            img = str(user_image).strip()
+            if not uid or not img or not os.path.exists(img):
+                print(f"[ENROLL] invalid request uid={uid} img={img}")
+                return
+            # Generate embedding via TRT
+            model = _get_trt_model()
+            if model is None:
+                print("[ENROLL] TRT model unavailable")
+                return
+            # Align to 112x112 RGB
+            rgb112 = _align_arcface_from_image_path(img)
+            if rgb112 is None:
+                print(f"[ENROLL] failed to read/align image: {img}")
+                return
+            x = rgb112.astype(np.float32)
+            x -= 127.5
+            x /= 128.0
+            x = np.transpose(x, (2, 0, 1))
+            x = np.expand_dims(x, axis=0).astype(np.float32)
+            inp = np.array(x, dtype=np.float32, order="C")
+            out = model.infer(inp)[0]
+            emb = np.asarray(out).reshape(1, -1).astype(np.float32)
+            # L2 normalize for cosine/IP
+            n = float(np.linalg.norm(emb)) + 1e-12
+            emb = (emb / n).astype(np.float32)
+
+            idx = _ensure_index()
+            # Update label mapping metadata (persons) while keeping per-vector labels in sync
+            labels_path = lbl_path
+            index_path = idx_path
+            if not labels_path:
+                labels_path = str(recog_cfg.get('labels_path', '')).strip()
+            if not index_path:
+                index_path = str(recog_cfg.get('index_path', '')).strip()
+            persons = {}
+            try:
+                if labels_path and os.path.exists(labels_path):
+                    with open(labels_path, 'r', encoding='utf-8') as f:
+                        meta = json.load(f) or {}
+                    persons = meta.get('persons', {}) if isinstance(meta, dict) else {}
+                    if not isinstance(persons, dict):
+                        persons = {}
+            except Exception:
+                persons = {}
+            # Apply add/update/remove: if user_name empty -> remove mapping; else upsert name
+            if uname:
+                persons[uid] = {'name': uname}
+            else:
+                if uid in persons:
+                    persons.pop(uid, None)
+
+            # Remove existing vectors labeled with this uid, then add new embedding with uid label
+            # Note: we do NOT delete person entirely unless uname is empty
+            try:
+                _ = idx.remove_label(uid)
+            except Exception:
+                pass
+            idx.add([uid], emb)
+            # Persist index and labels/persons
+            if index_path and labels_path:
+                try:
+                    # Save index with per-vector labels list
+                    idx.save(index_path, labels_path)
+                    # Save persons mapping
+                    meta = {}
+                    try:
+                        with open(labels_path, 'r', encoding='utf-8') as f:
+                            meta = json.load(f) or {}
+                    except Exception:
+                        meta = {}
+                    meta['persons'] = persons
+                    with open(labels_path, 'w', encoding='utf-8') as f:
+                        json.dump(meta, f, ensure_ascii=False, indent=2)
+                    print(f"[ENROLL] saved uid={uid} name='{uname}' to index")
+                except Exception as e:
+                    print(f"[ENROLL] save failed: {e}")
+        except Exception as e:
+            print(f"[ENROLL] error: {e}")
+
+    # --- Delete person (remove from index and persons map) ---
+    def _handle_del_person(user_id: str, resp_meta: Optional[dict] = None):
+        try:
+            uid = str(user_id).strip()
+            if not uid:
+                return False
+            idx = _ensure_index()
+            removed = 0
+            try:
+                removed = idx.remove_label(uid)
+            except Exception:
+                removed = 0
+            # Persist changes
+            labels_path = lbl_path or str(recog_cfg.get('labels_path', '')).strip()
+            index_path = idx_path or str(recog_cfg.get('index_path', '')).strip()
+            if index_path and labels_path:
+                try:
+                    idx.save(index_path, labels_path)
+                    # Remove from persons map as well
+                    meta = {}
+                    try:
+                        if os.path.exists(labels_path):
+                            with open(labels_path, 'r', encoding='utf-8') as f:
+                                meta = json.load(f) or {}
+                    except Exception:
+                        meta = {}
+                    persons = meta.get('persons', {}) if isinstance(meta, dict) else {}
+                    if isinstance(persons, dict) and uid in persons:
+                        persons.pop(uid, None)
+                    meta['persons'] = persons
+                    with open(labels_path, 'w', encoding='utf-8') as f:
+                        json.dump(meta, f, ensure_ascii=False, indent=2)
+                    print(f"[ENROLL] removed uid={uid}, vectors_removed={removed}")
+                except Exception as e:
+                    print(f"[ENROLL] remove save failed: {e}")
+        except Exception as e:
+            print(f"[ENROLL] del error: {e}")
+
+    # --- MQTT integration: listen for core_v2 requests to add/update sources and enroll persons ---
+    def _parse_and_handle_request(obj):
+        try:
+            # Parse payload as semicolon-separated tokens or structured dict
+            tokens = None
+            if isinstance(obj, dict):
+                if 'raw' in obj:
+                    try:
+                        payload_str = obj['raw'].decode('utf-8', errors='ignore')
+                        tokens = [t.strip() for t in payload_str.split(';')]
+                    except Exception:
+                        tokens = None
+                elif 'payload' in obj and isinstance(obj['payload'], str):
+                    tokens = [t.strip() for t in obj['payload'].split(';')]
+                elif 'cmd' in obj:
+                    # Structured JSON
+                    cmd = int(obj.get('cmd', 0))
+                    if cmd == 25:  # enable service
+                        cam_id = str(obj.get('cam_id', ''))
+                        rtsp = str(obj.get('rtsp', ''))
+                        face_enable = int(obj.get('face_enable', 0))
+                        cmd_id = str(obj.get('cmd_id',''))
+                        if face_enable == 1 and cam_id and rtsp:
+                            GLib.idle_add(_add_or_update_source, cam_id, rtsp, {'cmd':25,'cam_id':cam_id,'cmd_id':cmd_id,'status':0})
+                        elif face_enable == 0 and cam_id:
+                            GLib.idle_add(_remove_source, cam_id, {'cmd':25,'cam_id':cam_id,'cmd_id':cmd_id,'status':0})
+                    elif cmd == 26:  # disable service directly
+                        cam_id = str(obj.get('cam_id', ''))
+                        cmd_id = str(obj.get('cmd_id',''))
+                        if cam_id:
+                            GLib.idle_add(_remove_source, cam_id, {'cmd':26,'cam_id':cam_id,'cmd_id':cmd_id,'status':0})
+                    elif cmd == 60:  # CMD_BOX_PUT_PERSON
+                        uid = str(obj.get('user_id', ''))
+                        uname = str(obj.get('user_name', ''))
+                        uimg = str(obj.get('user_image', ''))
+                        cmd_id = str(obj.get('cmd_id',''))
+                        GLib.idle_add(_handle_put_person, uid, uname, uimg, {'cmd':60,'cmd_id':cmd_id,'status':2})
+                    elif cmd == 61:  # CMD_BOX_DEL_PERSON
+                        uid = str(obj.get('user_id', ''))
+                        cmd_id = str(obj.get('cmd_id',''))
+                        GLib.idle_add(_handle_del_person, uid, {'cmd':61,'cmd_id':cmd_id,'status':3})
+                    return
+            if not tokens or len(tokens) < 3:
+                return
+            def _tok(i, default=''):
+                try:
+                    return tokens[i]
+                except Exception:
+                    return default
+            # xcommon.h indices
+            REQ_IDX_CMD = 0
+            REQ_IDX_CAMID = 1
+            REQ_IDX_RTSP_URL = 2
+            REQ_IDX_FACE_ENABLE = 15
+            REQ_IDX_USER_ID = 2
+            REQ_IDX_USER_NAME = 3
+            REQ_IDX_USER_IMG_PATH = 4
+            # Extract cmd_id (last non-empty token)
+            cmd_id = ''
+            for t in reversed(tokens):
+                if t.strip():
+                    cmd_id = t.strip()
+                    break
+            try:
+                cmd = int(_tok(REQ_IDX_CMD, '0') or '0')
+            except Exception:
+                cmd = 0
+            if cmd == 25:  # CMD_BOX_ENABLE_SERVICE
+                cam_id = _tok(REQ_IDX_CAMID, '')
+                rtsp = _tok(REQ_IDX_RTSP_URL, '')
+                try:
+                    face_enable = int(_tok(REQ_IDX_FACE_ENABLE, '0') or '0')
+                except Exception:
+                    face_enable = 0
+                if face_enable == 1 and cam_id and rtsp:
+                    print(f"[MQTT] Enable face_core for cam={cam_id}, rtsp={rtsp}")
+                    GLib.idle_add(_add_or_update_source, cam_id, rtsp, {'cmd':25,'cam_id':cam_id,'cmd_id':cmd_id,'status':0})
+                elif face_enable == 0 and cam_id:
+                    GLib.idle_add(_remove_source, cam_id, {'cmd':25,'cam_id':cam_id,'cmd_id':cmd_id,'status':0})
+                return
+            if cmd == 26:  # CMD_BOX_DISABLE_SERVICE
+                cam_id = _tok(REQ_IDX_CAMID, '')
+                if cam_id:
+                    print(f"[MQTT] Disable face_core for cam={cam_id}")
+                    GLib.idle_add(_remove_source, cam_id, {'cmd':26,'cam_id':cam_id,'cmd_id':cmd_id,'status':0})
+                return
+            if cmd == 60:  # CMD_BOX_PUT_PERSON
+                uid = _tok(REQ_IDX_USER_ID, '')
+                uname = _tok(REQ_IDX_USER_NAME, '')
+                uimg = _tok(REQ_IDX_USER_IMG_PATH, '')
+                GLib.idle_add(_handle_put_person, uid, uname, uimg, {'cmd':60,'cmd_id':cmd_id,'status':2})
+                return
+            if cmd == 61:  # CMD_BOX_DEL_PERSON
+                uid = _tok(REQ_IDX_USER_ID, '')
+                GLib.idle_add(_handle_del_person, uid, {'cmd':61,'cmd_id':cmd_id,'status':3})
+                return
+        except Exception as e:
+            try:
+                print(f"[MQTT] parse error: {e}")
+            except Exception:
+                pass
+
+    try:
+        mqtt_cfg = cfg.get('mqtt', {}) if isinstance(cfg, dict) else {}
+        host = str(mqtt_cfg.get('host', 'localhost'))
+        port = int(mqtt_cfg.get('port', 1883))
+        topic = str(mqtt_cfg.get('request_topic', '/local/core/v2/ai/request'))
+        resp_topic = str(mqtt_cfg.get('response_topic', '/local/core/v2/ai/response'))
+        _mqtt = MQTTListener(host=host, port=port, topic=topic, on_message=_parse_and_handle_request)
+        _mqtt.start()
+        print(f"[MQTT] listening on {host}:{port} topic {topic}")
+
+        # Response helper: format "3;cmd;cam_or_zero;user_id_or_cam;cmd_id;status"
+        def _publish_response(cmd: int, cam_id: str, user_id: str, cmd_id: str, status: int):
+            try:
+                # If cam_id not provided but user context exists, place '0' as second field like examples
+                field_cam_slot = cam_id if cam_id else '0'
+                field_user_slot = user_id if user_id else cam_id
+                parts = [
+                    '3',                     # RET_RESP
+                    str(cmd),                # command
+                    str(field_cam_slot),     # cam id or 0
+                    str(field_user_slot or ''), # user id or cam id
+                    str(cmd_id or ''),       # command id token tail
+                    str(status)              # status code
+                ]
+                payload = ';'.join(parts)
+                _mqtt.publish(resp_topic, payload)
+            except Exception:
+                pass
+
+        mqtt_listener_ref = _mqtt  # keep reference to avoid GC
+    except Exception as e:
+        try:
+            print(f"[MQTT] not started: {e}")
+        except Exception:
+            pass
     try:
         loop.run()
     except:
