@@ -182,7 +182,9 @@ def create_source_bin(index, uri):
                     pass
                 return False
             
-            rtspsrc.connect('error', _rtsp_error)
+            # NOTE: GstRTSPSrc doesn't emit an 'error' signal; errors arrive on the bus.
+            # The previous attempt to connect to a non-existent 'error' signal caused:
+            # unknown signal name: error. We rely on bus_call() for error handling.
             
             # Link static parts
             if not depay.link(h264parse):
@@ -590,6 +592,23 @@ def main(cfg, run_duration=None):
                     # First set to READY to stop streaming
                     bin_.set_state(Gst.State.READY)
                     time.sleep(0.1)  # Brief pause
+                    
+                    # Try to find and stop the rtspsrc element specifically
+                    if entry.get('uri', '').startswith('rtsp://'):
+                        try:
+                            # Iterate through bin elements to find rtspsrc
+                            iterator = bin_.iterate_elements()
+                            while True:
+                                element = iterator.next()
+                                if element is None:
+                                    break
+                                if element.get_name().startswith('rtspsrc'):
+                                    print(f"[MQTT] Found rtspsrc element, setting to NULL")
+                                    element.set_state(Gst.State.NULL)
+                                    break
+                        except Exception as e:
+                            print(f"[MQTT] Error stopping rtspsrc: {e}")
+                    
                     bin_.set_state(Gst.State.NULL)
                 except Exception as e:
                     print(f"[MQTT] Error setting bin states: {e}")

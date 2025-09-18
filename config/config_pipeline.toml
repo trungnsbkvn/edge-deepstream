@@ -8,7 +8,7 @@ realtime=1
 
 [streammux]
 gpu_id=0
-batch-size=8
+batch-size=4
 width=1920
 height=1080
 batched-push-timeout=200
@@ -20,8 +20,8 @@ process-mode=0
 display-text=1
 
 [source]
-"1" = "rtsp://admin:wesmart!@192.168.0.243:554/Streaming/Channels/101"
-
+"1" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/301"
+"fd4fc4c111c84fc087dc255b97c3f18d" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
 [pgie]
 #config-file-path="config/config_retinaface.txt"
 config-file-path="config/config_yolov8n_face.txt"
@@ -35,7 +35,7 @@ config-file-path="config/config_tracker_perf.txt"
 [tiler]
 width=1920
 height=1080
-rows=4
+rows=2
 columns=2
 
 [sink]
