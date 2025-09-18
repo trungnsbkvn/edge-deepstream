@@ -300,6 +300,11 @@ def main(cfg, run_duration=None):
 
     pipeline.add(streammux)
     source_idx = 0
+    # Pool of freed source indices (tiler slots) to reuse when sources are removed
+    # Use a simple list; we will always pop the smallest index for deterministic layout.
+    freed_indices = []  # type: list[int]
+    # Policy: when a source is removed its index is stored here; new sources first reuse
+    # the lowest freed index to keep tiler layout compact and stable.
     is_live = False
     # for i in range(number_sources):
     # Build a deterministic mapping from batch index to cameraId using [source] keys directly
@@ -467,6 +472,7 @@ def main(cfg, run_duration=None):
                 except Exception:
                     pass
                 # Recreate with same index
+                # Recreate with same index (reuse existing slot)
                 idx = int(entry.get('index', source_idx))
                 new_bin = create_source_bin(idx, uri)
                 if not new_bin:
@@ -509,7 +515,16 @@ def main(cfg, run_duration=None):
 
             # Add new
             print(f"[MQTT] Adding new source cam {cid}")
-            idx = int(source_idx)
+            # Allocate an index: reuse a freed one if available, else use next incremental
+            if freed_indices:
+                freed_indices.sort()  # keep deterministic order
+                idx = freed_indices.pop(0)
+                try:
+                    print(f"[MQTT] Reusing freed slot index={idx} for cam {cid}")
+                except Exception:
+                    pass
+            else:
+                idx = int(source_idx)
             new_bin = create_source_bin(idx, uri)
             if not new_bin:
                 print(f"[MQTT] Failed to create source bin for {cid}")
@@ -552,7 +567,9 @@ def main(cfg, run_duration=None):
                 source_registry[cid]['reconnect_attempts'] = 0
             except Exception:
                 pass
-            source_idx += 1
+            if idx == source_idx:
+                # We consumed the highest new slot, advance counter
+                source_idx += 1
             
             try:
                 print(f"[MQTT] Source added: cam_id={cid} index={idx} total_active={len(source_registry)} batch_size={_active_batch_size()}")
@@ -642,6 +659,18 @@ def main(cfg, run_duration=None):
                 pass
             
             # Note: Removed flush events as they may interfere with RTSP sources
+
+            # Add the freed index back to pool for reuse
+            try:
+                freed_idx = int(entry.get('index'))
+                if freed_idx not in freed_indices and freed_idx < source_idx:
+                    freed_indices.append(freed_idx)
+                    try:
+                        print(f"[MQTT] Slot index {freed_idx} freed (available for reuse)")
+                    except Exception:
+                        pass
+            except Exception:
+                pass
             
             try:
                 if bin_:
