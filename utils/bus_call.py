@@ -12,6 +12,14 @@ def bus_call(bus, message, loop):
         sys.stderr.write("Warning: %s: %s\n" % (err, debug))
     elif t == Gst.MessageType.ERROR:
         err, debug = message.parse_error()
-        sys.stderr.write("Error: %s: %s\n" % (err, debug))
-        loop.quit()
+        err_str = str(err).lower()
+        debug_str = str(debug).lower()
+        # Don't quit on RTSP errors - let the pipeline continue
+        if ("rtspsrc" in err_str or "rtsp" in err_str or 
+            "rtspsrc" in debug_str or "rtsp" in debug_str or
+            "option not supported" in err_str or "option not supported" in debug_str):
+            sys.stderr.write("RTSP Error (non-fatal): %s: %s\n" % (err, debug))
+        else:
+            sys.stderr.write("Error: %s: %s\n" % (err, debug))
+            loop.quit()
     return True

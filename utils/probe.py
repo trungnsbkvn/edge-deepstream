@@ -145,6 +145,25 @@ def pgie_src_filter_probe(pad,info,u_data):
         except StopIteration:
             break
         
+        # Check if this source is still active (not removed)
+        source_id = int(frame_meta.source_id)
+        source_index_to_cam = None
+        try:
+            if isinstance(u_data, dict):
+                source_index_to_cam = u_data.get('source_index_to_cam')
+        except Exception:
+            source_index_to_cam = None
+        
+        if source_index_to_cam is not None:
+            cam_id = source_index_to_cam.get(source_id)
+            if cam_id is None:
+                # Source has been removed, skip processing this frame
+                try:
+                    l_frame = l_frame.next
+                except Exception:
+                    break
+                continue
+        
         # Original simple per-object filtering based on confidence only
         l_obj = frame_meta.obj_meta_list
         while l_obj is not None:
@@ -300,6 +319,27 @@ def sgie_feature_extract_probe(pad,info, data):
             frame_meta = pyds.NvDsFrameMeta.cast(l_frame.data)
         except StopIteration:
             break
+
+        # Check if this source is still active (not removed)
+        source_id = int(frame_meta.source_id)
+        source_index_to_cam = None
+        try:
+            if isinstance(data, (list, tuple)) and len(data) > 16:
+                source_index_to_cam = data[16]
+        except Exception:
+            source_index_to_cam = None
+        
+        if source_index_to_cam is not None:
+            cam_id = source_index_to_cam.get(source_id)
+            if cam_id is None:
+                # Source has been removed, skip processing this frame
+                if verbose:
+                    print(f"[SGIE_PROBE] Skipping frame from removed source {source_id}")
+                try:
+                    l_frame = l_frame.next
+                except Exception:
+                    break
+                continue
 
         l_obj = frame_meta.obj_meta_list
         frame_number = frame_meta.frame_num

@@ -1,21 +1,3 @@
-#!/usr/bin/env python3
-
-################################################################################
-# SPDX-FileCopyrightText: Copyright (c) 2019-2022 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: Apache-2.0
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-################################################################################
 import sys
 import os
 import math
@@ -130,6 +112,18 @@ def create_source_bin(index, uri):
             if not rtspsrc:
                 raise RuntimeError('rtspsrc create failed')
             rtspsrc.set_property('location', uri)
+            # Set additional RTSP properties for better compatibility
+            try:
+                rtspsrc.set_property('do-rtcp', True)
+                rtspsrc.set_property('do-retransmission', False)
+                rtspsrc.set_property('ntp-sync', False)
+                rtspsrc.set_property('user-agent', 'DeepStream/1.0')
+                if rtspsrc.find_property('buffer-mode') is not None:
+                    rtspsrc.set_property('buffer-mode', 0)  # None
+                if rtspsrc.find_property('drop-on-latency') is not None:
+                    rtspsrc.set_property('drop-on-latency', True)
+            except Exception:
+                pass
             # Latency/env overrides
             try:
                 env_latency = os.getenv('DS_RTSP_LATENCY')
@@ -177,6 +171,19 @@ def create_source_bin(index, uri):
                     pass
 
             rtspsrc.connect('pad-added', _rtsp_pad_added)
+            
+            # Add error handling for RTSP source
+            def _rtsp_error(src, error, debug):
+                try:
+                    print(f"[RTSP] Error from source {index}: {error} - {debug}")
+                    # Don't let RTSP errors crash the pipeline
+                    return True  # Return True to indicate error was handled
+                except Exception:
+                    pass
+                return False
+            
+            rtspsrc.connect('error', _rtsp_error)
+            
             # Link static parts
             if not depay.link(h264parse):
                 print(f"[RTSP] depay->parse link failed index={index}")
@@ -295,12 +302,8 @@ def main(cfg, run_duration=None):
     # for i in range(number_sources):
     # Build a deterministic mapping from batch index to cameraId using [source] keys directly
     source_index_to_cam = {}
-    # Registry for dynamic management: cam_id -> { 'bin', 'sinkpad', 'index', 'uri' }
+    # Registry for dynamic management: cam_id -> { 'bin', 'sinkpad', 'index', 'uri', 'last_frame_ts', 'reconnect_attempts' }
     source_registry = {}
-
-    # Track dynamic batch mode (batch-size <=0 means auto-grow, keep fixed max)
-    dynamic_batch_mode = False
-    dynamic_batch_target_max = 0
 
     def _sanitize_uri(u: str) -> str:
         try:
@@ -314,33 +317,8 @@ def main(cfg, run_duration=None):
         except Exception:
             return u
 
-    # Helper to (re)compute tiler layout when number of sources changes
-    def _update_tiler_layout(total_sources: int):
-        try:
-            if total_sources < 1:
-                total_sources = 1
-            rows = int(math.sqrt(total_sources))
-            cols = int(math.ceil((1.0 * total_sources) / rows))
-            try:
-                tiler.set_property("rows", rows)
-                tiler.set_property("columns", cols)
-            except Exception:
-                pass
-        except Exception:
-            pass
-
-    # Compute batch-size as (max index + 1) to preserve source_id mapping when indices have holes
-    def _active_batch_size() -> int:
-        try:
-            if not source_registry:
-                return 0
-            max_idx = max(int(e.get('index', -1)) for e in source_registry.values())
-            return max_idx + 1
-        except Exception:
-            return len(source_registry)
-
     # Comment out a source entry in the TOML [source] table (best-effort)
-    def _comment_source_in_config(cam_id: str):
+    def _delete_source_in_config(cam_id: str):
         try:
             cfg_path = os.getenv('DS_CONFIG_PATH', 'config/config_pipeline.toml')
             if not os.path.exists(cfg_path):
@@ -362,7 +340,7 @@ def main(cfg, run_duration=None):
                     new_lines.append(ln)
                     continue
                 if in_source and s.startswith(key_prefix) and not s.startswith('#'):
-                    new_lines.append('# ' + ln)
+                    # Skip this line to delete it
                     changed = True
                     continue
                 new_lines.append(ln)
@@ -374,7 +352,7 @@ def main(cfg, run_duration=None):
 
     # Persist (add or update) a source entry in the TOML [source] table (best-effort)
     def _persist_source_update(cam_id: str, uri: str):
-        # Re-write [source] section fully (sorted, compact) and update [streammux].batch-size
+        # Re-write [source] section fully (sorted, compact)
         try:
             cfg_path = os.getenv('DS_CONFIG_PATH', 'config/config_pipeline.toml')
             if not os.path.exists(cfg_path):
@@ -393,9 +371,6 @@ def main(cfg, run_duration=None):
 
             new_lines = []
             in_source = False
-            in_streammux = False
-            batch_written = False
-            # Determine batch-size to persist: number of active sources (so next start uses deterministic size)
             try:
                 persist_batch = len([k for k,v in active_sources.items() if v])
             except Exception:
@@ -405,10 +380,6 @@ def main(cfg, run_duration=None):
                 stripped = ln.strip()
                 # Section starts
                 if stripped.startswith('[') and stripped.endswith(']'):
-                    # Close any open section specific state
-                    if in_streammux and not batch_written:
-                        new_lines.append(f"batch-size={persist_batch}\n")
-                    in_streammux = False
                     in_source = False
                     # Begin new section
                     if stripped == '[source]':
@@ -420,11 +391,6 @@ def main(cfg, run_duration=None):
                             if val:
                                 new_lines.append(f'"{cid}" = "{val}"\n')
                         continue  # Skip writing original source section contents
-                    elif stripped == '[streammux]':
-                        in_streammux = True
-                        batch_written = False
-                        new_lines.append(ln)
-                        continue
                     else:
                         new_lines.append(ln)
                         continue
@@ -433,23 +399,8 @@ def main(cfg, run_duration=None):
                 if in_source:
                     continue
 
-                if in_streammux:
-                    # Replace any existing batch-size line
-                    if stripped.startswith('batch-size'):
-                        if not batch_written:
-                            new_lines.append(f"batch-size={persist_batch}\n")
-                            batch_written = True
-                        continue
-                    # Normal line inside streammux
-                    new_lines.append(ln)
-                    continue
-
                 # Default passthrough
                 new_lines.append(ln)
-
-            # File ended while inside streammux section without batch-size
-            if in_streammux and not batch_written:
-                new_lines.append(f"batch-size={persist_batch}\n")
 
             # Ensure a [source] section exists if it was missing originally
             if '[source]' not in ''.join(new_lines):
@@ -553,24 +504,6 @@ def main(cfg, run_duration=None):
                 entry.update({'bin': new_bin, 'sinkpad': sinkpad, 'uri': uri})
                 entry['last_frame_ts'] = time.time()
                 entry['reconnect_attempts'] = 0
-                try:
-                    if dynamic_batch_mode:
-                        streammux.set_property('batch-size', min(dynamic_batch_target_max, max(1, len(source_registry))))
-                    else:
-                        streammux.set_property('batch-size', _active_batch_size())
-                except Exception:
-                    pass
-                _update_tiler_layout(len(source_registry))
-                if resp_meta:
-                    try:
-                        _publish_response(resp_meta.get('cmd',0), cid, resp_meta.get('user_id',''), resp_meta.get('cmd_id',''), resp_meta.get('status',0))
-                    except Exception:
-                        pass
-                try:
-                    _persist_source_update(cid, uri)
-                except Exception:
-                    pass
-                return False
 
             # Add new
             print(f"[MQTT] Adding new source cam {cid}")
@@ -618,14 +551,7 @@ def main(cfg, run_duration=None):
             except Exception:
                 pass
             source_idx += 1
-            try:
-                if dynamic_batch_mode:
-                    streammux.set_property('batch-size', min(dynamic_batch_target_max, max(1, len(source_registry))))
-                else:
-                    streammux.set_property('batch-size', _active_batch_size())
-            except Exception:
-                pass
-            _update_tiler_layout(len(source_registry))
+            
             try:
                 print(f"[MQTT] Source added: cam_id={cid} index={idx} total_active={len(source_registry)} batch_size={_active_batch_size()}")
             except Exception:
@@ -655,12 +581,38 @@ def main(cfg, run_duration=None):
             entry = source_registry.pop(cid, None)
             if not entry:
                 return False
+            
+            # Get the source bin and set it to NULL state first
+            bin_ = entry.get('bin')
+            if bin_:
+                print(f"[MQTT] Setting source bin for {cid} to NULL state")
+                try:
+                    # First set to READY to stop streaming
+                    bin_.set_state(Gst.State.READY)
+                    time.sleep(0.1)  # Brief pause
+                    bin_.set_state(Gst.State.NULL)
+                except Exception as e:
+                    print(f"[MQTT] Error setting bin states: {e}")
+                    try:
+                        bin_.set_state(Gst.State.NULL)
+                    except Exception:
+                        pass
+            
             # Release streammux pad and remove bin
             try:
                 pad = entry.get('sinkpad')
                 if pad:
+                    print(f"[MQTT] Sending EOS and releasing pad for {cid}")
                     try:
                         pad.send_event(Gst.Event.new_eos())
+                    except Exception:
+                        pass
+                    # Unlink srcpad from sinkpad if possible
+                    try:
+                        if bin_:
+                            srcpad = bin_.get_static_pad("src")
+                            if srcpad and srcpad.is_linked():
+                                srcpad.unlink(pad)
                     except Exception:
                         pass
                     try:
@@ -669,19 +621,18 @@ def main(cfg, run_duration=None):
                         pass
             except Exception:
                 pass
+            
+            # Note: Removed flush events as they may interfere with RTSP sources
+            
             try:
-                bin_ = entry.get('bin')
                 if bin_:
-                    try:
-                        bin_.set_state(Gst.State.NULL)
-                    except Exception:
-                        pass
                     try:
                         pipeline.remove(bin_)
                     except Exception:
                         pass
             except Exception:
                 pass
+            
             # Clear index mapping for removed slot
             try:
                 idx = int(entry.get('index', -1))
@@ -689,26 +640,19 @@ def main(cfg, run_duration=None):
                     source_index_to_cam.pop(idx, None)
             except Exception:
                 pass
-            # Update batch-size to remaining sources (preserve mapping)
-            try:
-                if dynamic_batch_mode:
-                    streammux.set_property('batch-size', min(dynamic_batch_target_max, max(1, len(source_registry))))
-                else:
-                    streammux.set_property('batch-size', _active_batch_size())
-            except Exception:
-                pass
-            _update_tiler_layout(len(source_registry))
-            # Comment the source in config for persistence
-            _comment_source_in_config(cid)
-            try:
-                _persist_source_update('', '')  # Re-write config to update batch-size
-            except Exception:
-                pass
+            
+            # Update config to remove the source
+            _persist_source_update('', '')  # Re-write config to remove the source
+            
+            print(f"[MQTT] Source {cid} removal completed, waiting for cleanup...")
+            time.sleep(1.0)  # Give more time for EOS and flush to propagate
+            
             if resp_meta:
                 try:
                     _publish_response(resp_meta.get('cmd',0), cid, resp_meta.get('user_id',''), resp_meta.get('cmd_id',''), resp_meta.get('status',0))
                 except Exception:
                     pass
+                    
         except Exception as e:
             try:
                 print(f"[MQTT] remove error: {e}")
@@ -746,7 +690,9 @@ def main(cfg, run_duration=None):
             'bin': source_bin,
             'sinkpad': sinkpad,
             'index': int(source_idx),
-            'uri': uri_name
+            'uri': uri_name,
+            'last_frame_ts': time.time(),
+            'reconnect_attempts': 0
         }
         source_idx += 1
 
@@ -837,26 +783,6 @@ def main(cfg, run_duration=None):
         streammux.set_property('live-source', 1)
 
     set_property(cfg, streammux, "streammux")
-    # After applying configured properties, evaluate dynamic batch-size mode
-    try:
-        cfg_bs = int(cfg.get('streammux', {}).get('batch-size', 0))
-    except Exception:
-        cfg_bs = 0
-    if cfg_bs <= 0:
-        dynamic_batch_mode = True
-        try:
-            dynamic_batch_target_max = int(os.getenv('DS_DYNAMIC_MAX_BATCH', '16'))
-        except Exception:
-            dynamic_batch_target_max = 16
-        if dynamic_batch_target_max < 1:
-            dynamic_batch_target_max = 1
-        try:
-            streammux.set_property('batch-size', 1)
-            print(f"[DYN] streammux dynamic mode: config batch-size={cfg_bs}; target_max={dynamic_batch_target_max} start=1")
-        except Exception:
-            pass
-    else:
-        dynamic_batch_mode = False
     set_property(cfg, pgie, "pgie")
     set_property(cfg, sgie, "sgie")
     set_property(cfg, nvosd, "nvosd")
@@ -893,25 +819,6 @@ def main(cfg, run_duration=None):
     except Exception:
         pass
     set_tracker_properties(tracker, cfg['tracker']['config-file-path'])
-
-    # Handle zero-initial sources safely
-    try:
-        init_sources = max(1, number_sources)
-        tiler_rows = int(math.sqrt(init_sources))
-        tiler_columns = int(math.ceil((1.0 * init_sources) / tiler_rows))
-    except Exception:
-        tiler_rows, tiler_columns = 1, 1
-    try:
-        tiler.set_property("rows", tiler_rows)
-        tiler.set_property("columns", tiler_columns)
-    except Exception:
-        pass
-    # If starting with zero sources, ensure streammux batch-size at least 1; will grow dynamically
-    try:
-        if number_sources == 0:
-            streammux.set_property('batch-size', 1)
-    except Exception:
-        pass
 
     print("Adding elements to Pipeline \n")
     pipeline.add(pgie)
@@ -968,7 +875,8 @@ def main(cfg, run_duration=None):
     pgie_src_pad = pgie.get_static_pad("src")
     # Build probe data with cfg for thresholds; env can still override in probe
     pgie_probe_data = {
-        'thresholds': cfg.get('thresholds', {})
+        'thresholds': cfg.get('thresholds', {}),
+        'source_index_to_cam': source_index_to_cam
     }
     pgie_src_pad.add_probe(Gst.PadProbeType.BUFFER, pgie_src_filter_probe, pgie_probe_data)
 
@@ -1540,6 +1448,7 @@ def main(cfg, run_duration=None):
                         cam_id = str(obj.get('cam_id', ''))
                         cmd_id = str(obj.get('cmd_id',''))
                         if cam_id:
+                            print(f"[MQTT] Disable face_core for cam={cam_id}, structured: {obj}")
                             GLib.idle_add(_remove_source, cam_id, {'cmd':26,'cam_id':cam_id,'cmd_id':cmd_id,'status':0})
                     elif cmd == 60:  # CMD_BOX_PUT_PERSON
                         uid = str(obj.get('user_id', ''))
@@ -1593,7 +1502,7 @@ def main(cfg, run_duration=None):
             if cmd == 26:  # CMD_BOX_DISABLE_SERVICE
                 cam_id = _tok(REQ_IDX_CAMID, '')
                 if cam_id:
-                    print(f"[MQTT] Disable face_core for cam={cam_id}")
+                    print(f"[MQTT] Disable face_core for cam={cam_id}, raw: {obj}")
                     GLib.idle_add(_remove_source, cam_id, {'cmd':26,'cam_id':cam_id,'cmd_id':cmd_id,'status':0})
                 return
             if cmd == 60:  # CMD_BOX_PUT_PERSON
