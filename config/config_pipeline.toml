@@ -20,6 +20,8 @@ process-mode=0
 display-text=1
 
 [source]
+"1" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
+
 [pgie]
 #config-file-path="config/config_retinaface.txt"
 config-file-path="config/config_yolov8n_face.txt"

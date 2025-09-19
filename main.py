@@ -397,6 +397,9 @@ def main(cfg, run_duration=None):
                             val = active_sources[cid]
                             if val:
                                 new_lines.append(f'"{cid}" = "{val}"\n')
+                        # Add blank line after source section for better formatting
+                        if any(active_sources.values()):
+                            new_lines.append('\n')
                         continue  # Skip writing original source section contents
                     else:
                         new_lines.append(ln)
@@ -416,6 +419,9 @@ def main(cfg, run_duration=None):
                     val = active_sources[cid]
                     if val:
                         new_lines.append(f'"{cid}" = "{val}"\n')
+                # Add blank line after source section for better formatting
+                if any(active_sources.values()):
+                    new_lines.append('\n')
 
             with open(cfg_path, 'w', encoding='utf-8') as f:
                 f.writelines(new_lines)
