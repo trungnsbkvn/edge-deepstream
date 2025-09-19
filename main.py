@@ -515,6 +515,33 @@ def main(cfg, run_duration=None):
 
             # Add new
             print(f"[MQTT] Adding new source cam {cid}")
+            
+            # Check if this is the first source being added after all sources were removed
+            was_empty = len(source_registry) == 0
+            if was_empty:
+                print(f"[MQTT] First source after complete removal - ensuring pipeline sync")
+                try:
+                    # Brief pipeline synchronization to ensure clean state
+                    time.sleep(0.2)
+                    # Make sure pipeline is in PLAYING state
+                    pipeline.set_state(Gst.State.PLAYING)
+                    time.sleep(0.1)
+                    
+                    # Additional reset for inference elements to prevent data stream errors
+                    try:
+                        # Get inference elements and ensure they're in proper state
+                        pgie_elem = pipeline.get_by_name("primary-inference")
+                        sgie_elem = pipeline.get_by_name("secondary-inference")
+                        if pgie_elem:
+                            pgie_elem.sync_state_with_parent()
+                        if sgie_elem:
+                            sgie_elem.sync_state_with_parent()
+                    except Exception:
+                        pass
+                        
+                except Exception as e:
+                    print(f"[MQTT] Warning during pipeline sync: {e}")
+            
             # Allocate an index: reuse a freed one if available, else use next incremental
             if freed_indices:
                 freed_indices.sort()  # keep deterministic order
@@ -559,6 +586,15 @@ def main(cfg, run_duration=None):
                     new_bin.set_state(Gst.State.PLAYING)
                 except Exception:
                     pass
+            
+            # Additional sync for first source after empty state
+            if was_empty:
+                try:
+                    print(f"[MQTT] Additional sync for first source after empty state")
+                    time.sleep(0.3)  # Give more time for the first source to initialize
+                except Exception:
+                    pass
+            
             # Update maps
             source_index_to_cam[idx] = cid
             source_registry[cid] = {'bin': new_bin, 'sinkpad': sinkpad, 'index': idx, 'uri': uri}
@@ -616,10 +652,10 @@ def main(cfg, run_duration=None):
                             # Iterate through bin elements to find rtspsrc
                             iterator = bin_.iterate_elements()
                             while True:
-                                element = iterator.next()
-                                if element is None:
+                                result, element = iterator.next()
+                                if result != Gst.IteratorResult.OK:
                                     break
-                                if element.get_name().startswith('rtspsrc'):
+                                if element and element.get_name().startswith('rtspsrc'):
                                     print(f"[MQTT] Found rtspsrc element, setting to NULL")
                                     element.set_state(Gst.State.NULL)
                                     break
@@ -687,6 +723,38 @@ def main(cfg, run_duration=None):
             
             # Update config to remove the source
             _persist_source_update('', '')  # Re-write config to remove the source
+            
+            # Check if this was the last source
+            is_now_empty = len(source_registry) == 0
+            if is_now_empty:
+                print(f"[MQTT] Last source removed - ensuring pipeline cleanup")
+                try:
+                    # Additional cleanup when all sources are removed
+                    time.sleep(0.5)  # Give extra time for complete cleanup
+                    
+                    # Reset inference elements to prevent data stream errors
+                    try:
+                        pgie_elem = pipeline.get_by_name("primary-inference")
+                        sgie_elem = pipeline.get_by_name("secondary-inference")
+                        if pgie_elem:
+                            pgie_elem.set_state(Gst.State.READY)
+                        if sgie_elem:
+                            sgie_elem.set_state(Gst.State.READY)
+                        time.sleep(0.2)
+                        if pgie_elem:
+                            pgie_elem.set_state(Gst.State.PLAYING)
+                        if sgie_elem:
+                            sgie_elem.set_state(Gst.State.PLAYING)
+                    except Exception:
+                        pass
+                    
+                    # Force pipeline to a clean state for next source addition
+                    pipeline.set_state(Gst.State.READY)
+                    time.sleep(0.2)
+                    pipeline.set_state(Gst.State.PLAYING)
+                    print(f"[MQTT] Pipeline reset completed for empty state")
+                except Exception as e:
+                    print(f"[MQTT] Warning during pipeline cleanup: {e}")
             
             print(f"[MQTT] Source {cid} removal completed, waiting for cleanup...")
             time.sleep(1.0)  # Give more time for EOS and flush to propagate
