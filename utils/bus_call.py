@@ -2,11 +2,18 @@ import gi
 import sys
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst
+import os
 def bus_call(bus, message, loop):
     t = message.type
     if t == Gst.MessageType.EOS:
-        sys.stdout.write("End-of-stream\n")
-        loop.quit()
+        # Allow keeping loop alive if all dynamic sources were removed intentionally.
+        quit_on_empty = os.getenv('DS_QUIT_ON_EMPTY', '0') == '1'
+        if quit_on_empty:
+            sys.stdout.write("End-of-stream (quit_on_empty=1)\n")
+            loop.quit()
+        else:
+            sys.stdout.write("End-of-stream (ignored; waiting for dynamic sources)\n")
+        return True
     elif t==Gst.MessageType.WARNING:
         err, debug = message.parse_warning()
         sys.stderr.write("Warning: %s: %s\n" % (err, debug))

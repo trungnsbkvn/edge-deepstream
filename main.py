@@ -638,12 +638,8 @@ def main(cfg, run_duration=None):
             try:
                 pad = entry.get('sinkpad')
                 if pad:
-                    print(f"[MQTT] Sending EOS and releasing pad for {cid}")
-                    try:
-                        pad.send_event(Gst.Event.new_eos())
-                    except Exception:
-                        pass
-                    # Unlink srcpad from sinkpad if possible
+                    print(f"[MQTT] Releasing streammux pad for {cid} (no EOS to avoid pipeline shutdown)")
+                    # Unlink srcpad from sinkpad if possible (avoid EOS to entire pipeline when last source removed)
                     try:
                         if bin_:
                             srcpad = bin_.get_static_pad("src")
@@ -870,6 +866,23 @@ def main(cfg, run_duration=None):
 
     print("Adding elements to Pipeline \n")
     pipeline.add(pgie)
+    # Optional pre-SGIE colorspace conversion to RGBA for ROI helper compatibility
+    conv_pre_sgie = None
+    capsfilter_pre_sgie = None
+    force_rgba = os.getenv('DS_FORCE_CONVERT_RGBA','0') == '1'
+    if force_rgba:
+        try:
+            conv_pre_sgie = Gst.ElementFactory.make('nvvideoconvert', 'pre-sgie-conv')
+            capsfilter_pre_sgie = Gst.ElementFactory.make('capsfilter', 'pre-sgie-caps')
+            if conv_pre_sgie and capsfilter_pre_sgie:
+                capsfilter_pre_sgie.set_property('caps', Gst.Caps.from_string('video/x-raw(memory:NVMM), format=RGBA'))
+                pipeline.add(conv_pre_sgie)
+                pipeline.add(capsfilter_pre_sgie)
+                print('[PIPELINE] Inserted pre-SGIE RGBA conversion path (DS_FORCE_CONVERT_RGBA=1)')
+        except Exception as _e:
+            print(f"[PIPELINE] Failed to create pre-SGIE RGBA path: {_e}")
+            conv_pre_sgie = None
+            capsfilter_pre_sgie = None
     pipeline.add(sgie)
     pipeline.add(tracker)
     # Always add tiler so dynamic source additions >1 are supported
@@ -884,7 +897,12 @@ def main(cfg, run_duration=None):
     pgie.link(queue2)
     queue2.link(tracker)
     tracker.link(queue3)
-    queue3.link(sgie)
+    if force_rgba and conv_pre_sgie and capsfilter_pre_sgie:
+        queue3.link(conv_pre_sgie)
+        conv_pre_sgie.link(capsfilter_pre_sgie)
+        capsfilter_pre_sgie.link(sgie)
+    else:
+        queue3.link(sgie)
     sgie.link(queue4)
     queue4.link(tiler)
     tiler.link(queue5)
