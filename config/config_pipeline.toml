@@ -22,15 +22,15 @@ process-mode=0
 display-text=1
 
 [source]
-"video0" = "file:///home/m2n/edge-deepstream/data/media/friends_s1e1_cut.mp4"
+#"video0" = "file:///home/m2n/edge-deepstream/data/media/friends_s1e1_cut.mp4"
 "1" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
-#"2" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/801"
-#"3" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/701"
-#"4" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/601"
-#"5" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/501"
-#"6" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/401"
-#"7" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/301"
-#"8" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
+"2" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/801"
+"3" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/701"
+"4" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/601"
+"5" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/501"
+"6" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/401"
+"7" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/301"
+"8" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
 
 [pgie]
 #config-file-path="config/config_retinaface.txt"

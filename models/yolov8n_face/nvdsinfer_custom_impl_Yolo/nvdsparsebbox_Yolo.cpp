@@ -191,6 +191,7 @@ decodeTensorYoloFace(const float* boxes, const float* scores, const float* landm
         unsigned int y_idx = (landmarksSize == 10) ? (base + i2 * 2 + 1) : (base + i2 * 3 + 1);
         float lx = landmarks[x_idx];
         float ly = landmarks[y_idx];
+        
         // If the model outputs normalized coords (0..1), scale to pixels
         if (lx >= 0.0f && lx <= 1.5f && ly >= 0.0f && ly <= 1.5f) {
           lx *= static_cast<float>(netW);
@@ -213,6 +214,7 @@ decodeTensorYoloFace(const float* boxes, const float* scores, const float* landm
       float h = MAX(1.0f, by2 - by1);
       float lx[5] = {cx - 0.2f * w, cx + 0.2f * w, cx, cx - 0.15f * w, cx + 0.15f * w};
       float ly[5] = {cy - 0.2f * h, cy - 0.2f * h, cy, cy + 0.2f * h, cy + 0.2f * h};
+      
       for (unsigned int i2 = 0; i2 < num_points; i2++) {
         bbi.landmark[i2 * 2] = lround(CLIP(lx[i2], 0, netW));
         bbi.landmark[i2 * 2 + 1] = lround(CLIP(ly[i2], 0, netH));
@@ -247,8 +249,10 @@ decodeTensorYoloFace(const float* boxes, const float* scores, const float* landm
       int n_x  = bbi.landmark[4], n_y  = bbi.landmark[5];
       int lm_x = bbi.landmark[6], lm_y = bbi.landmark[7];
       int rm_x = bbi.landmark[8], rm_y = bbi.landmark[9];
+      
       float eye_dist = dx(le_x, le_y, re_x, re_y);
       float box_diag = std::sqrt(bbi.width * bbi.width + bbi.height * bbi.height);
+      
       if (eye_dist < 0.05f * box_diag || eye_dist > 1.2f * box_diag) {
         lmk_valid = false;
       }
@@ -287,13 +291,8 @@ static bool NvDsInferParseCustomYoloFace(std::vector<NvDsInferLayerInfo> const &
   std::vector<NvDsInferObjectDetectionInfo> objects = decodeTensorYoloFace((const float*) (boxes.buffer),
       (const float*) (scores.buffer), (const float*) (landmarks.buffer), outputSize, landmarksSize, networkInfo.width,
       networkInfo.height, detectionParams.perClassPreclusterThreshold);
-  // std::cout<<"objects size: "<<objects.size()<<std::endl;
   objectList.clear();
   objectList = nmsAllClasses(objects);
-  // std::cout<<"objects size after nms: "<<objectList.size()<<std::endl;
-  // for (auto r : objectList) {
-  //   std::cout << "bbox: " << r.left << " " << r.top << " " << r.width << " " << r.height << " " << r.detectionConfidence << " " << r.classId << std::endl;
-  // }
 
   return true;
 }
