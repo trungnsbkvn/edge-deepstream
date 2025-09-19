@@ -28,4 +28,4 @@ alignment-type=1
 #alignment-pics-path=/dev/shm/edge-deepstream/aligned
 alignment-pics-path=data/faces/aligned
 # Skip frame to keep up real-time when syncing display
-interval=0
+interval=5

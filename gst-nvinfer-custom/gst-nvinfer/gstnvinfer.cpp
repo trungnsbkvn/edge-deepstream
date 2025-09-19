@@ -1499,9 +1499,6 @@ align_preprocess(GstNvInfer *nvinfer, NvBufSurface * frame_surface, NvBufSurface
   // since every frame datasize should be the same, allocate host buffers once (sized by pitch*height)
   void *host_aligned_ptr = NULL;   // optional debug dump buffer (aligned)
   void *host_origin_ptr = NULL;    // optional debug dump buffer (original)
-  // (CPU warp buffers removed; we keep only optional debug host buffers)
-  
-
   // We'll align using the already-cropped SGIE input (surface)
   gint frame_width = (gint)surface->surfaceList[0].width;
   gint frame_height = (gint)surface->surfaceList[0].height;
@@ -1558,7 +1555,6 @@ align_preprocess(GstNvInfer *nvinfer, NvBufSurface * frame_surface, NvBufSurface
     landmarkInfos.erase(landmarkInfos.begin());
 
     // get affine matrix
-    // TODO let's get rid of opencv!
     for (unsigned int i=0;i<NUM_LMKS;i++) {
       lmks[i/2][i%2] = lmkinfo.landmarks[i];
       if (lmks[i/2][i%2] <= 0 || lmks[i/2][i%2] >= 10000){
@@ -1737,10 +1733,6 @@ align_preprocess(GstNvInfer *nvinfer, NvBufSurface * frame_surface, NvBufSurface
       nvinfer->align_last_log_ns = now_ns;
     }
   // No CPU mapping was used; all reads/writes were on GPU, so no NvBufSurface sync needed here.
-    
-
-
-
   if (do_vis) {
       // Aligned result: copy from device to host buffer for saving
       cudaMemcpy(host_aligned_ptr, dev_ptr, copy_bytes, cudaMemcpyDeviceToHost);

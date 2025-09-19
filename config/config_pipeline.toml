@@ -8,19 +8,29 @@ realtime=1
 
 [streammux]
 gpu_id=0
-batch-size=2
-width=1920
-height=1080
-batched-push-timeout=200
-# Do not wait for slow sources; push batch as inputs arrive
-sync-inputs=0
+batch-size=8                    # = number of sources (if all active simultaneously)
+width=640                       # match YOLOv8n input size
+height=640                      # match YOLOv8n input size
+batched-push-timeout=40000      # in µs (40ms = 25 FPS target). Adjust depending on FPS of sources.
+#enable-padding=1               # keep aspect ratio, pad with black
+#nvbuf-memory-type=0            # default (0: system, 2: device). On NX keep 0 for stability
+#live-source=1                  # important for RTSP
+sync-inputs=0                   # Do not wait for slow sources; push batch as inputs arrive
 
 [nvosd]
 process-mode=0
 display-text=1
 
 [source]
+"video0" = "file:///home/m2n/edge-deepstream/data/media/friends_s1e1_cut.mp4"
 "1" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
+#"2" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/801"
+#"3" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/701"
+#"4" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/601"
+#"5" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/501"
+#"6" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/401"
+#"7" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/301"
+#"8" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
 
 [pgie]
 #config-file-path="config/config_retinaface.txt"
@@ -37,6 +47,7 @@ width=1920
 height=1080
 #rows=2
 #columns=2
+#enable-padding=1
 
 [sink]
 qos=1
@@ -44,11 +55,11 @@ sync=0
 
 [recognition]
 # Cosine similarity (higher = stricter)
-threshold=0.4
+threshold=0.6
 # Directory to save recognized face images
 save_dir="data/faces/recognized"
 # Save mode for recognized images: "all" (every frame), "first" (first per track), "best" (best score per track)
-save_mode="all"
+save_mode="first"
 # Backend: "faiss" (default), "cuvs" (experimental; requires RAPIDS cuVS), or "auto"
 backend="faiss"
 # If your known_face_dir has images instead of .npy embeddings, you can point to a folder of .npy features
@@ -89,7 +100,7 @@ recognize_once_per_track=1
 
 [debug]
 # Verbose console prints (matching per-frame)
-verbose=1
+verbose=0
 
 [thresholds]
 # Minimum PGIE detection confidence to keep faces (env PGIE_MIN_CONF overrides if set)
