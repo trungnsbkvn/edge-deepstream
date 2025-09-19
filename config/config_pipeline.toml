@@ -100,7 +100,7 @@ recognize_once_per_track=1
 
 [debug]
 # Verbose console prints (matching per-frame)
-verbose=0
+verbose=1
 
 [thresholds]
 # Minimum PGIE detection confidence to keep faces (env PGIE_MIN_CONF overrides if set)

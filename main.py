@@ -112,24 +112,32 @@ def create_source_bin(index, uri):
             if not rtspsrc:
                 raise RuntimeError('rtspsrc create failed')
             rtspsrc.set_property('location', uri)
-            # Set additional RTSP properties for better compatibility
+            # Set additional RTSP properties for better real-time performance
             try:
-                rtspsrc.set_property('do-rtcp', True)
+                rtspsrc.set_property('do-rtcp', False)  # Disable RTCP for lower latency
                 rtspsrc.set_property('do-retransmission', False)
                 rtspsrc.set_property('ntp-sync', False)
                 rtspsrc.set_property('user-agent', 'DeepStream/1.0')
                 if rtspsrc.find_property('buffer-mode') is not None:
-                    rtspsrc.set_property('buffer-mode', 0)  # None
+                    rtspsrc.set_property('buffer-mode', 1)  # LOW_LATENCY mode
                 if rtspsrc.find_property('drop-on-latency') is not None:
                     rtspsrc.set_property('drop-on-latency', True)
+                # Additional real-time optimizations
+                if rtspsrc.find_property('timeout') is not None:
+                    rtspsrc.set_property('timeout', 5000000)  # 5 seconds timeout
+                if rtspsrc.find_property('retry') is not None:
+                    rtspsrc.set_property('retry', 3)  # Limit retries
             except Exception:
                 pass
-            # Latency/env overrides
+            # Latency/env overrides - prioritize low latency
             try:
                 env_latency = os.getenv('DS_RTSP_LATENCY')
-                latency_val = int(env_latency) if env_latency and env_latency.isdigit() else 150
+                latency_val = int(env_latency) if env_latency and env_latency.isdigit() else 100  # Reduced from 150
                 if rtspsrc.find_property('latency') is not None:
                     rtspsrc.set_property('latency', latency_val)
+                # Additional buffer control
+                if rtspsrc.find_property('tcp-timeout') is not None:
+                    rtspsrc.set_property('tcp-timeout', 5000000)  # 5s TCP timeout
             except Exception:
                 pass
             if os.getenv('DS_RTSP_TCP','0') == '1' and rtspsrc.find_property('protocols') is not None:
@@ -150,8 +158,12 @@ def create_source_bin(index, uri):
             queue_post = Gst.ElementFactory.make('queue', f'queue-postdec-{index}')
             if queue_post:
                 try:
+                    # More aggressive settings for real-time RTSP
                     queue_post.set_property('leaky', 2)
-                    queue_post.set_property('max-size-buffers', 10)
+                    queue_post.set_property('max-size-buffers', 3)  # Reduced from 10
+                    queue_post.set_property('max-size-bytes', 0)
+                    queue_post.set_property('max-size-time', 0)
+                    queue_post.set_property('silent', True)
                 except Exception:
                     pass
             for e in [rtspsrc, depay, h264parse, decoder, queue_post]:
@@ -828,13 +840,16 @@ def main(cfg, run_duration=None):
     pipeline.add(queue5)
     pipeline.add(queue6)
     pipeline.add(queue7)
-    # Leaky queues to avoid backlog; drop oldest buffers to prevent visual repeats
+    # Aggressive leaky queues for real-time performance
+    # More aggressive settings to prevent frame accumulation and repetition
     for q in (queue1, queue2, queue3, queue4, queue5, queue6, queue7):
         try:
             q.set_property('leaky', 2)  # downstream: drop oldest when downstream is slow
-            q.set_property('max-size-buffers', 10)
+            q.set_property('max-size-buffers', 3)  # Reduced from 10 to 3 for minimal latency
             q.set_property('max-size-bytes', 0)
             q.set_property('max-size-time', 0)
+            # Enable silent drops to avoid console spam
+            q.set_property('silent', True)
         except Exception:
             pass
 
