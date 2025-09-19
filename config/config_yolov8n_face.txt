@@ -27,7 +27,7 @@ custom-lib-path=../models/yolov8n_face/nvdsinfer_custom_impl_Yolo/libnvdsinfer_c
 net-scale-factor=0.0039215697906911373
 force-implicit-batch-dim=0
 # number of consecutive batches to skip for inference
-interval=0
+interval=1
 
 enable-output-landmark=1
 
