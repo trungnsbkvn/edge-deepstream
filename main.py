@@ -145,16 +145,23 @@ def create_source_bin(index, uri):
                     rtspsrc.set_property('protocols', 4)  # TCP
                 except Exception:
                     pass
-            depay = Gst.ElementFactory.make('rtph264depay', f'depay-{index}')
-            h264parse = Gst.ElementFactory.make('h264parse', f'h264parse-{index}')
+            # Create placeholders - will be set based on detected codec
+            depay = None
+            parse = None
             decoder = None
-            # Prefer hardware decoder
-            for cand in ['nvv4l2decoder', 'nvh264dec', 'avdec_h264']:
-                decoder = Gst.ElementFactory.make(cand, f'dec-{cand}-{index}')
-                if decoder:
-                    break
-            if not (depay and h264parse and decoder):
-                raise RuntimeError('H264 decode chain creation failed')
+            
+            # We'll detect codec dynamically in pad-added callback
+            # For now, create a queue to buffer incoming data
+            queue_pre = Gst.ElementFactory.make('queue', f'queue-pre-{index}')
+            if queue_pre:
+                try:
+                    queue_pre.set_property('leaky', 2)
+                    queue_pre.set_property('max-size-buffers', 5)
+                    queue_pre.set_property('max-size-bytes', 0)
+                    queue_pre.set_property('max-size-time', 0)
+                    queue_pre.set_property('silent', True)
+                except Exception:
+                    pass
             queue_post = Gst.ElementFactory.make('queue', f'queue-postdec-{index}')
             if queue_post:
                 try:
@@ -166,21 +173,119 @@ def create_source_bin(index, uri):
                     queue_post.set_property('silent', True)
                 except Exception:
                     pass
-            for e in [rtspsrc, depay, h264parse, decoder, queue_post]:
+            
+            # Add initial elements to bin (we'll add codec-specific ones dynamically)
+            for e in [rtspsrc, queue_pre]:
                 if e:
                     nbin.add(e)
 
+            # Track elements created dynamically for cleanup
+            dynamic_elements = {'depay': None, 'parse': None, 'decoder': None}
+            pipeline_linked = False
+
             def _rtsp_pad_added(src, pad):
+                nonlocal pipeline_linked, dynamic_elements
                 try:
+                    if pipeline_linked:
+                        return  # Already linked
+                        
                     caps = pad.get_current_caps()
+                    if not caps:
+                        caps = pad.query_caps()
                     name = caps.to_string() if caps else ''
-                    # Link only RTP H264 pads
-                    if 'application/x-rtp' in name and 'H264' in name.upper():
-                        sinkpad = depay.get_static_pad('sink')
-                        if sinkpad and pad.can_link(sinkpad):
-                            pad.link(sinkpad)
-                except Exception:
-                    pass
+                    print(f"[RTSP] Pad added with caps: {name}")
+                    
+                    # Detect codec type from RTP payload
+                    is_h264 = 'application/x-rtp' in name and 'H264' in name.upper()
+                    is_h265 = 'application/x-rtp' in name and ('H265' in name.upper() or 'HEVC' in name.upper())
+                    
+                    if is_h264:
+                        print(f"[RTSP] Detected H.264 stream for source {index}")
+                        depay = Gst.ElementFactory.make('rtph264depay', f'depay-{index}')
+                        parse = Gst.ElementFactory.make('h264parse', f'h264parse-{index}')
+                        # Prefer hardware decoder for H.264
+                        for cand in ['nvv4l2decoder', 'nvh264dec', 'avdec_h264']:
+                            decoder = Gst.ElementFactory.make(cand, f'dec-{cand}-{index}')
+                            if decoder:
+                                print(f"[RTSP] Using {cand} for H.264 decoding")
+                                break
+                    elif is_h265:
+                        print(f"[RTSP] Detected H.265/HEVC stream for source {index}")
+                        depay = Gst.ElementFactory.make('rtph265depay', f'depay-{index}')
+                        parse = Gst.ElementFactory.make('h265parse', f'h265parse-{index}')
+                        # Prefer hardware decoder for H.265
+                        for cand in ['nvv4l2decoder', 'nvh265dec', 'avdec_h265']:
+                            decoder = Gst.ElementFactory.make(cand, f'dec-{cand}-{index}')
+                            if decoder:
+                                print(f"[RTSP] Using {cand} for H.265 decoding")
+                                break
+                    else:
+                        print(f"[RTSP] Unsupported or unknown codec in caps: {name}")
+                        return
+                    
+                    if not (depay and parse and decoder):
+                        print(f"[RTSP] Failed to create decode chain elements for source {index}")
+                        return
+                    
+                    # Store references for cleanup
+                    dynamic_elements['depay'] = depay
+                    dynamic_elements['parse'] = parse
+                    dynamic_elements['decoder'] = decoder
+                    
+                    # Add elements to bin
+                    for e in [depay, parse, decoder, queue_post]:
+                        if e:
+                            nbin.add(e)
+                    
+                    # Link the pipeline: rtspsrc -> depay -> parse -> decoder -> queue_post
+                    sinkpad = depay.get_static_pad('sink')
+                    if sinkpad and pad.can_link(sinkpad):
+                        if pad.link(sinkpad) == Gst.PadLinkReturn.OK:
+                            print(f"[RTSP] Linked rtspsrc to depay for source {index}")
+                        else:
+                            print(f"[RTSP] Failed to link rtspsrc to depay for source {index}")
+                            return
+                    
+                    # Link the static parts of the pipeline
+                    if not depay.link(parse):
+                        print(f"[RTSP] depay->parse link failed index={index}")
+                        return
+                    if not parse.link(decoder):
+                        print(f"[RTSP] parse->decoder link failed index={index}")
+                        return
+                    if queue_post and not decoder.link(queue_post):
+                        print(f"[RTSP] decoder->queue link failed index={index}")
+                        return
+                    
+                    # Sync new elements with parent state
+                    for e in [depay, parse, decoder, queue_post]:
+                        if e:
+                            e.sync_state_with_parent()
+                    
+                    # Create ghost pad from last element src
+                    last = queue_post or decoder
+                    ghost_src = last.get_static_pad('src')
+                    if not ghost_src:
+                        print(f"[RTSP] No src pad for ghost pad creation, source {index}")
+                        return
+                    ghost_pad = Gst.GhostPad.new('src', ghost_src)
+                    if not nbin.add_pad(ghost_pad):
+                        print(f"[RTSP] Ghost pad add failed for source {index}")
+                        return
+                    
+                    # Link to streammux using stored sinkpad
+                    if hasattr(create_source_bin, 'sinkpads') and index in create_source_bin.sinkpads:
+                        sinkpad = create_source_bin.sinkpads[index]
+                        if ghost_pad.link(sinkpad) != Gst.PadLinkReturn.OK:
+                            print(f"[RTSP] Failed to link source bin to streammux for source {index}")
+                            return
+                        print(f"[RTSP] Successfully linked source {index} to streammux")
+                    
+                    pipeline_linked = True
+                    print(f"[RTSP] Successfully created and linked pipeline for source {index}")
+                    
+                except Exception as e:
+                    print(f"[RTSP] Exception in pad-added callback: {e}")
 
             rtspsrc.connect('pad-added', _rtsp_pad_added)
             
@@ -198,20 +303,7 @@ def create_source_bin(index, uri):
             # The previous attempt to connect to a non-existent 'error' signal caused:
             # unknown signal name: error. We rely on bus_call() for error handling.
             
-            # Link static parts
-            if not depay.link(h264parse):
-                print(f"[RTSP] depay->parse link failed index={index}")
-            if not h264parse.link(decoder):
-                print(f"[RTSP] parse->decoder link failed index={index}")
-            if queue_post and not decoder.link(queue_post):
-                print(f"[RTSP] decoder->queue link failed index={index}")
-            # Create ghost pad from last element src
-            last = queue_post or decoder
-            ghost_src = last.get_static_pad('src')
-            if not ghost_src:
-                raise RuntimeError('No src pad for ghost')
-            if not nbin.add_pad(Gst.GhostPad.new('src', ghost_src)):
-                raise RuntimeError('Ghost pad add failed')
+            # Return the bin - ghost pad will be added dynamically in pad-added callback
             return nbin
         except Exception as e:
             try:
@@ -800,16 +892,20 @@ def main(cfg, run_duration=None):
             sys.stderr.write("Unable to create source bin \n")
             continue
         pipeline.add(source_bin)
+        
+        # For RTSP sources, the source pad is created dynamically
+        # We need to connect it when the pad becomes available
         padname = "sink_%u" % source_idx
         sinkpad = streammux.get_request_pad(padname)
         if not sinkpad:
             sys.stderr.write("Unable to create sink pad bin \n")
             continue
-        srcpad = source_bin.get_static_pad("src")
-        if not srcpad:
-            sys.stderr.write("Unable to create src pad bin \n")
-            continue
-        srcpad.link(sinkpad)
+            
+        # Store sinkpad reference in a global dict for dynamic linking
+        if not hasattr(create_source_bin, 'sinkpads'):
+            create_source_bin.sinkpads = {}
+        create_source_bin.sinkpads[source_idx] = sinkpad
+        
         # Record mapping (k is camera id string from config)
         try:
             source_index_to_cam[source_idx] = str(k)
