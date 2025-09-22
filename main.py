@@ -11,6 +11,7 @@ from utils.event_sender import EventSender
 from utils.mqtt_listener import MQTTListener
 from utils.faiss_index import FaceIndex, FaceIndexConfig
 from utils.gen_feature import TensorRTInfer
+from utils import enroll_ops
 from typing import Any, Dict, Optional
 import configparser
 
@@ -1563,149 +1564,218 @@ def main(cfg, run_duration=None):
 
     # --- Enrollment: add/update/remove person ---
     def _handle_put_person(user_id: str, user_name: str, user_image: str, resp_meta: Optional[dict] = None):
+        """Refactored enrollment using utils.enroll_ops helpers."""
         try:
-            uid = str(user_id).strip()
-            uname = str(user_name).strip() if user_name is not None else ''
-            img = str(user_image).strip()
-            if not uid or not img or not os.path.exists(img):
-                print(f"[ENROLL] invalid request uid={uid} img={img}")
-                try:
-                    if resp_meta:
-                        _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 1)
-                except Exception:
-                    pass
-                return
-            # Generate embedding via TRT
-            model = _get_trt_model()
-            if model is None:
-                print("[ENROLL] TRT model unavailable")
-                try:
-                    if resp_meta:
-                        _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 5)
-                except Exception:
-                    pass
-                return
-            # Align to 112x112 RGB
-            rgb112 = _align_arcface_from_image_path(img)
-            if rgb112 is None:
-                print(f"[ENROLL] failed to read/align image: {img}")
-                try:
-                    if resp_meta:
-                        _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 4)
-                except Exception:
-                    pass
-                return
-            x = rgb112.astype(np.float32)
-            x -= 127.5
-            x /= 128.0
-            x = np.transpose(x, (2, 0, 1))
-            x = np.expand_dims(x, axis=0).astype(np.float32)
-            inp = np.array(x, dtype=np.float32, order="C")
-            out = model.infer(inp)[0]
-            emb = np.asarray(out).reshape(1, -1).astype(np.float32)
-            # L2 normalize for cosine/IP
-            n = float(np.linalg.norm(emb)) + 1e-12
-            emb = (emb / n).astype(np.float32)
-
-            idx = _ensure_index()
-            # Update label mapping metadata (persons) while keeping per-vector labels in sync
-            labels_path = lbl_path
-            index_path = idx_path
-            if not labels_path:
-                labels_path = str(recog_cfg.get('labels_path', '')).strip()
-            if not index_path:
-                index_path = str(recog_cfg.get('index_path', '')).strip()
-            persons = {}
-            try:
-                if labels_path and os.path.exists(labels_path):
-                    with open(labels_path, 'r', encoding='utf-8') as f:
-                        meta = json.load(f) or {}
-                    persons = meta.get('persons', {}) if isinstance(meta, dict) else {}
-                    if not isinstance(persons, dict):
-                        persons = {}
-            except Exception:
-                persons = {}
-            # Apply add/update/remove: if user_name empty -> remove mapping; else upsert name
-            if uname:
-                persons[uid] = {'name': uname}
-            else:
-                if uid in persons:
-                    persons.pop(uid, None)
-
-            # Remove existing vectors labeled with this uid, then add new embedding with uid label
-            # Note: we do NOT delete person entirely unless uname is empty
-            try:
-                _ = idx.remove_label(uid)
-            except Exception:
-                pass
-            idx.add([uid], emb)
-            # Persist index and labels/persons
-            if index_path and labels_path:
-                try:
-                    # Save index with per-vector labels list
-                    idx.save(index_path, labels_path)
-                    # Save persons mapping
-                    meta = {}
-                    try:
-                        with open(labels_path, 'r', encoding='utf-8') as f:
-                            meta = json.load(f) or {}
-                    except Exception:
-                        meta = {}
-                    meta['persons'] = persons
-                    with open(labels_path, 'w', encoding='utf-8') as f:
-                        json.dump(meta, f, ensure_ascii=False, indent=2)
-                    print(f"[ENROLL] saved uid={uid} name='{uname}' to index")
-                except Exception as e:
-                    print(f"[ENROLL] save failed: {e}")
-            try:
+            uid = (user_id or '').strip()
+            uname = (user_name or '').strip()
+            img_path = (user_image or '').strip()
+            if not uid or not img_path or not os.path.exists(img_path):
+                print(f"[ENROLL] invalid request uid={uid} img={img_path}")
                 if resp_meta:
-                    # Success status=2 per requirement
-                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), resp_meta.get('status',2))
+                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 1)
+                return
+
+            # Prepare directories
+            try:
+                known_faces_dir = cfg.get('pipeline', {}).get('known_face_dir', 'data/known_faces')
             except Exception:
-                pass
+                known_faces_dir = 'data/known_faces'
+            if not os.path.isabs(known_faces_dir):
+                known_faces_dir = os.path.join(os.getcwd(), known_faces_dir)
+            os.makedirs(known_faces_dir, exist_ok=True)
+
+            # Align face to 112x112 (BGR) using helper (crop_align_112 expects BGR)
+            try:
+                import cv2
+                bgr = cv2.imread(img_path)
+            except Exception:
+                bgr = None
+            face112 = enroll_ops.crop_align_112(bgr) if bgr is not None else None
+            if face112 is None:
+                print(f"[ENROLL] alignment failed: {img_path}")
+                if resp_meta:
+                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 4)
+                return
+
+            # Quality / blur check
+            blur_val = enroll_ops.blur_variance(face112)
+            try:
+                blur_min = float(os.getenv('DS_ENROLL_BLUR_VAR_MIN', '15'))
+            except Exception:
+                blur_min = 15.0
+            if blur_val < blur_min:
+                print(f"[ENROLL] blurry variance={blur_val:.2f} < {blur_min}")
+                if resp_meta:
+                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 10)
+                return
+
+            # Resolve engine path & embed
+            engine_path = enroll_ops.resolve_engine_from_cfg(cfg)
+            if not engine_path or not os.path.exists(engine_path):
+                print(f"[ENROLL] engine not found: {engine_path}")
+                if resp_meta:
+                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 5)
+                return
+            try:
+                emb_vec = enroll_ops.embed_arcface(face112, engine_path)
+            except Exception as ee:
+                print(f"[ENROLL] embedding failed: {ee}")
+                if resp_meta:
+                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 5)
+                return
+
+            # Ensure index (reuse existing lazy loader so probes see updates)
+            idx = _ensure_index()
+
+            # Thresholds
+            try:
+                recog_thresh_local = float(recog_cfg.get('threshold', 0.5))
+            except Exception:
+                recog_thresh_local = 0.5
+            try:
+                dup_thresh = float(os.getenv('DS_ENROLL_DUP_THRESHOLD', str(recog_thresh_local)))
+            except Exception:
+                dup_thresh = recog_thresh_local
+            try:
+                intra_thresh = float(os.getenv('DS_ENROLL_INTRA_THRESHOLD', '0.35'))
+            except Exception:
+                intra_thresh = 0.35
+            append_mode = os.getenv('DS_ENROLL_APPEND', '0') == '1'
+
+            # Existing metadata for user / persons
+            labels_path_effective = lbl_path or str(recog_cfg.get('labels_path','')).strip()
+            index_path_effective = idx_path or str(recog_cfg.get('index_path','')).strip()
+            meta = enroll_ops.read_labels(labels_path_effective) if labels_path_effective else {}
+            persons_map = meta.get('persons', {}) if isinstance(meta.get('persons',{}), dict) else {}
+            existing_user = uid in persons_map or (uid in getattr(idx, '_labels', []))
+
+            # Duplicate image name check (idempotent)
+            img_basename = os.path.basename(img_path)
+            existing_image_same_name = False
+            try:
+                for f in os.listdir(known_faces_dir):
+                    if f.lower() == img_basename.lower():
+                        existing_image_same_name = True
+                        break
+            except Exception:
+                existing_image_same_name = False
+            if existing_user and existing_image_same_name:
+                print(f"[ENROLL] already enrolled uid={uid} image={img_basename}")
+                if resp_meta:
+                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 2)
+                return
+            if existing_user and not existing_image_same_name:
+                append_mode = True
+
+            # Duplicate / similarity validation
+            if idx.size() > 0:
+                top_name, top_score = enroll_ops.search_top(idx, emb_vec)
+                if top_name:
+                    print(f"[ENROLL] top1 name={top_name} score={top_score:.4f}")
+                if top_name and top_score >= dup_thresh:
+                    if top_name != uid:
+                        print(f"[ENROLL] duplicate other user={top_name} score={top_score:.3f}")
+                        if resp_meta:
+                            _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 6)
+                        return
+                    else:
+                        # Intra-user similarity check
+                        try:
+                            all_vecs = idx._reconstruct_all()
+                        except Exception:
+                            all_vecs = None
+                        if all_vecs is not None:
+                            labels_list = list(getattr(idx,'_labels',[]))
+                            try:
+                                import numpy as _np
+                                u_vecs = [all_vecs[i] for i,l in enumerate(labels_list) if l == uid]
+                                if u_vecs:
+                                    stack = _np.vstack(u_vecs).astype('float32')
+                                    stack /= (_np.linalg.norm(stack, axis=1, keepdims=True)+1e-12)
+                                    sim_vals = stack @ emb_vec.reshape(-1)
+                                    if sim_vals.size > 0:
+                                        max_sim = float(sim_vals.max())
+                                        if max_sim < intra_thresh:
+                                            print(f"[ENROLL] intra-user mismatch max_sim={max_sim:.3f} < {intra_thresh}")
+                                            if resp_meta:
+                                                _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 7)
+                                            return
+                            except Exception as ve:
+                                print(f"[ENROLL] intra-user check warn: {ve}")
+
+            # Replacement vs append
+            if not append_mode:
+                try:
+                    _ = idx.remove_label(uid)
+                except Exception:
+                    pass
+
+            # Save aligned 112 image
+            aligned_rel = None
+            try:
+                import cv2, time as _time
+                ts_now = int(_time.time())
+                aligned_filename = f"{uid}_{ts_now}.png"
+                aligned_abs = os.path.join(known_faces_dir, aligned_filename)
+                cv2.imwrite(aligned_abs, face112)
+                aligned_rel = os.path.relpath(aligned_abs, os.getcwd())
+            except Exception as se:
+                print(f"[ENROLL] aligned save warn: {se}")
+
+            # Add embedding
+            idx.add([uid], emb_vec.reshape(1,-1))
+
+            # Copy original image for audit (best effort)
+            try:
+                import shutil
+                dest_full = os.path.join(known_faces_dir, img_basename)
+                if not os.path.exists(dest_full):
+                    shutil.copy2(img_path, dest_full)
+            except Exception as ce:
+                print(f"[ENROLL] copy warn: {ce}")
+
+            # Upsert metadata & persist
+            if labels_path_effective and index_path_effective:
+                try:
+                    enroll_ops.upsert_person_meta(meta, uid, uname, aligned_rel)
+                    idx.save(index_path_effective, labels_path_effective)
+                    enroll_ops.write_labels(labels_path_effective, meta)
+                    print(f"[ENROLL] saved uid={uid} name='{uname}' vectors={idx.size()}")
+                except Exception as pe:
+                    print(f"[ENROLL] persist warn: {pe}")
+
+            if resp_meta:
+                _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), resp_meta.get('status',2))
         except Exception as e:
             print(f"[ENROLL] error: {e}")
-            try:
-                if resp_meta:
-                    _publish_response(resp_meta.get('cmd',60), '0', str(user_id), resp_meta.get('cmd_id',''), 9)
-            except Exception:
-                pass
+            if resp_meta:
+                _publish_response(resp_meta.get('cmd',60), '0', str(user_id), resp_meta.get('cmd_id',''), 9)
 
     # --- Delete person (remove from index and persons map) ---
     def _handle_del_person(user_id: str, resp_meta: Optional[dict] = None):
+        """Refactored deletion using enroll_ops.delete_person."""
         try:
-            uid = str(user_id).strip()
+            uid = (user_id or '').strip()
             if not uid:
                 return False
             idx = _ensure_index()
-            removed = 0
+            labels_path_effective = lbl_path or str(recog_cfg.get('labels_path','')).strip()
+            index_path_effective = idx_path or str(recog_cfg.get('index_path','')).strip()
+            remove_files = os.getenv('DS_ENROLL_REMOVE_FILES','1') == '1'
+            removed = enroll_ops.delete_person(idx, uid, index_path_effective, labels_path_effective, remove_files=remove_files) if (labels_path_effective and index_path_effective) else 0
             try:
-                removed = idx.remove_label(uid)
+                new_size = idx.size()
             except Exception:
-                removed = 0
-            # Persist changes
-            labels_path = lbl_path or str(recog_cfg.get('labels_path', '')).strip()
-            index_path = idx_path or str(recog_cfg.get('index_path', '')).strip()
-            if index_path and labels_path:
-                try:
-                    idx.save(index_path, labels_path)
-                    # Remove from persons map as well
-                    meta = {}
-                    try:
-                        if os.path.exists(labels_path):
-                            with open(labels_path, 'r', encoding='utf-8') as f:
-                                meta = json.load(f) or {}
-                    except Exception:
-                        meta = {}
-                    persons = meta.get('persons', {}) if isinstance(meta, dict) else {}
-                    if isinstance(persons, dict) and uid in persons:
-                        persons.pop(uid, None)
-                    meta['persons'] = persons
-                    with open(labels_path, 'w', encoding='utf-8') as f:
-                        json.dump(meta, f, ensure_ascii=False, indent=2)
-                    print(f"[ENROLL] removed uid={uid}, vectors_removed={removed}")
-                except Exception as e:
-                    print(f"[ENROLL] remove save failed: {e}")
+                new_size = -1
+            print(f"[ENROLL] removed uid={uid} removed_vec={removed} new_size={new_size}")
+            # Clear runtime recognition caches
+            try:
+                from utils.probe import clear_name_cache_for_user
+                clear_name_cache_for_user(uid)
+            except Exception:
+                pass
+            if resp_meta:
+                _publish_response(resp_meta.get('cmd',61), '0', uid, resp_meta.get('cmd_id',''), resp_meta.get('status',3))
         except Exception as e:
             print(f"[ENROLL] del error: {e}")
 

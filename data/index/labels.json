@@ -48,7 +48,13 @@
       ]
     },
     "DN001": {
-      "name": "Daniel Nguyen"
+      "start_time": 1758516533,
+      "end_time": 1758516533,
+      "user_id": "DN001",
+      "name": "Daniel Nguyen",
+      "aligned_paths": [
+        "data/known_faces/DN001_1758516533.png"
+      ]
     }
   },
   "labels": [
@@ -57,7 +63,6 @@
     "xxx-yyy",
     "chandler",
     "dien",
-    "dien",
-    "DN001"
+    "dien"
   ]
 }

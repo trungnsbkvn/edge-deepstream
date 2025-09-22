@@ -4,10 +4,15 @@
 export DS_RTSP_LATENCY=200          # Reduce from 150ms to 200ms
 export DS_RTSP_DROP_ON_LATENCY=1    # Already set, but ensure it's active
 export DS_RTSP_TCP=1                # Use TCP for reliability
-export DS_RTSP_RETRANS=1           # Disable retransmission for lower latency
+export DS_RTSP_RETRANS=1            # Disable retransmission for lower latency
 #export DS_CONFIG_PATH=config/config_pipeline_realtime.toml
 # Enable realtime frame dropping globally
 export DS_REALTIME_DROP=0
+
+#Enrollment parameters
+export DS_ENROLL_DUP_THRESHOLD=0.55
+export DS_ENROLL_INTRA_THRESHOLD=0.40
+export DS_ENROLL_BLUR_VAR_MIN=25
 
 # Force NVMM caps for better performance
 export DS_FORCE_NVMM=1

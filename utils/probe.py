@@ -53,6 +53,37 @@ _NAME_MAP_CACHE = {
     'map': {}
 }
 
+# Recognition cache (track-id -> name) lives on sgie_feature_extract_probe attribute; add helpers
+def clear_name_cache_for_user(user_id: str):
+    try:
+        if hasattr(sgie_feature_extract_probe, '_recognize_cache'):
+            cache = sgie_feature_extract_probe._recognize_cache
+            # Remove any entries whose cached name equals user_id
+            to_del = [k for k,v in cache.items() if isinstance(v, dict) and v.get('name') == user_id]
+            for k in to_del:
+                try:
+                    cache.pop(k, None)
+                except Exception:
+                    pass
+    except Exception:
+        pass
+    # Force name map refresh next lookup by invalidating mtime
+    try:
+        _NAME_MAP_CACHE['mtime'] = -1.0
+    except Exception:
+        pass
+
+def clear_all_recognition_caches():
+    try:
+        if hasattr(sgie_feature_extract_probe, '_recognize_cache'):
+            sgie_feature_extract_probe._recognize_cache.clear()
+    except Exception:
+        pass
+    try:
+        _NAME_MAP_CACHE['mtime'] = -1.0
+    except Exception:
+        pass
+
 def _get_display_name(label: str, labels_path: str) -> str:
     if not label or not labels_path:
         return label
