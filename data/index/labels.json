@@ -1,5 +1,27 @@
 {
-  "persons": {},
+  "persons": {
+    "DN001": {
+      "start_time": 0,
+      "end_time": 0,
+      "user_id": "DN001",
+      "name": "Daniel Nguyen",
+      "aligned_paths": [
+        "data/known_faces/DN001_1758523562.png"
+      ]
+    },
+    "xxx": {
+      "start_time": 0,
+      "end_time": 0,
+      "user_id": "xxx",
+      "name": "Diện",
+      "aligned_paths": [
+        "data/known_faces/xxx_1758523776.png"
+      ]
+    }
+  },
   "version": 2,
-  "labels": []
+  "labels": [
+    "DN001",
+    "xxx"
+  ]
 }

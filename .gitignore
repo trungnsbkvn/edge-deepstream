@@ -62,3 +62,7 @@ core_v2/xmqtt.cpp
 core_v2/xmqtt.h
 core_v2/xservice.cpp
 core_v2/xservice.h
+data/index/faiss.index
+data/index/labels.json
+data/index/faiss.index
+data/index/labels.json
