@@ -268,10 +268,17 @@ def create_source_bin(index, uri):
                     if not ghost_src:
                         print(f"[RTSP] No src pad for ghost pad creation, source {index}")
                         return
-                    ghost_pad = Gst.GhostPad.new('src', ghost_src)
-                    if not nbin.add_pad(ghost_pad):
-                        print(f"[RTSP] Ghost pad add failed for source {index}")
-                        return
+                    # Reuse pre-created ghost pad if present; else create
+                    ghost_pad = nbin.get_static_pad('src')
+                    if ghost_pad and isinstance(ghost_pad, Gst.GhostPad):
+                        if not ghost_pad.set_target(ghost_src):
+                            print(f"[RTSP] Failed setting target on existing ghost pad for source {index}")
+                            return
+                    else:
+                        ghost_pad = Gst.GhostPad.new('src', ghost_src)
+                        if not nbin.add_pad(ghost_pad):
+                            print(f"[RTSP] Ghost pad add failed for source {index}")
+                            return
                     
                     # Link to streammux using stored sinkpad
                     if hasattr(create_source_bin, 'sinkpads') and index in create_source_bin.sinkpads:
@@ -288,6 +295,13 @@ def create_source_bin(index, uri):
                     print(f"[RTSP] Exception in pad-added callback: {e}")
 
             rtspsrc.connect('pad-added', _rtsp_pad_added)
+            # Pre-create an empty ghost pad so dynamic source addition logic can link
+            try:
+                if not nbin.get_static_pad('src'):
+                    empty_ghost = Gst.GhostPad.new_no_target('src', Gst.PadDirection.SRC)
+                    nbin.add_pad(empty_ghost)
+            except Exception:
+                pass
             
             # Add error handling for RTSP source
             def _rtsp_error(src, error, debug):

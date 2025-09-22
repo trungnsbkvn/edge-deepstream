@@ -1,15 +1,6 @@
 {
   "version": 2,
   "persons": {
-    "ross": {
-      "user_id": "ross",
-      "name": "Ross",
-      "start_time": 1758099768,
-      "end_time": 1758099768,
-      "aligned_paths": [
-        "data/known_faces/Ross.png"
-      ]
-    },
     "rachel": {
       "user_id": "rachel",
       "name": "Rachel",
@@ -67,7 +58,6 @@
     }
   },
   "labels": [
-    "ross",
     "rachel",
     "phoebe",
     "xxx-yyy",

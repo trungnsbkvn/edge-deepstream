@@ -22,15 +22,15 @@ process-mode=0
 display-text=1
 
 [source]
-"x" = "rtsp://admin:123456Aa@192.168.1.250:554/Streaming/Channels/501"
-#"1" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
-#"2" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/801"
-#"3" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
-#"4" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/601"
-#"5" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/501"
-#"6" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/401"
-#"7" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/301"
-#"8" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
+#"x" = "rtsp://admin:123456Aa@192.168.1.250:554/Streaming/Channels/501"
+"1" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
+"2" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/801"
+"3" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
+"4" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/601"
+"5" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/501"
+"6" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/401"
+"7" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/301"
+"8" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
 
 [pgie]
 #config-file-path="config/config_retinaface.txt"
