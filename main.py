@@ -11,6 +11,19 @@ from utils.event_sender import EventSender
 from utils.mqtt_listener import MQTTListener
 from utils.faiss_index import FaceIndex, FaceIndexConfig
 from utils.gen_feature import TensorRTInfer
+from utils.status_codes import (
+    STATUS_OK_GENERIC,
+    STATUS_ENROLL_SUCCESS,
+    STATUS_DELETE_SUCCESS,
+    STATUS_ALREADY_EXISTS,
+    STATUS_DUPLICATE_OTHER,
+    STATUS_INTRA_USER_MISMATCH,
+    STATUS_INVALID_REQUEST,
+    STATUS_ALIGN_FAIL,
+    STATUS_EMBED_FAIL,
+    STATUS_LOW_QUALITY_BLUR,
+    STATUS_UNKNOWN_ERROR,
+)
 from utils import enroll_ops
 from typing import Any, Dict, Optional
 import configparser
@@ -1572,7 +1585,7 @@ def main(cfg, run_duration=None):
             if not uid or not img_path or not os.path.exists(img_path):
                 print(f"[ENROLL] invalid request uid={uid} img={img_path}")
                 if resp_meta:
-                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 1)
+                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_INVALID_REQUEST)
                 return
 
             # Prepare directories
@@ -1594,7 +1607,7 @@ def main(cfg, run_duration=None):
             if face112 is None:
                 print(f"[ENROLL] alignment failed: {img_path}")
                 if resp_meta:
-                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 4)
+                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_ALIGN_FAIL)
                 return
 
             # Quality / blur check
@@ -1606,7 +1619,7 @@ def main(cfg, run_duration=None):
             if blur_val < blur_min:
                 print(f"[ENROLL] blurry variance={blur_val:.2f} < {blur_min}")
                 if resp_meta:
-                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 10)
+                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_LOW_QUALITY_BLUR)
                 return
 
             # Resolve engine path & embed
@@ -1614,14 +1627,14 @@ def main(cfg, run_duration=None):
             if not engine_path or not os.path.exists(engine_path):
                 print(f"[ENROLL] engine not found: {engine_path}")
                 if resp_meta:
-                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 5)
+                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_EMBED_FAIL)
                 return
             try:
                 emb_vec = enroll_ops.embed_arcface(face112, engine_path)
             except Exception as ee:
                 print(f"[ENROLL] embedding failed: {ee}")
                 if resp_meta:
-                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 5)
+                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_EMBED_FAIL)
                 return
 
             # Ensure index (reuse existing lazy loader so probes see updates)
@@ -1662,7 +1675,7 @@ def main(cfg, run_duration=None):
             if existing_user and existing_image_same_name:
                 print(f"[ENROLL] already enrolled uid={uid} image={img_basename}")
                 if resp_meta:
-                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 2)
+                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_ALREADY_EXISTS)
                 return
             if existing_user and not existing_image_same_name:
                 append_mode = True
@@ -1673,10 +1686,10 @@ def main(cfg, run_duration=None):
                 if top_name:
                     print(f"[ENROLL] top1 name={top_name} score={top_score:.4f}")
                 if top_name and top_score >= dup_thresh:
-                    if top_name != uid:
-                        print(f"[ENROLL] duplicate other user={top_name} score={top_score:.3f}")
-                        if resp_meta:
-                            _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 6)
+                        if top_name != uid:
+                            print(f"[ENROLL] duplicate other user={top_name} score={top_score:.3f}")
+                            if resp_meta:
+                                _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_DUPLICATE_OTHER)
                         return
                     else:
                         # Intra-user similarity check
@@ -1698,7 +1711,7 @@ def main(cfg, run_duration=None):
                                         if max_sim < intra_thresh:
                                             print(f"[ENROLL] intra-user mismatch max_sim={max_sim:.3f} < {intra_thresh}")
                                             if resp_meta:
-                                                _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 7)
+                                                _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_INTRA_USER_MISMATCH)
                                             return
                             except Exception as ve:
                                 print(f"[ENROLL] intra-user check warn: {ve}")
@@ -1745,11 +1758,11 @@ def main(cfg, run_duration=None):
                     print(f"[ENROLL] persist warn: {pe}")
 
             if resp_meta:
-                _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), resp_meta.get('status',2))
+                _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_ENROLL_SUCCESS)
         except Exception as e:
             print(f"[ENROLL] error: {e}")
             if resp_meta:
-                _publish_response(resp_meta.get('cmd',60), '0', str(user_id), resp_meta.get('cmd_id',''), 9)
+                _publish_response(resp_meta.get('cmd',60), '0', str(user_id), resp_meta.get('cmd_id',''), STATUS_UNKNOWN_ERROR)
 
     # --- Delete person (remove from index and persons map) ---
     def _handle_del_person(user_id: str, resp_meta: Optional[dict] = None):
@@ -1775,7 +1788,7 @@ def main(cfg, run_duration=None):
             except Exception:
                 pass
             if resp_meta:
-                _publish_response(resp_meta.get('cmd',61), '0', uid, resp_meta.get('cmd_id',''), resp_meta.get('status',3))
+                _publish_response(resp_meta.get('cmd',61), '0', uid, resp_meta.get('cmd_id',''), STATUS_DELETE_SUCCESS)
         except Exception as e:
             print(f"[ENROLL] del error: {e}")
 
