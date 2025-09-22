@@ -1569,16 +1569,31 @@ def main(cfg, run_duration=None):
             img = str(user_image).strip()
             if not uid or not img or not os.path.exists(img):
                 print(f"[ENROLL] invalid request uid={uid} img={img}")
+                try:
+                    if resp_meta:
+                        _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 1)
+                except Exception:
+                    pass
                 return
             # Generate embedding via TRT
             model = _get_trt_model()
             if model is None:
                 print("[ENROLL] TRT model unavailable")
+                try:
+                    if resp_meta:
+                        _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 5)
+                except Exception:
+                    pass
                 return
             # Align to 112x112 RGB
             rgb112 = _align_arcface_from_image_path(img)
             if rgb112 is None:
                 print(f"[ENROLL] failed to read/align image: {img}")
+                try:
+                    if resp_meta:
+                        _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), 4)
+                except Exception:
+                    pass
                 return
             x = rgb112.astype(np.float32)
             x -= 127.5
@@ -1642,8 +1657,19 @@ def main(cfg, run_duration=None):
                     print(f"[ENROLL] saved uid={uid} name='{uname}' to index")
                 except Exception as e:
                     print(f"[ENROLL] save failed: {e}")
+            try:
+                if resp_meta:
+                    # Success status=2 per requirement
+                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), resp_meta.get('status',2))
+            except Exception:
+                pass
         except Exception as e:
             print(f"[ENROLL] error: {e}")
+            try:
+                if resp_meta:
+                    _publish_response(resp_meta.get('cmd',60), '0', str(user_id), resp_meta.get('cmd_id',''), 9)
+            except Exception:
+                pass
 
     # --- Delete person (remove from index and persons map) ---
     def _handle_del_person(user_id: str, resp_meta: Optional[dict] = None):

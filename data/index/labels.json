@@ -28,15 +28,6 @@
         "data/known_faces/Monica.png"
       ]
     },
-    "6dd9c3f5-b429-4080-a344-2b6c33470f05": {
-      "user_id": "6dd9c3f5-b429-4080-a344-2b6c33470f05",
-      "name": "Daniel Nguyen",
-      "start_time": 1758100032,
-      "end_time": 1758100032,
-      "aligned_paths": [
-        "data/known_faces/DanielNguyen.png"
-      ]
-    },
     "chandler": {
       "user_id": "chandler",
       "name": "Chandler",
@@ -55,15 +46,18 @@
         "data/known_faces/DienWS_1.png",
         "data/known_faces/DienWS_2.png"
       ]
+    },
+    "DN001": {
+      "name": "Daniel Nguyen"
     }
   },
   "labels": [
     "rachel",
     "phoebe",
     "xxx-yyy",
-    "6dd9c3f5-b429-4080-a344-2b6c33470f05",
     "chandler",
     "dien",
-    "dien"
+    "dien",
+    "DN001"
   ]
 }
