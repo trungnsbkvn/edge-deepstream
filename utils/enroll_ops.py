@@ -160,9 +160,11 @@ def upsert_person_meta(meta: Dict[str, Any], user_id: str, name: str, aligned_re
     persons = meta.get('persons', {}) if isinstance(meta.get('persons', {}), dict) else {}
     now_ts = int(time.time())
     rec = persons.get(user_id, {}) if isinstance(persons.get(user_id, {}), dict) else {}
+    # User preference: initialize times to 0 if absent
     if 'start_time' not in rec:
-        rec['start_time'] = now_ts
-    rec['end_time'] = now_ts
+        rec['start_time'] = 0
+    if 'end_time' not in rec:
+        rec['end_time'] = 0
     rec['user_id'] = user_id
     rec['name'] = name or rec.get('name', user_id)
     paths = list(rec.get('aligned_paths', [])) if isinstance(rec.get('aligned_paths', []), list) else []
@@ -178,14 +180,25 @@ def upsert_person_meta(meta: Dict[str, Any], user_id: str, name: str, aligned_re
 # Delete: remove person record and aligned files if requested
 
 def delete_person(idx: FaceIndex, user_id: str, index_path: str, labels_path: str, remove_files: bool=True) -> int:
-    removed = 0
+    """Delete user vectors + metadata safely.
+
+    Only rewrite the labels list if vectors were actually removed. This prevents
+    wiping the labels array when the in-memory index failed to load (empty) but
+    labels.json still contains other identities.
+    """
+    # Attempt vector removal
     try:
         removed = idx.remove_label(user_id)
     except Exception:
         removed = 0
+
     meta = read_labels(labels_path)
+    if not isinstance(meta, dict):
+        meta = {}
     persons = meta.get('persons', {}) if isinstance(meta.get('persons', {}), dict) else {}
     rec = persons.get(user_id)
+
+    # Remove aligned image files only if we actually have a record and we want to remove files
     if remove_files and isinstance(rec, dict):
         for rel in rec.get('aligned_paths', []):
             try:
@@ -194,17 +207,29 @@ def delete_person(idx: FaceIndex, user_id: str, index_path: str, labels_path: st
                     os.remove(abs_path)
             except Exception:
                 pass
+
+    # Remove person record from persons map regardless of whether vectors were present
     if isinstance(persons, dict) and user_id in persons:
         persons.pop(user_id, None)
     meta['persons'] = persons
-    # Sync labels from idx
-    try:
-        meta['labels'] = list(getattr(idx,'_labels', []))
-    except Exception:
-        pass
-    # Persist both index & labels
-    idx.save(index_path, labels_path)
-    write_labels(labels_path, meta)
+
+    # If vectors were removed (index had this user), update labels list from index.
+    # Otherwise preserve existing labels to avoid accidental clearing.
+    if removed > 0:
+        try:
+            meta['labels'] = list(getattr(idx, '_labels', []))
+        except Exception:
+            pass
+        # Write updated labels/persons first, then save index (so idx.save sees latest persons)
+        write_labels(labels_path, meta)
+        try:
+            idx.save(index_path, labels_path)
+        except Exception:
+            pass
+    else:
+        # removed == 0; do NOT call idx.save (avoid overwriting labels with empty array)
+        # Keep original labels array intact
+        write_labels(labels_path, meta)
     return removed
 
 # ---------------- Quality & Similarity Checks ---------------- #

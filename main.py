@@ -1673,10 +1673,45 @@ def main(cfg, run_duration=None):
             except Exception:
                 existing_image_same_name = False
             if existing_user and existing_image_same_name:
-                print(f"[ENROLL] already enrolled uid={uid} image={img_basename}")
-                if resp_meta:
-                    _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_ALREADY_EXISTS)
-                return
+                # Reconstruct existing vectors and test similarity to decide true idempotency.
+                try:
+                    import numpy as _np
+                    all_vecs__idem = idx._reconstruct_all()
+                    labels__idem = list(getattr(idx,'_labels', []))
+                    u_vecs__idem = [all_vecs__idem[i] for i,l in enumerate(labels__idem) if l == uid]
+                    proceed = True
+                    if u_vecs__idem:
+                        stack_idem = _np.vstack(u_vecs__idem).astype('float32')
+                        stack_idem /= (_np.linalg.norm(stack_idem, axis=1, keepdims=True)+1e-12)
+                        sim_vals_idem = stack_idem @ emb_vec.reshape(-1)
+                        max_sim_idem = float(sim_vals_idem.max()) if sim_vals_idem.size>0 else -1.0
+                        if max_sim_idem >= dup_thresh:
+                            print(f"[ENROLL] already enrolled uid={uid} image={img_basename} max_sim={max_sim_idem:.3f} >= {dup_thresh}")
+                            proceed = False
+                    if not u_vecs__idem:
+                        # No existing vectors (labels.json had user but index empty) -> treat as fresh add
+                        proceed = True
+                except Exception as _sync_e:
+                    print(f"[ENROLL] idempotent similarity check warn: {_sync_e}")
+                    proceed = False  # safest: treat as idempotent to avoid duplicate vectors on error
+                if not proceed:
+                    # Idempotent: ensure labels.json kept in sync only
+                    try:
+                        if labels_path_effective and index_path_effective:
+                            meta_reload = enroll_ops.read_labels(labels_path_effective)
+                            if isinstance(meta_reload, dict):
+                                current_index_labels = list(getattr(idx,'_labels', []))
+                                file_labels = meta_reload.get('labels', []) if isinstance(meta_reload.get('labels', []), list) else []
+                                if current_index_labels != file_labels:
+                                    print(f"[ENROLL] idempotent: updating labels.json label list (len {len(file_labels)} -> {len(current_index_labels)})")
+                                    meta_reload['labels'] = current_index_labels
+                                    enroll_ops.write_labels(labels_path_effective, meta_reload)
+                    except Exception as _sync2_e:
+                        print(f"[ENROLL] idempotent sync warn: {_sync2_e}")
+                    if resp_meta:
+                        _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_ALREADY_EXISTS)
+                    return
+                # else fall through to treat as new vector (append/replace logic below)
             if existing_user and not existing_image_same_name:
                 append_mode = True
 
@@ -1685,43 +1720,48 @@ def main(cfg, run_duration=None):
                 top_name, top_score = enroll_ops.search_top(idx, emb_vec)
                 if top_name:
                     print(f"[ENROLL] top1 name={top_name} score={top_score:.4f}")
-                if top_name and top_score >= dup_thresh:
-                        if top_name != uid:
-                            print(f"[ENROLL] duplicate other user={top_name} score={top_score:.3f}")
-                            if resp_meta:
-                                _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_DUPLICATE_OTHER)
-                        return
-                    else:
-                        # Intra-user similarity check
+                # Case 1: New vector is too similar to an existing different user -> reject
+                if top_name and top_score >= dup_thresh and top_name != uid:
+                    print(f"[ENROLL] duplicate other user={top_name} score={top_score:.3f}")
+                    if resp_meta:
+                        _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_DUPLICATE_OTHER)
+                    return
+                # Case 2: Updating / adding more samples for existing user -> ensure similarity to at least one prior vector
+                if existing_user:
+                    try:
+                        all_vecs = idx._reconstruct_all()
+                    except Exception:
+                        all_vecs = None
+                    if all_vecs is not None:
+                        labels_list = list(getattr(idx,'_labels',[]))
                         try:
-                            all_vecs = idx._reconstruct_all()
-                        except Exception:
-                            all_vecs = None
-                        if all_vecs is not None:
-                            labels_list = list(getattr(idx,'_labels',[]))
-                            try:
-                                import numpy as _np
-                                u_vecs = [all_vecs[i] for i,l in enumerate(labels_list) if l == uid]
-                                if u_vecs:
-                                    stack = _np.vstack(u_vecs).astype('float32')
-                                    stack /= (_np.linalg.norm(stack, axis=1, keepdims=True)+1e-12)
-                                    sim_vals = stack @ emb_vec.reshape(-1)
-                                    if sim_vals.size > 0:
-                                        max_sim = float(sim_vals.max())
-                                        if max_sim < intra_thresh:
-                                            print(f"[ENROLL] intra-user mismatch max_sim={max_sim:.3f} < {intra_thresh}")
-                                            if resp_meta:
-                                                _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_INTRA_USER_MISMATCH)
-                                            return
-                            except Exception as ve:
-                                print(f"[ENROLL] intra-user check warn: {ve}")
+                            import numpy as _np
+                            u_vecs = [all_vecs[i] for i,l in enumerate(labels_list) if l == uid]
+                            if u_vecs:
+                                stack = _np.vstack(u_vecs).astype('float32')
+                                stack /= (_np.linalg.norm(stack, axis=1, keepdims=True)+1e-12)
+                                sim_vals = stack @ emb_vec.reshape(-1)
+                                if sim_vals.size > 0:
+                                    max_sim = float(sim_vals.max())
+                                    if max_sim < intra_thresh:
+                                        print(f"[ENROLL] intra-user mismatch max_sim={max_sim:.3f} < {intra_thresh}")
+                                        if resp_meta:
+                                            _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_INTRA_USER_MISMATCH)
+                                        return
+                        except Exception as ve:
+                            print(f"[ENROLL] intra-user check warn: {ve}")
 
-            # Replacement vs append
+            # Replacement vs append:
+            # Only remove existing vectors for this user when we intend a full replacement
+            # (append_mode False) AND we actually passed duplicate/intra-user validation.
+            # If we reached here, validation did not trigger early returns, so it's safe.
             if not append_mode:
                 try:
-                    _ = idx.remove_label(uid)
-                except Exception:
-                    pass
+                    removed_cnt = idx.remove_label(uid)
+                    if removed_cnt > 0:
+                        print(f"[ENROLL] replace mode: removed {removed_cnt} old vectors for uid={uid}")
+                except Exception as re:
+                    print(f"[ENROLL] replace cleanup warn uid={uid}: {re}")
 
             # Save aligned 112 image
             aligned_rel = None
@@ -1747,15 +1787,26 @@ def main(cfg, run_duration=None):
             except Exception as ce:
                 print(f"[ENROLL] copy warn: {ce}")
 
-            # Upsert metadata & persist
-            if labels_path_effective and index_path_effective:
-                try:
+            # Upsert metadata & persist (allow labels.json update even if index path missing)
+            try:
+                if labels_path_effective:
                     enroll_ops.upsert_person_meta(meta, uid, uname, aligned_rel)
-                    idx.save(index_path_effective, labels_path_effective)
+                if index_path_effective:
+                    try:
+                        idx.save(index_path_effective, labels_path_effective or labels_path_effective)
+                    except Exception as se_idx:
+                        print(f"[ENROLL] index save warn: {se_idx}")
+                if labels_path_effective:
+                    # Ensure 'labels' list reflects current index
+                    try:
+                        meta['labels'] = list(getattr(idx,'_labels', []))
+                    except Exception:
+                        pass
                     enroll_ops.write_labels(labels_path_effective, meta)
-                    print(f"[ENROLL] saved uid={uid} name='{uname}' vectors={idx.size()}")
-                except Exception as pe:
-                    print(f"[ENROLL] persist warn: {pe}")
+                if labels_path_effective or index_path_effective:
+                    print(f"[ENROLL] saved uid={uid} name='{uname}' vectors={idx.size()} labels_path={bool(labels_path_effective)} index_path={bool(index_path_effective)}")
+            except Exception as pe:
+                print(f"[ENROLL] persist warn: {pe}")
 
             if resp_meta:
                 _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_ENROLL_SUCCESS)
@@ -1775,16 +1826,36 @@ def main(cfg, run_duration=None):
             labels_path_effective = lbl_path or str(recog_cfg.get('labels_path','')).strip()
             index_path_effective = idx_path or str(recog_cfg.get('index_path','')).strip()
             remove_files = os.getenv('DS_ENROLL_REMOVE_FILES','1') == '1'
-            removed = enroll_ops.delete_person(idx, uid, index_path_effective, labels_path_effective, remove_files=remove_files) if (labels_path_effective and index_path_effective) else 0
+            # Deletion: allow operation if at least labels_path exists (index_path optional)
+            if labels_path_effective:
+                removed = enroll_ops.delete_person(idx, uid, index_path_effective or '', labels_path_effective, remove_files=remove_files)
+                # Fallback: if no vectors removed, try case-insensitive match
+                if removed == 0:
+                    try:
+                        lower_map = [l for l in getattr(idx,'_labels', [])]
+                        target = None
+                        for l in lower_map:
+                            if l.lower() == uid.lower() and l != uid:
+                                target = l
+                                break
+                        if target:
+                            print(f"[ENROLL] delete fallback case-insensitive match {uid} -> {target}")
+                            removed = enroll_ops.delete_person(idx, target, index_path_effective or '', labels_path_effective, remove_files=remove_files)
+                    except Exception as de_ce:
+                        print(f"[ENROLL] delete case-insensitive warn: {de_ce}")
+            else:
+                removed = 0
             try:
                 new_size = idx.size()
             except Exception:
                 new_size = -1
-            print(f"[ENROLL] removed uid={uid} removed_vec={removed} new_size={new_size}")
-            # Clear runtime recognition caches
+            print(f"[ENROLL] removed uid={uid} removed_vec={removed} new_size={new_size} labels_path={bool(labels_path_effective)} index_path={bool(index_path_effective)}")
+            # Clear runtime recognition caches (always) so stale OSD labels disappear
             try:
-                from utils.probe import clear_name_cache_for_user
+                from utils.probe import clear_name_cache_for_user, clear_all_recognition_caches, invalidate_user_from_active_cache
                 clear_name_cache_for_user(uid)
+                invalidate_user_from_active_cache(uid)
+                clear_all_recognition_caches()
             except Exception:
                 pass
             if resp_meta:

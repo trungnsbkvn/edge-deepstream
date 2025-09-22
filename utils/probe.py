@@ -84,6 +84,22 @@ def clear_all_recognition_caches():
     except Exception:
         pass
 
+def invalidate_user_from_active_cache(user_id: str):
+    """Mark any cached recognition entries for user_id as None (forces re-eval)."""
+    try:
+        if not user_id:
+            return
+        cache = getattr(sgie_feature_extract_probe, '_recognize_cache', None)
+        if isinstance(cache, dict):
+            for k,v in list(cache.items()):
+                try:
+                    if isinstance(v, dict) and v.get('name') == user_id:
+                        cache[k] = {'name': None}
+                except Exception:
+                    continue
+    except Exception:
+        pass
+
 def _get_display_name(label: str, labels_path: str) -> str:
     if not label or not labels_path:
         return label
@@ -102,6 +118,8 @@ def _get_display_name(label: str, labels_path: str) -> str:
                     try:
                         uid_s = str(uid).strip()
                         nm = str((p or {}).get('name', uid_s))
+                        if not nm.strip():
+                            nm = uid_s  # fallback if blank name stored
                         if uid_s:
                             name_map[uid_s] = nm
                     except Exception:
@@ -112,6 +130,8 @@ def _get_display_name(label: str, labels_path: str) -> str:
                     try:
                         uid = str(p.get('user_id', '')).strip()
                         nm = str(p.get('name', uid))
+                        if not nm.strip():
+                            nm = uid
                         if uid:
                             name_map[uid] = nm
                     except Exception:
@@ -122,7 +142,14 @@ def _get_display_name(label: str, labels_path: str) -> str:
                 for lb in labels:
                     s = str(lb)
                     if s not in name_map:
-                        name_map[s] = s
+                        name_map[s] = s or ''
+            # Final pass: ensure no blank values remain
+            try:
+                for k,v in list(name_map.items()):
+                    if not str(v).strip():
+                        name_map[k] = k
+            except Exception:
+                pass
             _NAME_MAP_CACHE['path'] = labels_path
             _NAME_MAP_CACHE['mtime'] = mtime
             _NAME_MAP_CACHE['map'] = name_map
@@ -451,7 +478,11 @@ def sgie_feature_extract_probe(pad,info, data):
                     display_meta = pyds.nvds_acquire_display_meta_from_pool(batch_meta)
                     display_meta.num_labels = 1
                     py_nvosd_text_params = display_meta.text_params[0]
-                    py_nvosd_text_params.display_text = display_name or top_name or ''
+                    # Ensure non-empty display text; fallback chain
+                    safe_name = display_name or top_name or ''
+                    if not safe_name.strip():
+                        safe_name = 'UNKNOWN'
+                    py_nvosd_text_params.display_text = safe_name
                     py_nvosd_text_params.x_offset = int(obj_meta.rect_params.left)
                     py_nvosd_text_params.y_offset = int(obj_meta.rect_params.top + obj_meta.rect_params.height)
                     py_nvosd_text_params.font_params.font_name = "Serif"
