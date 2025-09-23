@@ -70,12 +70,12 @@ use_index=1
 # Metric for matching: "cosine" (inner product) or "l2"
 metric="cosine"
 # FAISS index type: "flat" (exact), "ivf" (coarse quantizer), or "ivfpq" (compressed)
-index_type="ivf"
+index_type="flat"
 # Optimized: Enable GPU acceleration for better performance with large galleries
 use_gpu=0
 gpu_id=0
 # IVF lists (only for ivf/ivfpq); if 0, auto sqrt(N)
-nlist=100
+nlist=0
 # PQ sub-vectors (only for ivfpq); if 0, auto dim/8
 m_pq=0
 nbits_pq=8
@@ -124,7 +124,7 @@ response_topic = "/local/core/v2/ai/response"
 # Additional optimizations
 [optimizations]
 # Enable frame dropping for real-time performance
-#enable_frame_dropping=1
+enable_frame_dropping=1
 # Queue management
 #max_queue_size=3
 # Memory management
