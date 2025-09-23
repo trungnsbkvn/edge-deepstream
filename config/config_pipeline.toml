@@ -10,8 +10,8 @@ realtime=1
 gpu_id=0
 batch-size=8                    # = number of sources (if all active simultaneously)
 # Optimized: Reduced resolution for better throughput (YOLOv8n works well at lower res)
-width=960                       # Reduced from 1920 for better performance
-height=540                      # Reduced from 1080 for better performance
+width=640                       # Reduced from 1920 for better performance
+height=360                      # Reduced from 1080 for better performance
 # Optimized: Aggressive timeout for buffer overflow prevention
 batched-push-timeout=10000      # 10ms - Very aggressive to prevent decoder buffer accumulation
 enable-padding=1               # Keep aspect ratio, pad with black
