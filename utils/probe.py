@@ -665,6 +665,9 @@ def sgie_feature_extract_probe(pad,info, data):
                                     print(f"[WARN] save_crop_from_frame failed: {_e}", flush=True)
                             return None
 
+                        # We will also control event emission based on save_mode.
+                        # Mark whether this iteration produced a new "sendable" state.
+                        st['emit_event'] = False
                         if recog_save_mode == 'none':
                             pass
                         elif recog_save_mode == 'all':
@@ -674,6 +677,7 @@ def sgie_feature_extract_probe(pad,info, data):
                                 dst = save_crop_from_frame(out_dir)
                             if dst:
                                 st['last_path'] = dst
+                                st['emit_event'] = True  # send every frame
                         elif recog_save_mode == 'first':
                             if not st['saved_first']:
                                 dst = copy_aligned(out_dir)
@@ -682,7 +686,9 @@ def sgie_feature_extract_probe(pad,info, data):
                                 if dst:
                                     st['saved_first'] = True
                                     st['last_path'] = dst
+                                    st['emit_event'] = True  # send only first
                         else:  # best
+                            # Emit only when best improves
                             if top_sim > st['best_score']:
                                 dst = copy_aligned(out_dir, best=True)
                                 if not dst:
@@ -692,6 +698,7 @@ def sgie_feature_extract_probe(pad,info, data):
                                     st['best_path'] = dst
                                     st['best_name'] = display_name
                                     st['best_frame'] = frame_number
+                                    st['emit_event'] = True
                     except Exception as e:
                         if verbose:
                             print(f"[WARN] Could not save recognized face image: {e}", flush=True)
@@ -703,52 +710,64 @@ def sgie_feature_extract_probe(pad,info, data):
                         sender = data[17] if len(data) > 17 else None
                         send_img = bool(data[18]) if len(data) > 18 else True
                         if sender is not None:
-                            # Build event string for Go service: camera_id;event_type;timestamp;face_id;bbox_string;object_name;score
-                            cam_id = str(cam_map.get(frame_meta.source_id, frame_meta.source_id))
-                            event_type = 'FACE'  # EVENT_FACE_RECOGNITION as numeric value (1)
-                            ts = str(int(time.time()))
-                            face_id = str(top_name or '')  # GUID/user_id for face identification
-                            r = obj_meta.rect_params
-                            # Convert rect (left, top, width, height) to 8-number polygon: x1$y1$x2$y2$x3$y3$x4$y4
-                            _left = int(r.left)
-                            _top = int(r.top)
-                            _right = int(r.left + r.width)
-                            _bottom = int(r.top + r.height)
-                            bbox = f"{_left}${_top}${_right}${_top}${_right}${_bottom}${_left}${_bottom}"
-                            # Object name (display name for recognition)
-                            object_name = str(display_name or top_name or '')
-                            # Confidence score (cosine: similarity, l2: distance), 3 decimals
-                            val = top_dist if recog_metric == 'l2' else top_sim
+                            # Determine whether to send event according to save_mode.
+                            send_event = True
                             try:
-                                score_txt = f"{val:.3f}" if val is not None else "0.000"
-                            except Exception:
-                                score_txt = "0.000"
-                            # Format: camera_id;event_type;timestamp;face_id;bbox;object_name;score
-                            event_text = f"{cam_id};{event_type};{ts};{face_id};{bbox};{object_name};{score_txt}"
-                            # Include image bytes if requested: use last saved crop if any
-                            img_bytes = None
-                            if send_img:
-                                # Try best saved path
                                 st = track_state.get(int(obj_meta.object_id), {})
-                                img_path = st.get('best_path', None)
-                                if not img_path:
-                                    img_path = st.get('last_path', None)
-                                if not img_path:
-                                    # Fall back to copy_aligned or crop this frame quickly
-                                    pass
-                                if img_path and os.path.exists(img_path):
-                                    try:
-                                        with open(img_path, 'rb') as f:
-                                            img_bytes = f.read()
-                                    except Exception:
-                                        img_bytes = None
-                            # Send
-                            ok = sender.send(event_text, img_bytes)
-                            if verbose:
-                                img_size = len(img_bytes) if img_bytes else 0
-                                print(f"[EVENT] sent {'OK' if ok else 'FAILED'}: {event_text} (img_size: {img_size} bytes)", flush=True)
-                            elif not ok:
-                                print(f"[EVENT] send failed: {event_text}", flush=True)
+                                if recog_save_mode == 'all':
+                                    # always send if recognition happened (top_name available)
+                                    send_event = True
+                                elif recog_save_mode in ('first', 'best'):
+                                    # Only send when a new save occurred this frame
+                                    send_event = bool(st.get('emit_event', False))
+                                elif recog_save_mode == 'none':
+                                    send_event = False
+                            except Exception:
+                                pass
+                            if send_event:
+                                # Build event string for Go service: camera_id;event_type;timestamp;face_id;bbox_string;object_name;score
+                                cam_id = str(cam_map.get(frame_meta.source_id, frame_meta.source_id))
+                                event_type = 'FACE'  # EVENT_FACE_RECOGNITION as numeric value (1)
+                                ts = str(int(time.time()))
+                                face_id = str(top_name or '')  # GUID/user_id for face identification
+                                r = obj_meta.rect_params
+                                # Convert rect (left, top, width, height) to 8-number polygon: x1$y1$x2$y2$x3$y3$x4$y4
+                                _left = int(r.left)
+                                _top = int(r.top)
+                                _right = int(r.left + r.width)
+                                _bottom = int(r.top + r.height)
+                                bbox = f"{_left}${_top}${_right}${_top}${_right}${_bottom}${_left}${_bottom}"
+                                # Object name (display name for recognition)
+                                object_name = str(display_name or top_name or '')
+                                # Confidence score (cosine: similarity, l2: distance), 3 decimals
+                                val = top_dist if recog_metric == 'l2' else top_sim
+                                try:
+                                    score_txt = f"{val:.3f}" if val is not None else "0.000"
+                                except Exception:
+                                    score_txt = "0.000"
+                                # Format: camera_id;event_type;timestamp;face_id;bbox;object_name;score
+                                event_text = f"{cam_id};{event_type};{ts};{face_id};{bbox};{object_name};{score_txt}"
+                                # Include image bytes if requested: use last saved crop if any
+                                img_bytes = None
+                                if send_img:
+                                    # Try best saved path
+                                    st = track_state.get(int(obj_meta.object_id), {})
+                                    img_path = st.get('best_path', None)
+                                    if not img_path:
+                                        img_path = st.get('last_path', None)
+                                    if img_path and os.path.exists(img_path):
+                                        try:
+                                            with open(img_path, 'rb') as f:
+                                                img_bytes = f.read()
+                                        except Exception:
+                                            img_bytes = None
+                                # Send
+                                ok = sender.send(event_text, img_bytes)
+                                if verbose:
+                                    img_size = len(img_bytes) if img_bytes else 0
+                                    print(f"[EVENT] sent {'OK' if ok else 'FAILED'}: {event_text} (img_size: {img_size} bytes)", flush=True)
+                                elif not ok:
+                                    print(f"[EVENT] send failed: {event_text}", flush=True)
                     except Exception as e:
                         if verbose:
                             print(f"[EVENT] error: {e}", flush=True)
