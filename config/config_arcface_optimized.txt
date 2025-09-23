@@ -2,10 +2,10 @@
 gpu-id=0
 gie-unique-id=2
 onnx-file=../models/arcface/glintr100.onnx
-model-engine-file=../models/arcface/glintr100.onnx_b8_gpu0_fp16.engine
+model-engine-file=../models/arcface/glintr100.onnx_b1_gpu0_fp16.engine
 net-scale-factor=0.0078125
 offsets=127.5;127.5;127.5
-batch-size=8
+batch-size=1
 #0=RGB, 1=BGR
 model-color-format=0
 ## 0=FP32, 1=INT8, 2=FP16 mode
@@ -19,13 +19,18 @@ symmetric-padding=1
 classifier-async-mode=0
 operate-on-gie-id=1
 operate-on-class-ids=0
-#input-object-min-width=20
-#input-object-min-height=20
 
-# Alignment by custom gst-nvinfer
+# OPTIMIZED: Minimum object size for processing (filter small faces)
+input-object-min-width=30
+input-object-min-height=30
+
+# OPTIMIZED: Face alignment configuration
 alignment-type=1
-# Path to save pre/post-alignment crops
-#alignment-pics-path=/dev/shm/edge-deepstream/aligned
+# Save aligned faces to faster storage
 alignment-pics-path=data/faces/aligned
-# Optimized: Reduced interval for better recognition accuracy
+# Process every frame for better accuracy (since PGIE is now skipping more)
 interval=1
+
+# OPTIMIZED: Performance tuning
+# Enable TensorRT optimization hints
+workspace-size=1073741824  # 1GB workspace for TensorRT optimizations

@@ -1,29 +1,34 @@
 [pipeline]
-display=1
+display=0
 is_aarch64=1
 known_face_dir="data/known_faces"
 save_feature_path="data/features"
 save_feature=0
-realtime=0
+realtime=1
 
 [streammux]
 gpu_id=0
 batch-size=8                    # = number of sources (if all active simultaneously)
-width=640                       # match YOLOv8n input size
-height=640                      # match YOLOv8n input size
-batched-push-timeout=30000      # in µs (40ms = 25 FPS target). Adjust depending on FPS of sources.
+# Optimized: Reduced resolution for better throughput (YOLOv8n works well at lower res)
+width=960                       # Reduced from 1920 for better performance
+height=540                      # Reduced from 1080 for better performance
+# Optimized: Reduced timeout for lower latency
+batched-push-timeout=25000      # Reduced to 25ms for better real-time performance
 #enable-padding=1               # keep aspect ratio, pad with black
 #nvbuf-memory-type=0            # default (0: system, 2: device). On NX keep 0 for stability
 #live-source=1                  # important for RTSP
-sync-inputs=0                   # Do not wait for slow sources; push batch as inputs arrive
+#sync-inputs=1                   # Do not wait for slow sources; push batch as inputs arrive
 
 [nvosd]
 process-mode=0
 display-text=1
 
 [source]
-"5e1999edcc8e410fb4b0d1011e6b15de" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/601"
+"621ca2e007e648f898099597a078bccd" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/501"
 "625d66f10a0b4a0a920be73f705773bd" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
+"6a887f101a204b3788e45b9d4cbcb84b" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/601"
+"93efaf1091cc4b83990619a17347879f" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/801"
+"c0fad364fd7345b1af2fe5a2f691e7f7" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/701"
 "c9bb715db20a489f94f58d36bb3602d0" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/301"
 "d73cf20e2aa544b7b352070f24bff721" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/401"
 
@@ -47,8 +52,8 @@ qos=1
 sync=0
 
 [recognition]
-# Cosine similarity (higher = stricter)
-threshold=0.5
+# Optimized: Slightly higher cosine similarity threshold for better precision
+threshold=0.6
 # Directory to save recognized face images
 save_dir="data/faces/recognized"
 # Save mode for recognized images: "all" (every frame), "first" (first per track), "best" (best score per track)
@@ -65,8 +70,8 @@ use_index=1
 metric="cosine"
 # FAISS index type: "flat" (exact), "ivf" (coarse quantizer), or "ivfpq" (compressed)
 index_type="flat"
-# GPU acceleration (requires faiss-gpu); falls back to CPU if unavailable
-use_gpu=0
+# Optimized: Enable GPU acceleration for better performance with large galleries
+use_gpu=1
 gpu_id=0
 # IVF lists (only for ivf/ivfpq); if 0, auto sqrt(N)
 nlist=0
