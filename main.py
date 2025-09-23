@@ -29,7 +29,7 @@ from typing import Any, Dict, Optional
 import configparser
 
 # Global realtime flag to allow decoder frame dropping
-REALTIME_DROP = False
+REALTIME_DROP = True  # Enable by default for better real-time performance
 
 
 def cb_newpad(decodebin, decoder_src_pad, data):
@@ -107,6 +107,11 @@ def decodebin_child_added(child_proxy, Object, name, user_data):
                 Object.set_property('drop-frame-interval', 1)
             if Object.find_property('disable-dpb') is not None:
                 Object.set_property('disable-dpb', True)
+            # Additional V4L2 decoder buffer control
+            if Object.find_property('output-io-mode') is not None:
+                Object.set_property('output-io-mode', 2)  # GST_V4L2_IO_DMABUF_IMPORT
+            if Object.find_property('max-pool-size') is not None:
+                Object.set_property('max-pool-size', 4)  # Limit buffer pool size
     except Exception:
         pass
 
@@ -169,22 +174,26 @@ def create_source_bin(index, uri):
             queue_pre = Gst.ElementFactory.make('queue', f'queue-pre-{index}')
             if queue_pre:
                 try:
-                    queue_pre.set_property('leaky', 2)
-                    queue_pre.set_property('max-size-buffers', 5)
+                    queue_pre.set_property('leaky', 2)           # Drop old buffers
+                    queue_pre.set_property('max-size-buffers', 3)  # Small buffer pool
                     queue_pre.set_property('max-size-bytes', 0)
                     queue_pre.set_property('max-size-time', 0)
                     queue_pre.set_property('silent', True)
+                    # Add overflow protection
+                    queue_pre.set_property('flush-on-eos', True)
                 except Exception:
                     pass
             queue_post = Gst.ElementFactory.make('queue', f'queue-postdec-{index}')
             if queue_post:
                 try:
-                    # More aggressive settings for real-time RTSP
-                    queue_post.set_property('leaky', 2)
-                    queue_post.set_property('max-size-buffers', 3)  # Reduced from 10
+                    # Aggressive settings for real-time RTSP with buffer overflow protection
+                    queue_post.set_property('leaky', 2)          # Drop old buffers
+                    queue_post.set_property('max-size-buffers', 2)  # Very small buffer to force dropping
                     queue_post.set_property('max-size-bytes', 0)
                     queue_post.set_property('max-size-time', 0)
                     queue_post.set_property('silent', True)
+                    # Force immediate flushing on overflow
+                    queue_post.set_property('flush-on-eos', True)
                 except Exception:
                     pass
             
@@ -222,6 +231,19 @@ def create_source_bin(index, uri):
                             decoder = Gst.ElementFactory.make(cand, f'dec-{cand}-{index}')
                             if decoder:
                                 print(f"[RTSP] Using {cand} for H.264 decoding")
+                                # Configure decoder for real-time performance
+                                if 'nvv4l2decoder' in cand:
+                                    try:
+                                        if decoder.find_property('drop-frame-interval') is not None:
+                                            decoder.set_property('drop-frame-interval', 1)
+                                        if decoder.find_property('disable-dpb') is not None:
+                                            decoder.set_property('disable-dpb', True)
+                                        if decoder.find_property('max-pool-size') is not None:
+                                            decoder.set_property('max-pool-size', 4)
+                                        if decoder.find_property('output-io-mode') is not None:
+                                            decoder.set_property('output-io-mode', 2)  # DMABUF
+                                    except Exception as e:
+                                        print(f"[RTSP] Decoder config warning: {e}")
                                 break
                     elif is_h265:
                         print(f"[RTSP] Detected H.265/HEVC stream for source {index}")
@@ -232,6 +254,19 @@ def create_source_bin(index, uri):
                             decoder = Gst.ElementFactory.make(cand, f'dec-{cand}-{index}')
                             if decoder:
                                 print(f"[RTSP] Using {cand} for H.265 decoding")
+                                # Configure decoder for real-time performance
+                                if 'nvv4l2decoder' in cand:
+                                    try:
+                                        if decoder.find_property('drop-frame-interval') is not None:
+                                            decoder.set_property('drop-frame-interval', 1)
+                                        if decoder.find_property('disable-dpb') is not None:
+                                            decoder.set_property('disable-dpb', True)
+                                        if decoder.find_property('max-pool-size') is not None:
+                                            decoder.set_property('max-pool-size', 4)
+                                        if decoder.find_property('output-io-mode') is not None:
+                                            decoder.set_property('output-io-mode', 2)  # DMABUF
+                                    except Exception as e:
+                                        print(f"[RTSP] Decoder config warning: {e}")
                                 break
                     else:
                         print(f"[RTSP] Unsupported or unknown codec in caps: {name}")

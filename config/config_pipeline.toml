@@ -1,5 +1,5 @@
 [pipeline]
-display=0
+display=1
 is_aarch64=1
 known_face_dir="data/known_faces"
 save_feature_path="data/features"
@@ -12,12 +12,12 @@ batch-size=8                    # = number of sources (if all active simultaneou
 # Optimized: Reduced resolution for better throughput (YOLOv8n works well at lower res)
 width=960                       # Reduced from 1920 for better performance
 height=540                      # Reduced from 1080 for better performance
-# Optimized: Reduced timeout for lower latency
-batched-push-timeout=25000      # Reduced to 25ms for better real-time performance
-#enable-padding=1               # keep aspect ratio, pad with black
-#nvbuf-memory-type=0            # default (0: system, 2: device). On NX keep 0 for stability
-#live-source=1                  # important for RTSP
-#sync-inputs=1                   # Do not wait for slow sources; push batch as inputs arrive
+# Optimized: Aggressive timeout for buffer overflow prevention
+batched-push-timeout=10000      # 10ms - Very aggressive to prevent decoder buffer accumulation
+enable-padding=1               # Keep aspect ratio, pad with black
+nvbuf-memory-type=0            # Use system memory (more stable for buffer overflow issues)
+live-source=1                  # Important for RTSP
+sync-inputs=0                   # Critical: Don't wait for slow sources to prevent buffer backup
 
 [nvosd]
 process-mode=0
@@ -53,7 +53,7 @@ sync=0
 
 [recognition]
 # Optimized: Slightly higher cosine similarity threshold for better precision
-threshold=0.6
+threshold=0.5
 # Directory to save recognized face images
 save_dir="data/faces/recognized"
 # Save mode for recognized images: "all" (every frame), "first" (first per track), "best" (best score per track)
@@ -69,12 +69,12 @@ use_index=1
 # Metric for matching: "cosine" (inner product) or "l2"
 metric="cosine"
 # FAISS index type: "flat" (exact), "ivf" (coarse quantizer), or "ivfpq" (compressed)
-index_type="flat"
+index_type="ivf"
 # Optimized: Enable GPU acceleration for better performance with large galleries
-use_gpu=1
+use_gpu=0
 gpu_id=0
 # IVF lists (only for ivf/ivfpq); if 0, auto sqrt(N)
-nlist=0
+nlist=100
 # PQ sub-vectors (only for ivfpq); if 0, auto dim/8
 m_pq=0
 nbits_pq=8
@@ -94,11 +94,11 @@ stream_index_path="data/index/live.index"
 stream_labels_path="data/index/live_labels.json"
 
 # Recognize once per track: 1 enable, 0 disable
-recognize_once_per_track=1
+recognize_once_per_track=0
 
 [debug]
 # Verbose console prints (matching per-frame)
-verbose=1
+verbose=0
 
 [thresholds]
 # Minimum PGIE detection confidence to keep faces (env PGIE_MIN_CONF overrides if set)
@@ -119,3 +119,12 @@ port = 1883
 # Topics
 request_topic = "/local/core/v2/ai/request"
 response_topic = "/local/core/v2/ai/response"
+
+# Additional optimizations
+[optimizations]
+# Enable frame dropping for real-time performance
+#enable_frame_dropping=1
+# Queue management
+#max_queue_size=3
+# Memory management
+#use_nvmm=1

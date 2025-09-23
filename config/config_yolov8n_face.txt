@@ -3,7 +3,7 @@ gpu-id=0
 #0=RGB, 1=BGR
 model-color-format=0
 onnx-file=../models/yolov8n_face/yolov8n-face.onnx
-model-engine-file=../models/yolov8n_face/yolov8n-face.onnx_b8_gpu0_fp16.engine
+model-engine-file=../models/yolov8n_face/yolov8n-face.onnx_b4_gpu0_fp16.engine
 labelfile-path=../models/yolov8n_face/labels.txt
 # 1: Primary, 2: Secondary
 process-mode=1
@@ -17,7 +17,7 @@ output-blob-names=boxes;scores;landmarks
 cluster-mode=4
 maintain-aspect-ratio=1
 symmetric-padding=1
-batch-size=8
+batch-size=4
 num-detected-classes=1
 output-tensor-meta=1
 
@@ -28,7 +28,7 @@ net-scale-factor=0.0039215697906911373
 force-implicit-batch-dim=0
 # number of consecutive batches to skip for inference
 # Optimized: Skip 1 frame for better throughput while maintaining detection quality
-interval=2
+interval=1
 
 enable-output-landmark=1
 
@@ -36,11 +36,17 @@ enable-output-landmark=1
 # Apply to all classes (faces):
 [class-attrs-all]
 # Optimized: Slightly higher confidence threshold to reduce false positives
-pre-cluster-threshold=0.55
+pre-cluster-threshold=0.50
 # Optimized: Reduced top-K for better performance
-topk=15
+topk=50
 # Use NMS clustering with a slightly stricter IOU to reduce duplicates
 #cluster-mode=2
-nms-iou-threshold=0.45
+nms-iou-threshold=0.40
 # Optimized: Match pre-cluster threshold for consistency
-post-cluster-threshold=0.55
+post-cluster-threshold=0.50
+
+# OPTIMIZED: Input object size filtering (reduce small/noisy detections)
+#input-object-min-width=40
+#input-object-min-height=40
+#input-object-max-width=800
+#input-object-max-height=800
