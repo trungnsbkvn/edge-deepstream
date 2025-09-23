@@ -347,6 +347,10 @@ def sgie_feature_extract_probe(pad,info, data):
     if not hasattr(sgie_feature_extract_probe, '_track_state'):
         sgie_feature_extract_probe._track_state = {}
     track_state = sgie_feature_extract_probe._track_state
+    # Embedding history cache per track: track_id -> list of embeddings (np.ndarray)
+    if not hasattr(sgie_feature_extract_probe, '_emb_hist'):
+        sgie_feature_extract_probe._emb_hist = {}
+    emb_hist = sgie_feature_extract_probe._emb_hist
     # Cache recognized name per track to avoid per-frame matching when enabled
     if not hasattr(sgie_feature_extract_probe, '_recognize_cache'):
         sgie_feature_extract_probe._recognize_cache = {}
@@ -471,6 +475,38 @@ def sgie_feature_extract_probe(pad,info, data):
                 t_search = time.time()
                 # Fast path: reuse cached recognition for this track id
                 oid = int(obj_meta.object_id)
+                # ---- Embedding history accumulation ----
+                try:
+                    # Load cache params lazily from config fields passed through data vector (reuse idx_path tuple space if needed)
+                    # We don't have direct config values here; fallback defaults then allow environment overrides.
+                    max_hist = int(os.getenv('TRACK_EMB_MAX','5'))
+                    min_fuse = int(os.getenv('TRACK_EMB_MIN_FUSE','3'))
+                    fuse_mode = os.getenv('TRACK_EMB_FUSE_MODE','mean')
+                except Exception:
+                    max_hist, min_fuse, fuse_mode = 5, 3, 'mean'
+                hist = emb_hist.get(oid, [])
+                # Append current embedding (flatten)
+                try:
+                    hist.append(face_feature.reshape(-1))
+                    if len(hist) > max_hist:
+                        hist.pop(0)
+                    emb_hist[oid] = hist
+                except Exception:
+                    pass
+                # Decide representative embedding (fusion) for matching
+                rep_embedding = face_feature.reshape(-1)
+                if len(hist) >= min_fuse:
+                    try:
+                        H = np.vstack(hist)
+                        if fuse_mode == 'median':
+                            rep_embedding = np.median(H, axis=0)
+                        else:
+                            rep_embedding = H.mean(axis=0)
+                        # Normalize fused embedding
+                        nrm = np.linalg.norm(rep_embedding) + 1e-12
+                        rep_embedding = (rep_embedding / nrm).astype(np.float32)
+                    except Exception:
+                        rep_embedding = face_feature.reshape(-1)
                 if recognize_once and oid in recognize_cache:
                     cached = recognize_cache.get(oid)
                     if cached is not None:
@@ -486,7 +522,7 @@ def sgie_feature_extract_probe(pad,info, data):
                     # Prefer FAISS index if available
                     if vector_index is not None and vector_index.size() > 0:
                         try:
-                            name, score = vector_index.search_top1(face_feature.reshape(-1))
+                            name, score = vector_index.search_top1(rep_embedding.reshape(-1))
                             perf_stats.incr('faiss_searches')
                             if recog_metric == 'l2':
                                 top_name = name
@@ -498,7 +534,7 @@ def sgie_feature_extract_probe(pad,info, data):
                         except Exception:
                             top_name, top_sim, top_dist = None, -1.0, None
                     elif loaded_faces:
-                        emb = face_feature.reshape(-1)
+                        emb = rep_embedding.reshape(-1)
                         if recog_metric == 'l2':
                             best = (None, float('inf'))
                             for key, value in loaded_faces.items():

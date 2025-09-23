@@ -131,3 +131,11 @@ enable_frame_dropping=1
 #max_queue_size=3
 # Memory management
 #use_nvmm=1
+
+[cache]
+# Maximum embeddings to keep per active track for fusion
+max_track_embeddings=1000
+# Minimum embeddings required before using fused embedding for recognition
+min_embeddings_for_fusion=3
+# Fusion mode: mean | median (mean is faster, median more robust to outliers)
+fusion_mode="mean"
