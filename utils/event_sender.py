@@ -66,9 +66,20 @@ class EventSender:
         try:
             self._ensure_conn()
             assert self._sock is not None
-            sent = self._sock.send(buf)
-            return sent == len(buf)
-        except Exception:
+            # Use sendall to avoid partial packet writes (critical for framing)
+            self._sock.sendall(buf)
+            if os.getenv('EVENT_SENDER_DEBUG') == '1':
+                try:
+                    print(f"[EVENT_SENDER] sent packet bytes={len(buf)} text_len={strLen} img_len={imgSize}", flush=True)
+                except Exception:
+                    pass
+            return True
+        except Exception as e:
+            if os.getenv('EVENT_SENDER_DEBUG') == '1':
+                try:
+                    print(f"[EVENT_SENDER] send error: {e}", flush=True)
+                except Exception:
+                    pass
             # Reset connection on failure; caller can retry later
             self.close()
             return False

@@ -223,6 +223,25 @@ def pgie_src_filter_probe(pad,info,u_data):
                 continue
         
         # Original simple per-object filtering based on confidence only
+        debug_dets = os.getenv('PGIE_DEBUG_DETS','0') == '1'
+        if debug_dets:
+            # Count objects before filtering for diagnostics
+            try:
+                _cnt_before = 0
+                _l_tmp = frame_meta.obj_meta_list
+                while _l_tmp is not None:
+                    try:
+                        _ = pyds.NvDsObjectMeta.cast(_l_tmp.data)
+                        _cnt_before += 1
+                    except Exception:
+                        pass
+                    try:
+                        _l_tmp = _l_tmp.next
+                    except Exception:
+                        break
+                print(f"[PGIE_PROBE] frame={frame_meta.frame_num} src={source_id} objs_before_filter={_cnt_before} MIN_CONF={MIN_CONF}")
+            except Exception:
+                pass
         l_obj = frame_meta.obj_meta_list
         while l_obj is not None:
             try:
@@ -244,7 +263,17 @@ def pgie_src_filter_probe(pad,info,u_data):
                 next_obj = None
 
             if drop_signal is True:
+                if debug_dets:
+                    try:
+                        print(f"[PGIE_PROBE]   drop obj_id={getattr(obj_meta,'object_id',-1)} conf={conf:.3f}")
+                    except Exception:
+                        pass
                 pyds.nvds_remove_obj_meta_from_frame(frame_meta, obj_meta)
+            elif debug_dets:
+                try:
+                    print(f"[PGIE_PROBE]   keep obj_id={getattr(obj_meta,'object_id',-1)} conf={conf:.3f}")
+                except Exception:
+                    pass
 
             l_obj = next_obj
 
@@ -642,7 +671,9 @@ def sgie_feature_extract_probe(pad,info, data):
                             # Try aligned copy, else save crop from frame
                             dst = copy_aligned(out_dir)
                             if not dst:
-                                _ = save_crop_from_frame(out_dir)
+                                dst = save_crop_from_frame(out_dir)
+                            if dst:
+                                st['last_path'] = dst
                         elif recog_save_mode == 'first':
                             if not st['saved_first']:
                                 dst = copy_aligned(out_dir)
@@ -650,6 +681,7 @@ def sgie_feature_extract_probe(pad,info, data):
                                     dst = save_crop_from_frame(out_dir)
                                 if dst:
                                     st['saved_first'] = True
+                                    st['last_path'] = dst
                         else:  # best
                             if top_sim > st['best_score']:
                                 dst = copy_aligned(out_dir, best=True)
@@ -671,21 +703,28 @@ def sgie_feature_extract_probe(pad,info, data):
                         sender = data[17] if len(data) > 17 else None
                         send_img = bool(data[18]) if len(data) > 18 else True
                         if sender is not None:
-                            # Build event string: camera_id;event_type;timestamp;user_id;bbox_string;name
+                            # Build event string for Go service: camera_id;event_type;timestamp;face_id;bbox_string;object_name;score
                             cam_id = str(cam_map.get(frame_meta.source_id, frame_meta.source_id))
-                            event_type = 'face_recognized'
+                            event_type = 'FACE'  # EVENT_FACE_RECOGNITION as numeric value (1)
                             ts = str(int(time.time()))
-                            user_id = str(top_name or '')
+                            face_id = str(top_name or '')  # GUID/user_id for face identification
                             r = obj_meta.rect_params
-                            bbox = f"{int(r.left)},{int(r.top)},{int(r.width)},{int(r.height)}"
-                            # Last fields separated by ';': name ; score (cosine: similarity, l2: distance), 3 decimals
-                            name_txt = str(display_name or user_id)
+                            # Convert rect (left, top, width, height) to 8-number polygon: x1$y1$x2$y2$x3$y3$x4$y4
+                            _left = int(r.left)
+                            _top = int(r.top)
+                            _right = int(r.left + r.width)
+                            _bottom = int(r.top + r.height)
+                            bbox = f"{_left}${_top}${_right}${_top}${_right}${_bottom}${_left}${_bottom}"
+                            # Object name (display name for recognition)
+                            object_name = str(display_name or top_name or '')
+                            # Confidence score (cosine: similarity, l2: distance), 3 decimals
                             val = top_dist if recog_metric == 'l2' else top_sim
                             try:
-                                score_txt = f"{val:.3f}" if val is not None else ""
+                                score_txt = f"{val:.3f}" if val is not None else "0.000"
                             except Exception:
-                                score_txt = ""
-                            event_text = f"{cam_id};{event_type};{ts};{user_id};{bbox};{name_txt};{score_txt}"
+                                score_txt = "0.000"
+                            # Format: camera_id;event_type;timestamp;face_id;bbox;object_name;score
+                            event_text = f"{cam_id};{event_type};{ts};{face_id};{bbox};{object_name};{score_txt}"
                             # Include image bytes if requested: use last saved crop if any
                             img_bytes = None
                             if send_img:
@@ -705,7 +744,10 @@ def sgie_feature_extract_probe(pad,info, data):
                                         img_bytes = None
                             # Send
                             ok = sender.send(event_text, img_bytes)
-                            if verbose and not ok:
+                            if verbose:
+                                img_size = len(img_bytes) if img_bytes else 0
+                                print(f"[EVENT] sent {'OK' if ok else 'FAILED'}: {event_text} (img_size: {img_size} bytes)", flush=True)
+                            elif not ok:
                                 print(f"[EVENT] send failed: {event_text}", flush=True)
                     except Exception as e:
                         if verbose:
