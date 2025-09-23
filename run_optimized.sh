@@ -50,5 +50,16 @@ echo "Monitor GPU usage with: watch -n 1 nvidia-smi"
 echo "Press Ctrl+C to stop"
 echo ""
 
+#Enrollment parameters
+export DS_ENROLL_DUP_THRESHOLD=0.55
+export DS_ENROLL_INTRA_THRESHOLD=0.40
+export DS_ENROLL_BLUR_VAR_MIN=25
+
+# Force NVMM caps for better performance
+export DS_FORCE_NVMM=1
+
+export EMBEDDING_CACHE_SIZE=1000
+
 # Run the application
-python3 main.py "$CONFIG_FILE"
+echo "Starting edge-deepstream with real-time optimizations..."
+LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libgomp.so.1 python3 main.py "$CONFIG_FILE"

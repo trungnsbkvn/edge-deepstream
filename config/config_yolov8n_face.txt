@@ -44,9 +44,3 @@ topk=50
 nms-iou-threshold=0.40
 # Optimized: Match pre-cluster threshold for consistency
 post-cluster-threshold=0.50
-
-# OPTIMIZED: Input object size filtering (reduce small/noisy detections)
-input-object-min-width=20
-input-object-min-height=20
-#input-object-max-width=800
-#input-object-max-height=800
