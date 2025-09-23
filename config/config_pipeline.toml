@@ -55,7 +55,8 @@ sync=0
 # Optimized: Slightly higher cosine similarity threshold for better precision
 threshold=0.5
 # Directory to save recognized face images
-save_dir="data/faces/recognized"
+#save_dir="data/faces/recognized"
+save_dir="/dev/shm/edge-deepstream/recognized"
 # Save mode for recognized images: "all" (every frame), "first" (first per track), "best" (best score per track)
 save_mode="first"
 # Backend: "faiss" (default), "cuvs" (experimental; requires RAPIDS cuVS), or "auto"
@@ -94,7 +95,7 @@ stream_index_path="data/index/live.index"
 stream_labels_path="data/index/live_labels.json"
 
 # Recognize once per track: 1 enable, 0 disable
-recognize_once_per_track=0
+recognize_once_per_track=1
 
 [debug]
 # Verbose console prints (matching per-frame)

@@ -25,8 +25,8 @@ operate-on-class-ids=0
 # Alignment by custom gst-nvinfer
 alignment-type=1
 # Path to save pre/post-alignment crops
-#alignment-pics-path=/dev/shm/edge-deepstream/aligned
-alignment-pics-path=data/faces/aligned
+alignment-pics-path=/dev/shm/edge-deepstream/aligned
+#alignment-pics-path=data/faces/aligned
 # Optimized: Reduced interval for better recognition accuracy
 interval=1
 

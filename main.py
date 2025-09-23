@@ -1230,6 +1230,15 @@ def main(cfg, run_duration=None):
                 alignment_pic_dir = ''
     except Exception:
         alignment_pic_dir = ''
+    
+    # Ensure alignment directory exists (especially important for tmpfs paths like /dev/shm)
+    if alignment_pic_dir:
+        try:
+            os.makedirs(alignment_pic_dir, exist_ok=True)
+            print(f"[PIPELINE] Alignment directory ensured: {alignment_pic_dir}")
+        except Exception as e:
+            print(f"[PIPELINE] Warning: Could not create alignment directory {alignment_pic_dir}: {e}")
+            alignment_pic_dir = ''  # Disable alignment if directory creation fails
     # Debug/verbosity
     try:
         debug_cfg = cfg.get('debug', {})
