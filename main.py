@@ -1750,41 +1750,25 @@ def main(cfg, run_duration=None):
             if existing_user and not existing_image_same_name:
                 append_mode = True
 
-            # Duplicate / similarity validation
+            # Face similarity validation with modified logic
             if idx.size() > 0:
                 top_name, top_score = enroll_ops.search_top(idx, emb_vec)
                 if top_name:
                     print(f"[ENROLL] top1 name={top_name} score={top_score:.4f}")
-                # Case 1: New vector is too similar to an existing different user -> reject
+                
+                # Check if the face belongs to a different person than the requested user_id
                 if top_name and top_score >= dup_thresh and top_name != uid:
-                    print(f"[ENROLL] duplicate other user={top_name} score={top_score:.3f}")
+                    print(f"[ENROLL] face belongs to different user={top_name} score={top_score:.3f}, requested uid={uid}")
                     if resp_meta:
                         _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_DUPLICATE_OTHER)
                     return
-                # Case 2: Updating / adding more samples for existing user -> ensure similarity to at least one prior vector
-                if existing_user:
-                    try:
-                        all_vecs = idx._reconstruct_all()
-                    except Exception:
-                        all_vecs = None
-                    if all_vecs is not None:
-                        labels_list = list(getattr(idx,'_labels',[]))
-                        try:
-                            import numpy as _np
-                            u_vecs = [all_vecs[i] for i,l in enumerate(labels_list) if l == uid]
-                            if u_vecs:
-                                stack = _np.vstack(u_vecs).astype('float32')
-                                stack /= (_np.linalg.norm(stack, axis=1, keepdims=True)+1e-12)
-                                sim_vals = stack @ emb_vec.reshape(-1)
-                                if sim_vals.size > 0:
-                                    max_sim = float(sim_vals.max())
-                                    if max_sim < intra_thresh:
-                                        print(f"[ENROLL] intra-user mismatch max_sim={max_sim:.3f} < {intra_thresh}")
-                                        if resp_meta:
-                                            _publish_response(resp_meta.get('cmd',60), '0', uid, resp_meta.get('cmd_id',''), STATUS_INTRA_USER_MISMATCH)
-                                        return
-                        except Exception as ve:
-                            print(f"[ENROLL] intra-user check warn: {ve}")
+                
+                # For same user (top_name == uid), allow adding the new face regardless of similarity
+                # This enables adding multiple different faces/angles/expressions for the same person
+                if top_name and top_name == uid:
+                    print(f"[ENROLL] adding new face for same user={uid} score={top_score:.4f}")
+                    # Force append mode when adding to same user
+                    append_mode = True
 
             # Replacement vs append:
             # Only remove existing vectors for this user when we intend a full replacement

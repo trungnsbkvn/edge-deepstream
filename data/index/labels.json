@@ -6,7 +6,9 @@
       "user_id": "91f441577bb547dfb080b3398195a3f0",
       "name": "Dienws",
       "aligned_paths": [
-        "data/known_faces/91f441577bb547dfb080b3398195a3f0_1758529671.png"
+        "data/known_faces/91f441577bb547dfb080b3398195a3f0_1758529671.png",
+        "data/known_faces/91f441577bb547dfb080b3398195a3f0_1758612946.png",
+        "data/known_faces/91f441577bb547dfb080b3398195a3f0_1758613269.png"
       ]
     },
     "3153a3d16aa943629a10cbc1c81fc870": {
@@ -142,6 +144,8 @@
     "chandler",
     "monica",
     "rachel",
-    "phoebe"
+    "phoebe",
+    "91f441577bb547dfb080b3398195a3f0",
+    "91f441577bb547dfb080b3398195a3f0"
   ]
 }
