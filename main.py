@@ -1243,8 +1243,10 @@ def main(cfg, run_duration=None):
     try:
         debug_cfg = cfg.get('debug', {})
         verbose = bool(debug_cfg.get('verbose', 0))
+        perf_verbose = int(debug_cfg.get('perf_verbose', 0))
     except Exception:
         verbose = False
+        perf_verbose = 0
 
     # Indexing options for live updates
     try:
@@ -1307,7 +1309,8 @@ def main(cfg, run_duration=None):
         recognize_once,       # 15 recognize once per track
         source_index_to_cam,  # 16 map: mux batch index -> cameraId
         event_sender,         # 17 EventSender or None
-        send_images           # 18 send image bytes flag
+        send_images,          # 18 send image bytes flag
+        perf_verbose          # 19 performance verbosity
     ]
     sgie_src_pad.add_probe(Gst.PadProbeType.BUFFER, sgie_feature_extract_probe, data)
 

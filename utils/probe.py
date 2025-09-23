@@ -10,6 +10,8 @@ from gi.repository import GLib, Gst
 
 import pyds
 
+from utils import perf_stats  # performance metrics helper
+
 # Lazy-load the ROI helper shared library for robust crops from NvBufSurface
 _roi_lib = None
 def _load_roi_lib():
@@ -167,6 +169,8 @@ def pgie_src_filter_probe(pad,info,u_data):
     if not gst_buffer:
         print("Unable to get GstBuffer ")
         return
+    perf_stats.incr('frames_pgie')
+    t_start = time.time()
 
     batch_meta = pyds.gst_buffer_get_nvds_batch_meta(hash(gst_buffer))
     l_frame = batch_meta.frame_meta_list
@@ -189,7 +193,12 @@ def pgie_src_filter_probe(pad,info,u_data):
     except Exception:
         MIN_CONF = 0.6
     # One-time debug to confirm probe is attached and env is read
-    if not hasattr(pgie_src_filter_probe, '_dbg_once'):
+    perf_verbose = 0
+    try:
+        perf_verbose = int(getattr(u_data.get('debug', {}), 'get', lambda *_:0)('perf_verbose',0)) if isinstance(u_data, dict) else 0
+    except Exception:
+        perf_verbose = 0
+    if not hasattr(pgie_src_filter_probe, '_dbg_once') and perf_verbose >= 2:
         pgie_src_filter_probe._dbg_once = True
         try:
             src = 'ENV' if env_min is not None else ('CFG' if cfg_min is not None else 'DEFAULT')
@@ -275,6 +284,12 @@ def pgie_src_filter_probe(pad,info,u_data):
                 except Exception:
                     pass
 
+            # Count kept detections
+            try:
+                perf_stats.incr('detections')
+            except Exception:
+                pass
+
             l_obj = next_obj
 
         try:
@@ -282,6 +297,12 @@ def pgie_src_filter_probe(pad,info,u_data):
         except StopIteration:
             break
 
+    try:
+        dt = (time.time() - t_start)*1000.0
+        perf_stats.record('pgie_ms_ewma', dt)
+        perf_stats.maybe_flush()
+    except Exception:
+        pass
     return Gst.PadProbeReturn.OK
 
 def sgie_feature_extract_probe(pad,info, data):
@@ -301,6 +322,8 @@ def sgie_feature_extract_probe(pad,info, data):
     if not gst_buffer:
         print("Unable to get GstBuffer ")
         return
+    perf_stats.incr('frames_sgie')
+    t_sgie = time.time()
 
     batch_meta = pyds.gst_buffer_get_nvds_batch_meta(hash(gst_buffer))    
     l_frame = batch_meta.frame_meta_list
@@ -377,7 +400,12 @@ def sgie_feature_extract_probe(pad,info, data):
         sgie_feature_extract_probe._indexed_tracks = set()
 
     # One-time debug to confirm SGIE probe wiring and key params
-    if not hasattr(sgie_feature_extract_probe, '_dbg_once'):
+    perf_verbose = 0
+    try:
+        perf_verbose = int(data[19]) if isinstance(data,(list,tuple)) and len(data) > 19 else 0
+    except Exception:
+        perf_verbose = 0
+    if not hasattr(sgie_feature_extract_probe, '_dbg_once') and perf_verbose >= 2:
         sgie_feature_extract_probe._dbg_once = True
         try:
             vi = None
@@ -438,9 +466,9 @@ def sgie_feature_extract_probe(pad,info, data):
 
             face_feature = get_face_feature(obj_meta, frame_number, data)
             if face_feature is not None:
-                top_name = None
-                top_sim = -1.0  # higher is better similarity proxy
-                top_dist = None # for l2 only
+                # Embedding extraction time not directly measured (ArcFace runs before), but treat feature retrieval negligible.
+                perf_stats.incr('recognition_attempts')
+                t_search = time.time()
                 # Fast path: reuse cached recognition for this track id
                 oid = int(obj_meta.object_id)
                 if recognize_once and oid in recognize_cache:
@@ -459,6 +487,7 @@ def sgie_feature_extract_probe(pad,info, data):
                     if vector_index is not None and vector_index.size() > 0:
                         try:
                             name, score = vector_index.search_top1(face_feature.reshape(-1))
+                            perf_stats.incr('faiss_searches')
                             if recog_metric == 'l2':
                                 top_name = name
                                 top_dist = float(score)
@@ -727,7 +756,7 @@ def sgie_feature_extract_probe(pad,info, data):
                             if send_event:
                                 # Build event string for Go service: camera_id;event_type;timestamp;face_id;bbox_string;object_name;score
                                 cam_id = str(cam_map.get(frame_meta.source_id, frame_meta.source_id))
-                                event_type = 'FACE'  # EVENT_FACE_RECOGNITION as numeric value (1)
+                                event_type = 'FACE'  # EVENT_FACE_RECOGNITION
                                 ts = str(int(time.time()))
                                 face_id = str(top_name or '')  # GUID/user_id for face identification
                                 r = obj_meta.rect_params
@@ -815,6 +844,11 @@ def sgie_feature_extract_probe(pad,info, data):
         except StopIteration:
             break
 
+    try:
+        perf_stats.record('sgie_ms_ewma', (time.time()-t_sgie)*1000.0)
+        perf_stats.maybe_flush()
+    except Exception:
+        pass
     return Gst.PadProbeReturn.OK
 
 

@@ -36,11 +36,11 @@ enable-output-landmark=1
 # Apply to all classes (faces):
 [class-attrs-all]
 # Optimized: Slightly higher confidence threshold to reduce false positives
-pre-cluster-threshold=0.50
+pre-cluster-threshold=0.55
 # Optimized: Reduced top-K for better performance
-topk=50
+topk=15
 # Use NMS clustering with a slightly stricter IOU to reduce duplicates
 #cluster-mode=2
-nms-iou-threshold=0.40
+nms-iou-threshold=0.50
 # Optimized: Match pre-cluster threshold for consistency
-post-cluster-threshold=0.50
+post-cluster-threshold=0.55

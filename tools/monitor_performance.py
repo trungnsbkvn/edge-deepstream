@@ -13,6 +13,8 @@ import threading
 import signal
 import sys
 
+PERF_STATS_PATH = os.environ.get('PERF_STATS_PATH', '/dev/shm/edge-deepstream/perf_stats.json')
+
 class PipelineMonitor:
     def __init__(self, log_file="performance_log.json"):
         self.log_file = log_file
@@ -113,12 +115,32 @@ class PipelineMonitor:
             'detections_per_second': 0,
             'recognitions_per_second': 0,
             'avg_confidence': 0,
-            'active_tracks': 0
+            'active_tracks': 0,
+            'pgie_fps': 0,
+            'sgie_fps': 0,
+            'faiss_searches_per_s': 0,
+            'pgie_ms': 0,
+            'sgie_ms': 0,
+            'faiss_ms': 0,
         }
-        
-        # Try to read from pipeline log or shared memory
-        # This would be integrated with your main pipeline
-        
+        try:
+            if os.path.exists(PERF_STATS_PATH):
+                with open(PERF_STATS_PATH,'r') as f:
+                    snap = json.load(f)
+                rates = snap.get('rates', {})
+                timers = snap.get('timers', {})
+                stats.update({
+                    'detections_per_second': round(rates.get('detections_per_s',0),2),
+                    'recognitions_per_second': round(rates.get('recognitions_per_s',0),2),
+                    'pgie_fps': round(rates.get('fps_pgie',0),2),
+                    'sgie_fps': round(rates.get('fps_sgie',0),2),
+                    'faiss_searches_per_s': round(rates.get('faiss_searches_per_s',0),2),
+                    'pgie_ms': round(timers.get('pgie_ms_ewma',0),2),
+                    'sgie_ms': round(timers.get('sgie_ms_ewma',0),2),
+                    'faiss_ms': round(timers.get('faiss_ms_ewma',0),2),
+                })
+        except Exception:
+            pass
         return stats
     
     def print_status(self, sample: Dict):
@@ -135,8 +157,9 @@ class PipelineMonitor:
             print(f"GPU Memory: {gpu['memory_percent']:.1f}% ({gpu['memory_used_mb']:.0f}/{gpu['memory_total_mb']:.0f} MB)")
         
         pipeline = sample['pipeline_stats']
-        print(f"Detections/s: {pipeline['detections_per_second']}")
-        print(f"Recognitions/s: {pipeline['recognitions_per_second']}")
+        print(f"Detections/s: {pipeline['detections_per_second']}  (PGIE FPS: {pipeline['pgie_fps']}, {pipeline['pgie_ms']} ms avg)")
+        print(f"Recognitions/s: {pipeline['recognitions_per_second']}  (SGIE FPS: {pipeline['sgie_fps']}, {pipeline['sgie_ms']} ms avg)")
+        print(f"FAISS searches/s: {pipeline['faiss_searches_per_s']} (avg {pipeline['faiss_ms']} ms)")
         print(f"Active Tracks: {pipeline['active_tracks']}")
     
     def stop_monitoring(self):

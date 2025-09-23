@@ -1,0 +1,4713 @@
+{
+  "start_time": 1758619376.1018639,
+  "samples": [
+    {
+      "timestamp": 1758619376.111513,
+      "cpu_percent": 84.4,
+      "memory_percent": 95.4,
+      "memory_used_gb": 6.074245452880859,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 0.5,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 1.55,
+        "sgie_fps": 1.53,
+        "faiss_searches_per_s": 0.3,
+        "pgie_ms": 0.46,
+        "sgie_ms": 6.08,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619380.1782649,
+      "cpu_percent": 82.8,
+      "memory_percent": 95.4,
+      "memory_used_gb": 6.075107574462891,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 0.64,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 1.97,
+        "sgie_fps": 1.94,
+        "faiss_searches_per_s": 0.28,
+        "pgie_ms": 0.68,
+        "sgie_ms": 4.37,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619384.2142096,
+      "cpu_percent": 76.0,
+      "memory_percent": 95.7,
+      "memory_used_gb": 6.089443206787109,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 0.76,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 2.33,
+        "sgie_fps": 2.31,
+        "faiss_searches_per_s": 0.26,
+        "pgie_ms": 0.4,
+        "sgie_ms": 5.07,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619388.2462,
+      "cpu_percent": 84.8,
+      "memory_percent": 95.7,
+      "memory_used_gb": 6.089366912841797,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 0.88,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 2.68,
+        "sgie_fps": 2.65,
+        "faiss_searches_per_s": 0.24,
+        "pgie_ms": 0.54,
+        "sgie_ms": 6.39,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619392.274709,
+      "cpu_percent": 87.3,
+      "memory_percent": 95.8,
+      "memory_used_gb": 6.095882415771484,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.05,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 2.96,
+        "sgie_fps": 2.96,
+        "faiss_searches_per_s": 0.23,
+        "pgie_ms": 0.45,
+        "sgie_ms": 3.61,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619396.3022318,
+      "cpu_percent": 87.2,
+      "memory_percent": 95.9,
+      "memory_used_gb": 6.140655517578125,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.08,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 3.07,
+        "sgie_fps": 3.05,
+        "faiss_searches_per_s": 0.22,
+        "pgie_ms": 0.52,
+        "sgie_ms": 4.17,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619400.342261,
+      "cpu_percent": 86.7,
+      "memory_percent": 95.6,
+      "memory_used_gb": 6.129589080810547,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.15,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 3.3,
+        "sgie_fps": 3.28,
+        "faiss_searches_per_s": 0.22,
+        "pgie_ms": 0.44,
+        "sgie_ms": 3.42,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619404.3713706,
+      "cpu_percent": 94.0,
+      "memory_percent": 96.3,
+      "memory_used_gb": 6.212375640869141,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.22,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 3.5,
+        "sgie_fps": 3.49,
+        "faiss_searches_per_s": 0.21,
+        "pgie_ms": 0.42,
+        "sgie_ms": 5.16,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619408.4301648,
+      "cpu_percent": 87.7,
+      "memory_percent": 95.7,
+      "memory_used_gb": 6.176647186279297,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.25,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 3.61,
+        "sgie_fps": 3.59,
+        "faiss_searches_per_s": 0.2,
+        "pgie_ms": 0.38,
+        "sgie_ms": 3.63,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619412.4581547,
+      "cpu_percent": 87.2,
+      "memory_percent": 95.8,
+      "memory_used_gb": 6.1777191162109375,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.32,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 3.81,
+        "sgie_fps": 3.79,
+        "faiss_searches_per_s": 0.19,
+        "pgie_ms": 0.7,
+        "sgie_ms": 4.31,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619416.4941826,
+      "cpu_percent": 63.6,
+      "memory_percent": 95.8,
+      "memory_used_gb": 6.178379058837891,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.38,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 3.99,
+        "sgie_fps": 3.98,
+        "faiss_searches_per_s": 0.19,
+        "pgie_ms": 0.44,
+        "sgie_ms": 5.16,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619420.530853,
+      "cpu_percent": 63.0,
+      "memory_percent": 95.8,
+      "memory_used_gb": 6.180095672607422,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.45,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 4.21,
+        "sgie_fps": 4.2,
+        "faiss_searches_per_s": 0.19,
+        "pgie_ms": 0.4,
+        "sgie_ms": 4.03,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619424.5701778,
+      "cpu_percent": 61.7,
+      "memory_percent": 94.1,
+      "memory_used_gb": 6.0683135986328125,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.51,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 4.42,
+        "sgie_fps": 4.42,
+        "faiss_searches_per_s": 0.18,
+        "pgie_ms": 0.39,
+        "sgie_ms": 4.06,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619428.5942607,
+      "cpu_percent": 85.5,
+      "memory_percent": 96.0,
+      "memory_used_gb": 6.190765380859375,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.57,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 4.59,
+        "sgie_fps": 4.58,
+        "faiss_searches_per_s": 0.17,
+        "pgie_ms": 0.44,
+        "sgie_ms": 4.12,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619432.6301427,
+      "cpu_percent": 64.7,
+      "memory_percent": 95.8,
+      "memory_used_gb": 6.176719665527344,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.62,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 4.74,
+        "sgie_fps": 4.72,
+        "faiss_searches_per_s": 0.16,
+        "pgie_ms": 0.63,
+        "sgie_ms": 2.41,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619436.6655881,
+      "cpu_percent": 74.5,
+      "memory_percent": 96.1,
+      "memory_used_gb": 6.199287414550781,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.65,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 4.9,
+        "sgie_fps": 4.89,
+        "faiss_searches_per_s": 0.26,
+        "pgie_ms": 0.42,
+        "sgie_ms": 2.5,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619440.690372,
+      "cpu_percent": 67.5,
+      "memory_percent": 96.2,
+      "memory_used_gb": 6.207172393798828,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.68,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 5.09,
+        "sgie_fps": 5.08,
+        "faiss_searches_per_s": 0.34,
+        "pgie_ms": 0.41,
+        "sgie_ms": 0.78,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619444.7281775,
+      "cpu_percent": 96.2,
+      "memory_percent": 95.3,
+      "memory_used_gb": 6.146442413330078,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.62,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 5.32,
+        "sgie_fps": 5.32,
+        "faiss_searches_per_s": 0.33,
+        "pgie_ms": 0.37,
+        "sgie_ms": 1.2,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619448.8101637,
+      "cpu_percent": 88.7,
+      "memory_percent": 96.5,
+      "memory_used_gb": 6.223785400390625,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.6,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 5.4,
+        "sgie_fps": 5.39,
+        "faiss_searches_per_s": 0.32,
+        "pgie_ms": 0.33,
+        "sgie_ms": 0.61,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619452.8499556,
+      "cpu_percent": 86.0,
+      "memory_percent": 97.1,
+      "memory_used_gb": 6.236728668212891,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.56,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 5.53,
+        "sgie_fps": 5.52,
+        "faiss_searches_per_s": 0.32,
+        "pgie_ms": 0.4,
+        "sgie_ms": 1.55,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619456.9701962,
+      "cpu_percent": 87.6,
+      "memory_percent": 97.2,
+      "memory_used_gb": 6.272243499755859,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.51,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 5.66,
+        "sgie_fps": 5.64,
+        "faiss_searches_per_s": 0.31,
+        "pgie_ms": 0.45,
+        "sgie_ms": 0.69,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619461.0373418,
+      "cpu_percent": 99.5,
+      "memory_percent": 97.5,
+      "memory_used_gb": 6.294925689697266,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.47,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 5.78,
+        "sgie_fps": 5.77,
+        "faiss_searches_per_s": 0.3,
+        "pgie_ms": 0.73,
+        "sgie_ms": 0.75,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619465.1022043,
+      "cpu_percent": 97.5,
+      "memory_percent": 97.7,
+      "memory_used_gb": 6.313133239746094,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.42,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 5.82,
+        "sgie_fps": 5.82,
+        "faiss_searches_per_s": 0.29,
+        "pgie_ms": 0.35,
+        "sgie_ms": 1.37,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619469.3388124,
+      "cpu_percent": 68.4,
+      "memory_percent": 97.7,
+      "memory_used_gb": 6.312408447265625,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.38,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 5.9,
+        "sgie_fps": 5.89,
+        "faiss_searches_per_s": 0.28,
+        "pgie_ms": 0.4,
+        "sgie_ms": 0.78,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619473.366266,
+      "cpu_percent": 55.8,
+      "memory_percent": 97.7,
+      "memory_used_gb": 6.310024261474609,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.35,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 6.12,
+        "sgie_fps": 6.12,
+        "faiss_searches_per_s": 0.27,
+        "pgie_ms": 0.41,
+        "sgie_ms": 0.61,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619477.3882139,
+      "cpu_percent": 57.9,
+      "memory_percent": 97.7,
+      "memory_used_gb": 6.312664031982422,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.31,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 6.31,
+        "sgie_fps": 6.3,
+        "faiss_searches_per_s": 0.27,
+        "pgie_ms": 0.48,
+        "sgie_ms": 0.61,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619481.4182303,
+      "cpu_percent": 63.5,
+      "memory_percent": 97.7,
+      "memory_used_gb": 6.310756683349609,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.29,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 6.51,
+        "sgie_fps": 6.5,
+        "faiss_searches_per_s": 0.27,
+        "pgie_ms": 0.41,
+        "sgie_ms": 2.5,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619485.4830334,
+      "cpu_percent": 59.3,
+      "memory_percent": 96.1,
+      "memory_used_gb": 6.201572418212891,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.32,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 6.6,
+        "sgie_fps": 6.59,
+        "faiss_searches_per_s": 0.35,
+        "pgie_ms": 0.4,
+        "sgie_ms": 1.15,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619489.510151,
+      "cpu_percent": 60.8,
+      "memory_percent": 96.1,
+      "memory_used_gb": 6.202369689941406,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.29,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 6.77,
+        "sgie_fps": 6.77,
+        "faiss_searches_per_s": 0.34,
+        "pgie_ms": 0.5,
+        "sgie_ms": 0.73,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619493.5341253,
+      "cpu_percent": 61.8,
+      "memory_percent": 96.1,
+      "memory_used_gb": 6.202396392822266,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.31,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 6.9,
+        "sgie_fps": 6.9,
+        "faiss_searches_per_s": 0.4,
+        "pgie_ms": 0.4,
+        "sgie_ms": 2.12,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619497.566784,
+      "cpu_percent": 58.0,
+      "memory_percent": 96.1,
+      "memory_used_gb": 6.202320098876953,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.29,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 7.04,
+        "sgie_fps": 7.03,
+        "faiss_searches_per_s": 0.39,
+        "pgie_ms": 0.38,
+        "sgie_ms": 0.65,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619501.5968697,
+      "cpu_percent": 59.4,
+      "memory_percent": 96.1,
+      "memory_used_gb": 6.203220367431641,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.28,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 7.16,
+        "sgie_fps": 7.16,
+        "faiss_searches_per_s": 0.41,
+        "pgie_ms": 0.52,
+        "sgie_ms": 0.66,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619505.6230154,
+      "cpu_percent": 58.7,
+      "memory_percent": 96.1,
+      "memory_used_gb": 6.202678680419922,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.29,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 7.29,
+        "sgie_fps": 7.28,
+        "faiss_searches_per_s": 0.48,
+        "pgie_ms": 0.76,
+        "sgie_ms": 3.91,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619509.6462424,
+      "cpu_percent": 71.4,
+      "memory_percent": 96.2,
+      "memory_used_gb": 6.203632354736328,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.3,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 7.38,
+        "sgie_fps": 7.37,
+        "faiss_searches_per_s": 0.55,
+        "pgie_ms": 0.52,
+        "sgie_ms": 2.17,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619513.6821437,
+      "cpu_percent": 60.6,
+      "memory_percent": 96.2,
+      "memory_used_gb": 6.203102111816406,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.32,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 7.44,
+        "sgie_fps": 7.44,
+        "faiss_searches_per_s": 0.68,
+        "pgie_ms": 0.41,
+        "sgie_ms": 3.3,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619517.7142146,
+      "cpu_percent": 98.2,
+      "memory_percent": 96.2,
+      "memory_used_gb": 6.203754425048828,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.36,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 7.47,
+        "sgie_fps": 7.47,
+        "faiss_searches_per_s": 0.84,
+        "pgie_ms": 0.52,
+        "sgie_ms": 3.6,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619521.7732298,
+      "cpu_percent": 60.4,
+      "memory_percent": 92.8,
+      "memory_used_gb": 5.9741058349609375,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.36,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 7.46,
+        "sgie_fps": 7.45,
+        "faiss_searches_per_s": 0.89,
+        "pgie_ms": 0.48,
+        "sgie_ms": 4.34,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619525.797963,
+      "cpu_percent": 74.4,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.935985565185547,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.36,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 7.53,
+        "sgie_fps": 7.53,
+        "faiss_searches_per_s": 0.93,
+        "pgie_ms": 0.41,
+        "sgie_ms": 0.82,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619529.8278785,
+      "cpu_percent": 64.7,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.935787200927734,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.34,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 7.64,
+        "sgie_fps": 7.63,
+        "faiss_searches_per_s": 0.91,
+        "pgie_ms": 0.37,
+        "sgie_ms": 0.69,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619533.850195,
+      "cpu_percent": 57.1,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.934902191162109,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.34,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 7.72,
+        "sgie_fps": 7.71,
+        "faiss_searches_per_s": 0.92,
+        "pgie_ms": 0.36,
+        "sgie_ms": 0.7,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619537.8821337,
+      "cpu_percent": 58.8,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.936000823974609,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.32,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 7.81,
+        "sgie_fps": 7.81,
+        "faiss_searches_per_s": 0.92,
+        "pgie_ms": 0.41,
+        "sgie_ms": 0.69,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619541.9060066,
+      "cpu_percent": 62.1,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.9357452392578125,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.31,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 7.91,
+        "sgie_fps": 7.91,
+        "faiss_searches_per_s": 0.94,
+        "pgie_ms": 0.62,
+        "sgie_ms": 3.53,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619545.9422092,
+      "cpu_percent": 58.4,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.930332183837891,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.34,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 7.96,
+        "sgie_fps": 7.95,
+        "faiss_searches_per_s": 1.07,
+        "pgie_ms": 1.38,
+        "sgie_ms": 2.91,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619549.9661381,
+      "cpu_percent": 64.7,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.931427001953125,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.33,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.03,
+        "sgie_fps": 8.02,
+        "faiss_searches_per_s": 1.09,
+        "pgie_ms": 0.41,
+        "sgie_ms": 0.62,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619553.9931328,
+      "cpu_percent": 56.6,
+      "memory_percent": 92.1,
+      "memory_used_gb": 5.929370880126953,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.32,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.09,
+        "sgie_fps": 8.08,
+        "faiss_searches_per_s": 1.11,
+        "pgie_ms": 0.38,
+        "sgie_ms": 0.76,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619558.01815,
+      "cpu_percent": 60.4,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.931205749511719,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.31,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.16,
+        "sgie_fps": 8.15,
+        "faiss_searches_per_s": 1.12,
+        "pgie_ms": 0.41,
+        "sgie_ms": 3.32,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619562.0498617,
+      "cpu_percent": 60.6,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.932029724121094,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.33,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.2,
+        "sgie_fps": 8.2,
+        "faiss_searches_per_s": 1.19,
+        "pgie_ms": 0.45,
+        "sgie_ms": 3.21,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619566.0724795,
+      "cpu_percent": 62.0,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.931873321533203,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.34,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.25,
+        "sgie_fps": 8.25,
+        "faiss_searches_per_s": 1.26,
+        "pgie_ms": 0.38,
+        "sgie_ms": 0.63,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619570.0981565,
+      "cpu_percent": 66.2,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.932651519775391,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.34,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.32,
+        "sgie_fps": 8.31,
+        "faiss_searches_per_s": 1.27,
+        "pgie_ms": 0.36,
+        "sgie_ms": 1.33,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619574.1261396,
+      "cpu_percent": 58.7,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.9326629638671875,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.33,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.37,
+        "sgie_fps": 8.36,
+        "faiss_searches_per_s": 1.28,
+        "pgie_ms": 0.44,
+        "sgie_ms": 2.17,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619578.150256,
+      "cpu_percent": 60.4,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.9326324462890625,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.36,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.4,
+        "sgie_fps": 8.4,
+        "faiss_searches_per_s": 1.36,
+        "pgie_ms": 0.5,
+        "sgie_ms": 3.13,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619582.1821456,
+      "cpu_percent": 57.1,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.9337005615234375,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.41,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.42,
+        "sgie_fps": 8.41,
+        "faiss_searches_per_s": 1.49,
+        "pgie_ms": 0.33,
+        "sgie_ms": 2.95,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619586.2142444,
+      "cpu_percent": 60.8,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.93365478515625,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.43,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.45,
+        "sgie_fps": 8.45,
+        "faiss_searches_per_s": 1.56,
+        "pgie_ms": 0.41,
+        "sgie_ms": 0.84,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619590.234212,
+      "cpu_percent": 64.9,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.933574676513672,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.45,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.5,
+        "sgie_fps": 8.5,
+        "faiss_searches_per_s": 1.57,
+        "pgie_ms": 0.37,
+        "sgie_ms": 0.63,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619594.2621524,
+      "cpu_percent": 56.3,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.9331207275390625,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.45,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.55,
+        "sgie_fps": 8.55,
+        "faiss_searches_per_s": 1.57,
+        "pgie_ms": 0.37,
+        "sgie_ms": 0.63,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619598.2941725,
+      "cpu_percent": 57.3,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.933036804199219,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.43,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.63,
+        "sgie_fps": 8.63,
+        "faiss_searches_per_s": 1.55,
+        "pgie_ms": 0.38,
+        "sgie_ms": 0.61,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619602.3181965,
+      "cpu_percent": 57.3,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.933406829833984,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.44,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.68,
+        "sgie_fps": 8.67,
+        "faiss_searches_per_s": 1.6,
+        "pgie_ms": 0.39,
+        "sgie_ms": 1.66,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619606.358146,
+      "cpu_percent": 60.2,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.9335174560546875,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.42,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.74,
+        "sgie_fps": 8.73,
+        "faiss_searches_per_s": 1.58,
+        "pgie_ms": 0.39,
+        "sgie_ms": 0.61,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619610.3822713,
+      "cpu_percent": 62.3,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.9335174560546875,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.4,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.82,
+        "sgie_fps": 8.82,
+        "faiss_searches_per_s": 1.55,
+        "pgie_ms": 0.39,
+        "sgie_ms": 1.18,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619614.4061263,
+      "cpu_percent": 57.7,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.932987213134766,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.38,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.9,
+        "sgie_fps": 8.89,
+        "faiss_searches_per_s": 1.53,
+        "pgie_ms": 0.42,
+        "sgie_ms": 0.84,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619618.4341753,
+      "cpu_percent": 59.2,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.934253692626953,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.36,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 8.97,
+        "sgie_fps": 8.97,
+        "faiss_searches_per_s": 1.51,
+        "pgie_ms": 0.37,
+        "sgie_ms": 0.57,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619622.457448,
+      "cpu_percent": 59.6,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.9342041015625,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.34,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.05,
+        "sgie_fps": 9.04,
+        "faiss_searches_per_s": 1.49,
+        "pgie_ms": 0.38,
+        "sgie_ms": 0.63,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619626.481255,
+      "cpu_percent": 59.7,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.933418273925781,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.36,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.07,
+        "sgie_fps": 9.06,
+        "faiss_searches_per_s": 1.56,
+        "pgie_ms": 0.43,
+        "sgie_ms": 0.98,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619630.5023017,
+      "cpu_percent": 54.7,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.935306549072266,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.34,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.12,
+        "sgie_fps": 9.11,
+        "faiss_searches_per_s": 1.54,
+        "pgie_ms": 0.47,
+        "sgie_ms": 0.61,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619634.5221674,
+      "cpu_percent": 59.9,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.935230255126953,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.35,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.16,
+        "sgie_fps": 9.15,
+        "faiss_searches_per_s": 1.56,
+        "pgie_ms": 0.59,
+        "sgie_ms": 0.95,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619638.5621607,
+      "cpu_percent": 57.8,
+      "memory_percent": 92.2,
+      "memory_used_gb": 5.93487548828125,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.34,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.19,
+        "sgie_fps": 9.18,
+        "faiss_searches_per_s": 1.56,
+        "pgie_ms": 0.93,
+        "sgie_ms": 0.75,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619642.5942242,
+      "cpu_percent": 61.1,
+      "memory_percent": 92.3,
+      "memory_used_gb": 5.941825866699219,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.34,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.2,
+        "sgie_fps": 9.2,
+        "faiss_searches_per_s": 1.6,
+        "pgie_ms": 0.43,
+        "sgie_ms": 4.33,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619646.622179,
+      "cpu_percent": 60.4,
+      "memory_percent": 92.4,
+      "memory_used_gb": 5.944278717041016,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.35,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.23,
+        "sgie_fps": 9.22,
+        "faiss_searches_per_s": 1.66,
+        "pgie_ms": 0.45,
+        "sgie_ms": 2.16,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619650.654252,
+      "cpu_percent": 60.9,
+      "memory_percent": 92.4,
+      "memory_used_gb": 5.945381164550781,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.38,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.23,
+        "sgie_fps": 9.22,
+        "faiss_searches_per_s": 1.76,
+        "pgie_ms": 0.43,
+        "sgie_ms": 4.09,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619654.686217,
+      "cpu_percent": 63.3,
+      "memory_percent": 92.4,
+      "memory_used_gb": 5.945926666259766,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.38,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.25,
+        "sgie_fps": 9.25,
+        "faiss_searches_per_s": 1.8,
+        "pgie_ms": 0.44,
+        "sgie_ms": 0.88,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619658.7159498,
+      "cpu_percent": 61.9,
+      "memory_percent": 92.4,
+      "memory_used_gb": 5.944377899169922,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.38,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.28,
+        "sgie_fps": 9.28,
+        "faiss_searches_per_s": 1.8,
+        "pgie_ms": 0.45,
+        "sgie_ms": 0.74,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619662.7382529,
+      "cpu_percent": 64.8,
+      "memory_percent": 92.4,
+      "memory_used_gb": 5.948143005371094,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.36,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.34,
+        "sgie_fps": 9.33,
+        "faiss_searches_per_s": 1.78,
+        "pgie_ms": 0.43,
+        "sgie_ms": 0.58,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619666.762116,
+      "cpu_percent": 62.6,
+      "memory_percent": 92.5,
+      "memory_used_gb": 5.949550628662109,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.34,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.38,
+        "sgie_fps": 9.38,
+        "faiss_searches_per_s": 1.76,
+        "pgie_ms": 0.44,
+        "sgie_ms": 0.71,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619670.798183,
+      "cpu_percent": 63.9,
+      "memory_percent": 92.5,
+      "memory_used_gb": 5.949176788330078,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.33,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.43,
+        "sgie_fps": 9.42,
+        "faiss_searches_per_s": 1.74,
+        "pgie_ms": 0.86,
+        "sgie_ms": 0.78,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619674.8261902,
+      "cpu_percent": 64.3,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.964820861816406,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.33,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.43,
+        "sgie_fps": 9.43,
+        "faiss_searches_per_s": 1.77,
+        "pgie_ms": 0.4,
+        "sgie_ms": 1.25,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619678.8781464,
+      "cpu_percent": 59.2,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.9637298583984375,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.32,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.45,
+        "sgie_fps": 9.44,
+        "faiss_searches_per_s": 1.76,
+        "pgie_ms": 0.4,
+        "sgie_ms": 0.63,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619682.9181304,
+      "cpu_percent": 58.1,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.964042663574219,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.31,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.5,
+        "sgie_fps": 9.5,
+        "faiss_searches_per_s": 1.74,
+        "pgie_ms": 0.46,
+        "sgie_ms": 0.55,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619686.9501894,
+      "cpu_percent": 56.6,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.963592529296875,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.29,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.56,
+        "sgie_fps": 9.55,
+        "faiss_searches_per_s": 1.72,
+        "pgie_ms": 0.37,
+        "sgie_ms": 0.71,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619690.986193,
+      "cpu_percent": 59.1,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.963611602783203,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.28,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.61,
+        "sgie_fps": 9.61,
+        "faiss_searches_per_s": 1.7,
+        "pgie_ms": 0.45,
+        "sgie_ms": 0.63,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619695.0061655,
+      "cpu_percent": 65.3,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.964672088623047,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.27,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.66,
+        "sgie_fps": 9.66,
+        "faiss_searches_per_s": 1.68,
+        "pgie_ms": 0.65,
+        "sgie_ms": 0.76,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619699.0343122,
+      "cpu_percent": 56.0,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.963798522949219,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.26,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.7,
+        "sgie_fps": 9.7,
+        "faiss_searches_per_s": 1.67,
+        "pgie_ms": 0.37,
+        "sgie_ms": 0.85,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619703.0609386,
+      "cpu_percent": 56.1,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.964530944824219,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.25,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.73,
+        "sgie_fps": 9.72,
+        "faiss_searches_per_s": 1.67,
+        "pgie_ms": 0.37,
+        "sgie_ms": 0.55,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619707.0861895,
+      "cpu_percent": 57.7,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.964244842529297,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.24,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.77,
+        "sgie_fps": 9.77,
+        "faiss_searches_per_s": 1.65,
+        "pgie_ms": 0.39,
+        "sgie_ms": 0.57,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619711.1220055,
+      "cpu_percent": 63.6,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.964691162109375,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.23,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.81,
+        "faiss_searches_per_s": 1.63,
+        "pgie_ms": 0.42,
+        "sgie_ms": 0.64,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619715.1541371,
+      "cpu_percent": 59.5,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.964454650878906,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.22,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.87,
+        "sgie_fps": 9.87,
+        "faiss_searches_per_s": 1.62,
+        "pgie_ms": 0.39,
+        "sgie_ms": 0.59,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619719.186325,
+      "cpu_percent": 57.6,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.964763641357422,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.21,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.92,
+        "sgie_fps": 9.91,
+        "faiss_searches_per_s": 1.6,
+        "pgie_ms": 0.34,
+        "sgie_ms": 0.59,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619723.2102005,
+      "cpu_percent": 56.4,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.963855743408203,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.22,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.94,
+        "sgie_fps": 9.93,
+        "faiss_searches_per_s": 1.63,
+        "pgie_ms": 0.39,
+        "sgie_ms": 1.06,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619727.234206,
+      "cpu_percent": 60.1,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.9646453857421875,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.24,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.95,
+        "sgie_fps": 9.94,
+        "faiss_searches_per_s": 1.61,
+        "pgie_ms": 0.36,
+        "sgie_ms": 4.05,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619731.2613466,
+      "cpu_percent": 56.7,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.964500427246094,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.26,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.95,
+        "sgie_fps": 9.94,
+        "faiss_searches_per_s": 1.6,
+        "pgie_ms": 0.47,
+        "sgie_ms": 3.17,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619735.2821176,
+      "cpu_percent": 64.2,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.965423583984375,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.26,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.97,
+        "sgie_fps": 9.96,
+        "faiss_searches_per_s": 1.58,
+        "pgie_ms": 0.43,
+        "sgie_ms": 0.59,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619739.3022099,
+      "cpu_percent": 60.8,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.964931488037109,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.24,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 10.01,
+        "sgie_fps": 10.0,
+        "faiss_searches_per_s": 1.57,
+        "pgie_ms": 0.42,
+        "sgie_ms": 0.77,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619743.333803,
+      "cpu_percent": 61.1,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.9645843505859375,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.25,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 10.02,
+        "sgie_fps": 10.02,
+        "faiss_searches_per_s": 1.6,
+        "pgie_ms": 0.44,
+        "sgie_ms": 3.6,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619747.3605268,
+      "cpu_percent": 57.3,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.964359283447266,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.27,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 10.02,
+        "sgie_fps": 10.01,
+        "faiss_searches_per_s": 1.68,
+        "pgie_ms": 0.42,
+        "sgie_ms": 3.18,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619751.3862162,
+      "cpu_percent": 57.7,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.9655303955078125,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.27,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 10.03,
+        "sgie_fps": 10.03,
+        "faiss_searches_per_s": 1.7,
+        "pgie_ms": 0.41,
+        "sgie_ms": 0.64,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619755.406212,
+      "cpu_percent": 59.8,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.965850830078125,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.27,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 10.06,
+        "sgie_fps": 10.06,
+        "faiss_searches_per_s": 1.71,
+        "pgie_ms": 0.36,
+        "sgie_ms": 1.34,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619759.4301271,
+      "cpu_percent": 62.1,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.965061187744141,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.29,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 10.06,
+        "sgie_fps": 10.06,
+        "faiss_searches_per_s": 1.77,
+        "pgie_ms": 0.41,
+        "sgie_ms": 3.47,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619763.4581482,
+      "cpu_percent": 55.8,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.965305328369141,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.29,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 10.08,
+        "sgie_fps": 10.08,
+        "faiss_searches_per_s": 1.77,
+        "pgie_ms": 0.43,
+        "sgie_ms": 0.63,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619767.4975362,
+      "cpu_percent": 59.3,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.965736389160156,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.3,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 10.11,
+        "sgie_fps": 10.1,
+        "faiss_searches_per_s": 1.79,
+        "pgie_ms": 0.42,
+        "sgie_ms": 5.27,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619771.5381496,
+      "cpu_percent": 68.4,
+      "memory_percent": 92.7,
+      "memory_used_gb": 5.965888977050781,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.33,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 10.11,
+        "sgie_fps": 10.11,
+        "faiss_searches_per_s": 1.81,
+        "pgie_ms": 0.4,
+        "sgie_ms": 3.0,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619775.5697563,
+      "cpu_percent": 91.4,
+      "memory_percent": 93.0,
+      "memory_used_gb": 5.9834136962890625,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.36,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 10.08,
+        "sgie_fps": 10.08,
+        "faiss_searches_per_s": 1.85,
+        "pgie_ms": 0.5,
+        "sgie_ms": 12.1,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619779.6381693,
+      "cpu_percent": 86.3,
+      "memory_percent": 93.1,
+      "memory_used_gb": 5.991241455078125,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.38,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 10.05,
+        "sgie_fps": 10.05,
+        "faiss_searches_per_s": 1.87,
+        "pgie_ms": 0.83,
+        "sgie_ms": 8.69,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619783.673465,
+      "cpu_percent": 62.4,
+      "memory_percent": 93.1,
+      "memory_used_gb": 5.990699768066406,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.4,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 10.05,
+        "sgie_fps": 10.04,
+        "faiss_searches_per_s": 1.88,
+        "pgie_ms": 0.36,
+        "sgie_ms": 4.39,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619787.6942542,
+      "cpu_percent": 59.2,
+      "memory_percent": 93.1,
+      "memory_used_gb": 5.991004943847656,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.42,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 10.04,
+        "sgie_fps": 10.04,
+        "faiss_searches_per_s": 1.86,
+        "pgie_ms": 0.78,
+        "sgie_ms": 5.06,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619791.7342513,
+      "cpu_percent": 84.1,
+      "memory_percent": 93.2,
+      "memory_used_gb": 6.001033782958984,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.43,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 10.02,
+        "sgie_fps": 10.02,
+        "faiss_searches_per_s": 1.84,
+        "pgie_ms": 0.35,
+        "sgie_ms": 3.63,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619795.7582443,
+      "cpu_percent": 93.2,
+      "memory_percent": 93.4,
+      "memory_used_gb": 6.009624481201172,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.44,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 10.02,
+        "sgie_fps": 10.01,
+        "faiss_searches_per_s": 1.84,
+        "pgie_ms": 0.38,
+        "sgie_ms": 4.16,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619799.8142407,
+      "cpu_percent": 85.3,
+      "memory_percent": 93.6,
+      "memory_used_gb": 6.0235137939453125,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.45,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.99,
+        "sgie_fps": 9.98,
+        "faiss_searches_per_s": 1.82,
+        "pgie_ms": 0.5,
+        "sgie_ms": 4.44,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619803.8732555,
+      "cpu_percent": 82.4,
+      "memory_percent": 93.6,
+      "memory_used_gb": 6.024738311767578,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.46,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.98,
+        "sgie_fps": 9.97,
+        "faiss_searches_per_s": 1.8,
+        "pgie_ms": 0.61,
+        "sgie_ms": 4.62,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619807.9101722,
+      "cpu_percent": 95.7,
+      "memory_percent": 93.7,
+      "memory_used_gb": 6.032878875732422,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.48,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.96,
+        "sgie_fps": 9.96,
+        "faiss_searches_per_s": 1.8,
+        "pgie_ms": 0.66,
+        "sgie_ms": 3.91,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619812.0339327,
+      "cpu_percent": 63.6,
+      "memory_percent": 93.7,
+      "memory_used_gb": 6.033882141113281,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.48,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.94,
+        "sgie_fps": 9.94,
+        "faiss_searches_per_s": 1.78,
+        "pgie_ms": 0.36,
+        "sgie_ms": 4.57,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619816.0653765,
+      "cpu_percent": 58.7,
+      "memory_percent": 93.7,
+      "memory_used_gb": 6.034633636474609,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.5,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.94,
+        "sgie_fps": 9.93,
+        "faiss_searches_per_s": 1.77,
+        "pgie_ms": 0.38,
+        "sgie_ms": 4.17,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619820.0975854,
+      "cpu_percent": 63.4,
+      "memory_percent": 93.7,
+      "memory_used_gb": 6.034381866455078,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.51,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.93,
+        "sgie_fps": 9.93,
+        "faiss_searches_per_s": 1.75,
+        "pgie_ms": 0.4,
+        "sgie_ms": 4.5,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619824.129671,
+      "cpu_percent": 58.5,
+      "memory_percent": 93.7,
+      "memory_used_gb": 6.034481048583984,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.53,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.93,
+        "sgie_fps": 9.93,
+        "faiss_searches_per_s": 1.74,
+        "pgie_ms": 0.36,
+        "sgie_ms": 6.8,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619828.1509833,
+      "cpu_percent": 58.5,
+      "memory_percent": 93.7,
+      "memory_used_gb": 6.034690856933594,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.54,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.93,
+        "sgie_fps": 9.93,
+        "faiss_searches_per_s": 1.72,
+        "pgie_ms": 0.45,
+        "sgie_ms": 4.36,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619832.175411,
+      "cpu_percent": 60.3,
+      "memory_percent": 93.7,
+      "memory_used_gb": 6.034576416015625,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.56,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.93,
+        "sgie_fps": 9.93,
+        "faiss_searches_per_s": 1.71,
+        "pgie_ms": 0.4,
+        "sgie_ms": 3.74,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619836.2014332,
+      "cpu_percent": 62.5,
+      "memory_percent": 93.7,
+      "memory_used_gb": 6.034576416015625,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.57,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.93,
+        "sgie_fps": 9.93,
+        "faiss_searches_per_s": 1.7,
+        "pgie_ms": 0.68,
+        "sgie_ms": 3.55,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619840.226601,
+      "cpu_percent": 65.5,
+      "memory_percent": 93.7,
+      "memory_used_gb": 6.0343475341796875,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.59,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.93,
+        "sgie_fps": 9.92,
+        "faiss_searches_per_s": 1.68,
+        "pgie_ms": 0.41,
+        "sgie_ms": 3.25,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619844.2501876,
+      "cpu_percent": 60.5,
+      "memory_percent": 93.7,
+      "memory_used_gb": 6.034435272216797,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.6,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.92,
+        "sgie_fps": 9.92,
+        "faiss_searches_per_s": 1.67,
+        "pgie_ms": 0.36,
+        "sgie_ms": 3.22,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619848.2701843,
+      "cpu_percent": 58.8,
+      "memory_percent": 93.7,
+      "memory_used_gb": 6.034313201904297,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.61,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.92,
+        "sgie_fps": 9.92,
+        "faiss_searches_per_s": 1.66,
+        "pgie_ms": 0.38,
+        "sgie_ms": 3.72,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619852.2972984,
+      "cpu_percent": 58.4,
+      "memory_percent": 93.7,
+      "memory_used_gb": 6.035102844238281,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.64,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.92,
+        "sgie_fps": 9.92,
+        "faiss_searches_per_s": 1.65,
+        "pgie_ms": 0.39,
+        "sgie_ms": 5.51,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619856.32208,
+      "cpu_percent": 59.1,
+      "memory_percent": 93.7,
+      "memory_used_gb": 6.034900665283203,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.66,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.92,
+        "sgie_fps": 9.92,
+        "faiss_searches_per_s": 1.64,
+        "pgie_ms": 0.39,
+        "sgie_ms": 4.1,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619860.3545554,
+      "cpu_percent": 64.6,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.035358428955078,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.67,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.92,
+        "sgie_fps": 9.91,
+        "faiss_searches_per_s": 1.63,
+        "pgie_ms": 0.41,
+        "sgie_ms": 3.37,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619864.3821516,
+      "cpu_percent": 58.4,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.035259246826172,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.68,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.91,
+        "sgie_fps": 9.91,
+        "faiss_searches_per_s": 1.62,
+        "pgie_ms": 0.36,
+        "sgie_ms": 3.64,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619868.4262953,
+      "cpu_percent": 63.0,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.035453796386719,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.69,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.91,
+        "sgie_fps": 9.91,
+        "faiss_searches_per_s": 1.61,
+        "pgie_ms": 0.4,
+        "sgie_ms": 3.75,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619872.4542267,
+      "cpu_percent": 60.2,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.035469055175781,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.71,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.91,
+        "sgie_fps": 9.9,
+        "faiss_searches_per_s": 1.6,
+        "pgie_ms": 0.39,
+        "sgie_ms": 4.16,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619876.4782069,
+      "cpu_percent": 62.1,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.036075592041016,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.72,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.9,
+        "sgie_fps": 9.9,
+        "faiss_searches_per_s": 1.58,
+        "pgie_ms": 0.39,
+        "sgie_ms": 3.16,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619880.5024302,
+      "cpu_percent": 57.3,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.036632537841797,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.73,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.9,
+        "sgie_fps": 9.9,
+        "faiss_searches_per_s": 1.57,
+        "pgie_ms": 0.41,
+        "sgie_ms": 4.48,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619884.5221508,
+      "cpu_percent": 63.8,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.036190032958984,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.75,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.9,
+        "sgie_fps": 9.9,
+        "faiss_searches_per_s": 1.56,
+        "pgie_ms": 0.41,
+        "sgie_ms": 3.82,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619888.5670457,
+      "cpu_percent": 59.1,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.036045074462891,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.76,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.9,
+        "sgie_fps": 9.9,
+        "faiss_searches_per_s": 1.55,
+        "pgie_ms": 0.37,
+        "sgie_ms": 3.26,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619892.5962708,
+      "cpu_percent": 61.5,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.036640167236328,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.77,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.9,
+        "sgie_fps": 9.9,
+        "faiss_searches_per_s": 1.54,
+        "pgie_ms": 0.43,
+        "sgie_ms": 3.18,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619896.618241,
+      "cpu_percent": 61.0,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.035793304443359,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.78,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.9,
+        "sgie_fps": 9.9,
+        "faiss_searches_per_s": 1.53,
+        "pgie_ms": 0.42,
+        "sgie_ms": 3.22,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619900.6384242,
+      "cpu_percent": 59.0,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.037403106689453,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.79,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.9,
+        "sgie_fps": 9.89,
+        "faiss_searches_per_s": 1.52,
+        "pgie_ms": 0.43,
+        "sgie_ms": 4.0,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619904.6647127,
+      "cpu_percent": 65.1,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.036872863769531,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.8,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.9,
+        "sgie_fps": 9.89,
+        "faiss_searches_per_s": 1.51,
+        "pgie_ms": 0.39,
+        "sgie_ms": 3.4,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619908.6861398,
+      "cpu_percent": 60.5,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.037330627441406,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.81,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.89,
+        "sgie_fps": 9.89,
+        "faiss_searches_per_s": 1.5,
+        "pgie_ms": 0.4,
+        "sgie_ms": 4.24,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619912.7259917,
+      "cpu_percent": 57.7,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.035297393798828,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.82,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.89,
+        "sgie_fps": 9.89,
+        "faiss_searches_per_s": 1.49,
+        "pgie_ms": 0.35,
+        "sgie_ms": 3.14,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619916.7501462,
+      "cpu_percent": 60.5,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.036155700683594,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.83,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.89,
+        "sgie_fps": 9.89,
+        "faiss_searches_per_s": 1.48,
+        "pgie_ms": 0.44,
+        "sgie_ms": 3.13,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619920.7741985,
+      "cpu_percent": 60.3,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.036800384521484,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.84,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.88,
+        "sgie_fps": 9.88,
+        "faiss_searches_per_s": 1.47,
+        "pgie_ms": 0.38,
+        "sgie_ms": 5.64,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619924.7941725,
+      "cpu_percent": 66.8,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.037803649902344,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.85,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.88,
+        "sgie_fps": 9.88,
+        "faiss_searches_per_s": 1.47,
+        "pgie_ms": 0.43,
+        "sgie_ms": 3.49,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619928.8315783,
+      "cpu_percent": 61.4,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.0369110107421875,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.86,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.88,
+        "sgie_fps": 9.88,
+        "faiss_searches_per_s": 1.46,
+        "pgie_ms": 0.52,
+        "sgie_ms": 3.78,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619932.855388,
+      "cpu_percent": 59.9,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.037513732910156,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.87,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.88,
+        "sgie_fps": 9.88,
+        "faiss_searches_per_s": 1.45,
+        "pgie_ms": 0.42,
+        "sgie_ms": 4.05,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619936.8826528,
+      "cpu_percent": 59.8,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.037437438964844,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.88,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.88,
+        "sgie_fps": 9.88,
+        "faiss_searches_per_s": 1.44,
+        "pgie_ms": 0.43,
+        "sgie_ms": 3.6,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619940.9102073,
+      "cpu_percent": 59.1,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.037361145019531,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.88,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.88,
+        "sgie_fps": 9.88,
+        "faiss_searches_per_s": 1.43,
+        "pgie_ms": 0.34,
+        "sgie_ms": 3.33,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619944.9421463,
+      "cpu_percent": 64.9,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.037281036376953,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.89,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.88,
+        "sgie_fps": 9.88,
+        "faiss_searches_per_s": 1.42,
+        "pgie_ms": 0.37,
+        "sgie_ms": 3.54,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619948.9821765,
+      "cpu_percent": 60.1,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.037494659423828,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.9,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.88,
+        "sgie_fps": 9.88,
+        "faiss_searches_per_s": 1.41,
+        "pgie_ms": 0.36,
+        "sgie_ms": 3.49,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619953.0102024,
+      "cpu_percent": 60.8,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.037418365478516,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.91,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.88,
+        "sgie_fps": 9.88,
+        "faiss_searches_per_s": 1.4,
+        "pgie_ms": 0.37,
+        "sgie_ms": 4.33,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619957.037528,
+      "cpu_percent": 58.8,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.037364959716797,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.93,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.88,
+        "sgie_fps": 9.88,
+        "faiss_searches_per_s": 1.39,
+        "pgie_ms": 0.35,
+        "sgie_ms": 3.47,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619961.0621784,
+      "cpu_percent": 65.9,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.0381622314453125,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.93,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.88,
+        "sgie_fps": 9.87,
+        "faiss_searches_per_s": 1.39,
+        "pgie_ms": 0.4,
+        "sgie_ms": 3.65,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619965.0941515,
+      "cpu_percent": 63.6,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.039081573486328,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.94,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.88,
+        "sgie_fps": 9.87,
+        "faiss_searches_per_s": 1.38,
+        "pgie_ms": 0.38,
+        "sgie_ms": 3.61,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619969.1141796,
+      "cpu_percent": 57.7,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.037384033203125,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.95,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.87,
+        "sgie_fps": 9.87,
+        "faiss_searches_per_s": 1.37,
+        "pgie_ms": 0.35,
+        "sgie_ms": 4.05,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619973.13429,
+      "cpu_percent": 57.9,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.035701751708984,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.96,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.87,
+        "sgie_fps": 9.87,
+        "faiss_searches_per_s": 1.36,
+        "pgie_ms": 0.36,
+        "sgie_ms": 3.38,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619977.166164,
+      "cpu_percent": 61.1,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.037670135498047,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.96,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.87,
+        "sgie_fps": 9.87,
+        "faiss_searches_per_s": 1.35,
+        "pgie_ms": 0.41,
+        "sgie_ms": 3.7,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619981.1943674,
+      "cpu_percent": 60.3,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.03851318359375,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.98,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.87,
+        "sgie_fps": 9.87,
+        "faiss_searches_per_s": 1.34,
+        "pgie_ms": 0.73,
+        "sgie_ms": 3.31,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619985.226407,
+      "cpu_percent": 67.0,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.039142608642578,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 1.99,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.87,
+        "sgie_fps": 9.86,
+        "faiss_searches_per_s": 1.34,
+        "pgie_ms": 0.42,
+        "sgie_ms": 5.06,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619989.2708504,
+      "cpu_percent": 60.8,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.038703918457031,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.0,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.87,
+        "sgie_fps": 9.86,
+        "faiss_searches_per_s": 1.33,
+        "pgie_ms": 0.55,
+        "sgie_ms": 3.67,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619993.314126,
+      "cpu_percent": 59.2,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.0387115478515625,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.0,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.86,
+        "sgie_fps": 9.86,
+        "faiss_searches_per_s": 1.33,
+        "pgie_ms": 0.35,
+        "sgie_ms": 3.68,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758619997.3381345,
+      "cpu_percent": 59.1,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.038654327392578,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.01,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.86,
+        "sgie_fps": 9.86,
+        "faiss_searches_per_s": 1.32,
+        "pgie_ms": 0.36,
+        "sgie_ms": 3.23,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620001.3742049,
+      "cpu_percent": 60.1,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.039394378662109,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.02,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.86,
+        "sgie_fps": 9.86,
+        "faiss_searches_per_s": 1.31,
+        "pgie_ms": 0.43,
+        "sgie_ms": 3.46,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620005.3982954,
+      "cpu_percent": 64.4,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.039043426513672,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.03,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.86,
+        "sgie_fps": 9.86,
+        "faiss_searches_per_s": 1.3,
+        "pgie_ms": 0.59,
+        "sgie_ms": 4.73,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620009.4215248,
+      "cpu_percent": 59.7,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.0401611328125,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.03,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.86,
+        "sgie_fps": 9.85,
+        "faiss_searches_per_s": 1.29,
+        "pgie_ms": 0.39,
+        "sgie_ms": 3.06,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620013.4541433,
+      "cpu_percent": 61.9,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.0383148193359375,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.04,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.86,
+        "sgie_fps": 9.85,
+        "faiss_searches_per_s": 1.29,
+        "pgie_ms": 0.5,
+        "sgie_ms": 5.42,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620017.4741669,
+      "cpu_percent": 57.7,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.039527893066406,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.05,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.86,
+        "sgie_fps": 9.85,
+        "faiss_searches_per_s": 1.29,
+        "pgie_ms": 0.41,
+        "sgie_ms": 3.43,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620021.5015566,
+      "cpu_percent": 58.5,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.039318084716797,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.06,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.85,
+        "sgie_fps": 9.85,
+        "faiss_searches_per_s": 1.28,
+        "pgie_ms": 0.35,
+        "sgie_ms": 4.4,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620025.5222409,
+      "cpu_percent": 56.6,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.0398101806640625,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.06,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.85,
+        "sgie_fps": 9.85,
+        "faiss_searches_per_s": 1.27,
+        "pgie_ms": 0.39,
+        "sgie_ms": 3.48,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620029.5461848,
+      "cpu_percent": 66.8,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.039794921875,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.07,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.85,
+        "sgie_fps": 9.85,
+        "faiss_searches_per_s": 1.26,
+        "pgie_ms": 0.37,
+        "sgie_ms": 4.31,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620033.5804117,
+      "cpu_percent": 60.1,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.0390472412109375,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.08,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.85,
+        "sgie_fps": 9.85,
+        "faiss_searches_per_s": 1.26,
+        "pgie_ms": 0.38,
+        "sgie_ms": 3.15,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620037.6062317,
+      "cpu_percent": 71.6,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.038974761962891,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.08,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.85,
+        "sgie_fps": 9.85,
+        "faiss_searches_per_s": 1.25,
+        "pgie_ms": 0.42,
+        "sgie_ms": 4.25,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620041.6301634,
+      "cpu_percent": 62.7,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.039154052734375,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.09,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.85,
+        "sgie_fps": 9.85,
+        "faiss_searches_per_s": 1.24,
+        "pgie_ms": 0.45,
+        "sgie_ms": 4.08,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620045.6581426,
+      "cpu_percent": 58.7,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.0399932861328125,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.1,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.85,
+        "sgie_fps": 9.84,
+        "faiss_searches_per_s": 1.24,
+        "pgie_ms": 0.41,
+        "sgie_ms": 3.37,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620049.684773,
+      "cpu_percent": 66.3,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.0404205322265625,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.11,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.85,
+        "sgie_fps": 9.84,
+        "faiss_searches_per_s": 1.23,
+        "pgie_ms": 0.35,
+        "sgie_ms": 3.31,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620053.706267,
+      "cpu_percent": 56.8,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.040782928466797,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.11,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.84,
+        "sgie_fps": 9.84,
+        "faiss_searches_per_s": 1.23,
+        "pgie_ms": 0.39,
+        "sgie_ms": 4.21,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620057.738113,
+      "cpu_percent": 60.9,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.039661407470703,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.12,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.84,
+        "sgie_fps": 9.84,
+        "faiss_searches_per_s": 1.22,
+        "pgie_ms": 0.37,
+        "sgie_ms": 3.57,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620061.761863,
+      "cpu_percent": 58.2,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.040607452392578,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.12,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.84,
+        "sgie_fps": 9.84,
+        "faiss_searches_per_s": 1.22,
+        "pgie_ms": 0.35,
+        "sgie_ms": 3.25,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620065.7822134,
+      "cpu_percent": 63.7,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.040473937988281,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.13,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.84,
+        "sgie_fps": 9.84,
+        "faiss_searches_per_s": 1.21,
+        "pgie_ms": 0.4,
+        "sgie_ms": 3.61,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620069.8021348,
+      "cpu_percent": 63.5,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.041744232177734,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.14,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.84,
+        "sgie_fps": 9.84,
+        "faiss_searches_per_s": 1.2,
+        "pgie_ms": 0.6,
+        "sgie_ms": 3.17,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620073.8345382,
+      "cpu_percent": 68.9,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.042076110839844,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.14,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.84,
+        "sgie_fps": 9.84,
+        "faiss_searches_per_s": 1.2,
+        "pgie_ms": 0.46,
+        "sgie_ms": 3.77,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620077.8702006,
+      "cpu_percent": 60.8,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.043571472167969,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.15,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.84,
+        "sgie_fps": 9.83,
+        "faiss_searches_per_s": 1.19,
+        "pgie_ms": 0.51,
+        "sgie_ms": 4.09,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620081.8942912,
+      "cpu_percent": 60.1,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.04443359375,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.15,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.83,
+        "sgie_fps": 9.83,
+        "faiss_searches_per_s": 1.19,
+        "pgie_ms": 0.39,
+        "sgie_ms": 4.27,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620085.9362895,
+      "cpu_percent": 58.5,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.044437408447266,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.16,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.83,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.18,
+        "pgie_ms": 0.49,
+        "sgie_ms": 3.48,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620089.9622228,
+      "cpu_percent": 64.8,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.043956756591797,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.17,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.83,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.17,
+        "pgie_ms": 0.38,
+        "sgie_ms": 3.57,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620093.9893146,
+      "cpu_percent": 56.7,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.043376922607422,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.18,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.83,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.17,
+        "pgie_ms": 0.38,
+        "sgie_ms": 3.25,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620098.0261297,
+      "cpu_percent": 60.0,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.043659210205078,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.18,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.16,
+        "pgie_ms": 0.41,
+        "sgie_ms": 3.61,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620102.0502234,
+      "cpu_percent": 60.1,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.0434417724609375,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.19,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.83,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.15,
+        "pgie_ms": 0.41,
+        "sgie_ms": 3.53,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620106.0741367,
+      "cpu_percent": 58.6,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.043834686279297,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.21,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.17,
+        "pgie_ms": 0.62,
+        "sgie_ms": 3.59,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620110.0982296,
+      "cpu_percent": 64.6,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.043384552001953,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.22,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.16,
+        "pgie_ms": 0.67,
+        "sgie_ms": 3.83,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620114.1501348,
+      "cpu_percent": 61.7,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.043270111083984,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.23,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.18,
+        "pgie_ms": 0.36,
+        "sgie_ms": 6.83,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620118.170167,
+      "cpu_percent": 58.9,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.040252685546875,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.24,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.18,
+        "pgie_ms": 0.44,
+        "sgie_ms": 4.53,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620122.1941478,
+      "cpu_percent": 53.9,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.0423431396484375,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.25,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.18,
+        "pgie_ms": 0.37,
+        "sgie_ms": 3.59,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620126.226135,
+      "cpu_percent": 58.7,
+      "memory_percent": 93.8,
+      "memory_used_gb": 6.038509368896484,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.25,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.17,
+        "pgie_ms": 0.4,
+        "sgie_ms": 3.06,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620130.250201,
+      "cpu_percent": 63.5,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.043434143066406,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.26,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.16,
+        "pgie_ms": 0.34,
+        "sgie_ms": 3.55,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620134.2781537,
+      "cpu_percent": 55.2,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.043693542480469,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.26,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.16,
+        "pgie_ms": 0.39,
+        "sgie_ms": 3.18,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620138.3021317,
+      "cpu_percent": 56.2,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.044586181640625,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.27,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.15,
+        "pgie_ms": 0.37,
+        "sgie_ms": 3.52,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620142.336207,
+      "cpu_percent": 56.5,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.043666839599609,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.27,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.83,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.15,
+        "pgie_ms": 0.46,
+        "sgie_ms": 3.67,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620146.3621426,
+      "cpu_percent": 62.8,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.043338775634766,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.28,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.15,
+        "pgie_ms": 0.35,
+        "sgie_ms": 3.34,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620150.385777,
+      "cpu_percent": 62.2,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.044921875,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.28,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.14,
+        "pgie_ms": 0.48,
+        "sgie_ms": 3.86,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620154.4221659,
+      "cpu_percent": 58.3,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.045215606689453,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.29,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.14,
+        "pgie_ms": 0.4,
+        "sgie_ms": 3.49,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620158.461396,
+      "cpu_percent": 57.5,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.044597625732422,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.3,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.14,
+        "pgie_ms": 0.31,
+        "sgie_ms": 4.35,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620162.4923806,
+      "cpu_percent": 58.0,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.044269561767578,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.3,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.14,
+        "pgie_ms": 0.52,
+        "sgie_ms": 3.3,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620166.518132,
+      "cpu_percent": 57.6,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.044197082519531,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.31,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.13,
+        "pgie_ms": 0.37,
+        "sgie_ms": 3.26,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620170.5381532,
+      "cpu_percent": 55.0,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.045234680175781,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.31,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.83,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.12,
+        "pgie_ms": 0.35,
+        "sgie_ms": 3.9,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620174.574272,
+      "cpu_percent": 62.7,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.045505523681641,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.32,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.12,
+        "pgie_ms": 0.4,
+        "sgie_ms": 3.07,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620178.6182482,
+      "cpu_percent": 61.1,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.044330596923828,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.32,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.83,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.11,
+        "pgie_ms": 0.34,
+        "sgie_ms": 3.68,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620182.642158,
+      "cpu_percent": 60.2,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.0443267822265625,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.33,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.11,
+        "pgie_ms": 0.35,
+        "sgie_ms": 3.24,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620186.6707969,
+      "cpu_percent": 59.0,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.045143127441406,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.34,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.11,
+        "pgie_ms": 0.48,
+        "sgie_ms": 4.18,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620190.7058897,
+      "cpu_percent": 54.4,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.044246673583984,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.34,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.83,
+        "sgie_fps": 9.83,
+        "faiss_searches_per_s": 1.11,
+        "pgie_ms": 0.41,
+        "sgie_ms": 3.79,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620194.7381492,
+      "cpu_percent": 65.7,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.0452117919921875,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.35,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.83,
+        "sgie_fps": 9.83,
+        "faiss_searches_per_s": 1.1,
+        "pgie_ms": 0.42,
+        "sgie_ms": 4.17,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620198.7622182,
+      "cpu_percent": 79.2,
+      "memory_percent": 93.9,
+      "memory_used_gb": 6.046726226806641,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.35,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.82,
+        "faiss_searches_per_s": 1.1,
+        "pgie_ms": 0.58,
+        "sgie_ms": 5.11,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620202.80217,
+      "cpu_percent": 94.5,
+      "memory_percent": 95.9,
+      "memory_used_gb": 6.136081695556641,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.36,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.82,
+        "sgie_fps": 9.81,
+        "faiss_searches_per_s": 1.1,
+        "pgie_ms": 0.59,
+        "sgie_ms": 5.72,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620206.8341815,
+      "cpu_percent": 70.5,
+      "memory_percent": 96.6,
+      "memory_used_gb": 6.178230285644531,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.36,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.8,
+        "sgie_fps": 9.8,
+        "faiss_searches_per_s": 1.09,
+        "pgie_ms": 0.55,
+        "sgie_ms": 3.7,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620210.8702676,
+      "cpu_percent": 62.0,
+      "memory_percent": 96.6,
+      "memory_used_gb": 6.178623199462891,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.36,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.8,
+        "sgie_fps": 9.8,
+        "faiss_searches_per_s": 1.09,
+        "pgie_ms": 0.45,
+        "sgie_ms": 4.23,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620214.9017866,
+      "cpu_percent": 64.4,
+      "memory_percent": 96.7,
+      "memory_used_gb": 6.179813385009766,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.36,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.8,
+        "sgie_fps": 9.8,
+        "faiss_searches_per_s": 1.08,
+        "pgie_ms": 0.38,
+        "sgie_ms": 3.49,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620218.928734,
+      "cpu_percent": 57.4,
+      "memory_percent": 96.7,
+      "memory_used_gb": 6.177761077880859,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.37,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.8,
+        "sgie_fps": 9.8,
+        "faiss_searches_per_s": 1.08,
+        "pgie_ms": 0.39,
+        "sgie_ms": 3.96,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620222.9741855,
+      "cpu_percent": 59.3,
+      "memory_percent": 95.0,
+      "memory_used_gb": 6.0666351318359375,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.37,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.8,
+        "sgie_fps": 9.8,
+        "faiss_searches_per_s": 1.07,
+        "pgie_ms": 0.4,
+        "sgie_ms": 3.52,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620226.9976592,
+      "cpu_percent": 55.8,
+      "memory_percent": 95.0,
+      "memory_used_gb": 6.067344665527344,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.38,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.8,
+        "sgie_fps": 9.8,
+        "faiss_searches_per_s": 1.07,
+        "pgie_ms": 0.35,
+        "sgie_ms": 4.51,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620231.020229,
+      "cpu_percent": 60.7,
+      "memory_percent": 95.0,
+      "memory_used_gb": 6.066551208496094,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.38,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.8,
+        "sgie_fps": 9.8,
+        "faiss_searches_per_s": 1.07,
+        "pgie_ms": 0.49,
+        "sgie_ms": 5.12,
+        "faiss_ms": 0.0
+      }
+    },
+    {
+      "timestamp": 1758620235.0457652,
+      "cpu_percent": 59.6,
+      "memory_percent": 95.0,
+      "memory_used_gb": 6.066837310791016,
+      "gpu_stats": {
+        "gpu_utilization": 0,
+        "memory_percent": 0
+      },
+      "pipeline_stats": {
+        "detections_per_second": 2.39,
+        "recognitions_per_second": 0.0,
+        "avg_confidence": 0,
+        "active_tracks": 0,
+        "pgie_fps": 9.8,
+        "sgie_fps": 9.8,
+        "faiss_searches_per_s": 1.06,
+        "pgie_ms": 0.37,
+        "sgie_ms": 3.18,
+        "faiss_ms": 0.0
+      }
+    }
+  ]
+}
