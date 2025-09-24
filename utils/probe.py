@@ -11,6 +11,7 @@ from gi.repository import GLib, Gst
 import pyds
 
 from utils import perf_stats  # performance metrics helper
+from utils.env import _env_bool, _env_int, _env_float, _env_str
 
 # Lazy-load the ROI helper shared library for robust crops from NvBufSurface
 _roi_lib = None
@@ -182,7 +183,7 @@ def pgie_src_filter_probe(pad,info,u_data):
             cfg_min = u_data.get('thresholds', {}).get('pgie_min_conf', None)
     except Exception:
         cfg_min = None
-    env_min = os.getenv('PGIE_MIN_CONF')
+    env_min = _env_str('PGIE_MIN_CONF', None)
     try:
         if env_min is not None:
             MIN_CONF = float(env_min)
@@ -232,7 +233,7 @@ def pgie_src_filter_probe(pad,info,u_data):
                 continue
         
         # Original simple per-object filtering based on confidence only
-        debug_dets = os.getenv('PGIE_DEBUG_DETS','0') == '1'
+        debug_dets = bool(_env_bool('PGIE_DEBUG_DETS', False))
         if debug_dets:
             # Count objects before filtering for diagnostics
             try:
@@ -560,9 +561,9 @@ def sgie_feature_extract_probe(pad,info, data):
                         else:
                             if top_sim >= threshold:
                                 match_ok = True
-                    # Cache result for this track if enabled and we got a match
-                    if recognize_once:
-                        recognize_cache[oid] = {'name': top_name if match_ok else None}
+                    # Cache result for this track only when we got a positive match
+                    if recognize_once and match_ok:
+                        recognize_cache[oid] = {'name': top_name}
                 if match_ok:
                     # Map FAISS label (user_id or name) to display name via labels.json
                     display_name = _get_display_name(top_name, lbl_path) if top_name else None

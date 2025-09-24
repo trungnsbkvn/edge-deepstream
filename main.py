@@ -26,10 +26,16 @@ from utils.status_codes import (
 )
 from utils import enroll_ops
 from typing import Any, Dict, Optional
+from utils.env import _env_bool, _env_int, _env_float, _env_str
 import configparser
 
 # Global realtime flag to allow decoder frame dropping
 REALTIME_DROP = True  # Enable by default for better real-time performance
+
+"""
+Env helpers now centralized in utils.env to enable reuse.
+Importing: _env_bool, _env_int, _env_float, _env_str
+"""
 
 
 def cb_newpad(decodebin, decoder_src_pad, data):
@@ -83,19 +89,18 @@ def decodebin_child_added(child_proxy, Object, name, user_data):
     if "source" in name:
         # Low-latency tuning for RTSP source (rtspsrc)
         try:
-            env_latency = os.getenv('DS_RTSP_LATENCY')
-            latency_val = int(env_latency) if env_latency and env_latency.isdigit() else 150
+            latency_val = _env_int('DS_RTSP_LATENCY', 150)
             if Object.find_property('latency') is not None:
                 Object.set_property('latency', latency_val)
-            if os.getenv('DS_RTSP_TCP','0') == '1' and Object.find_property('protocols') is not None:
+            if _env_bool('DS_RTSP_TCP', False) and Object.find_property('protocols') is not None:
                 try:
                     Object.set_property('protocols', 4)  # TCP
                 except Exception:
                     pass
             if Object.find_property('do-retransmission') is not None:
-                Object.set_property('do-retransmission', os.getenv('DS_RTSP_RETRANS','0') == '1')
+                Object.set_property('do-retransmission', bool(_env_bool('DS_RTSP_RETRANS', False)))
             if Object.find_property('drop-on-latency') is not None:
-                Object.set_property('drop-on-latency', os.getenv('DS_RTSP_DROP_ON_LATENCY','0') == '1')
+                Object.set_property('drop-on-latency', bool(_env_bool('DS_RTSP_DROP_ON_LATENCY', False)))
             if Object.find_property('ntp-sync') is not None:
                 Object.set_property('ntp-sync', False)
         except Exception:
@@ -133,33 +138,35 @@ def create_source_bin(index, uri):
             rtspsrc.set_property('location', uri)
             # Set additional RTSP properties for better real-time performance
             try:
-                rtspsrc.set_property('do-rtcp', False)  # Disable RTCP for lower latency
-                rtspsrc.set_property('do-retransmission', False)
-                rtspsrc.set_property('ntp-sync', False)
-                rtspsrc.set_property('user-agent', 'DeepStream/1.0')
+                # Allow overrides for core RTSP settings via environment
+                rtspsrc.set_property('do-rtcp', bool(_env_bool('DS_RTSP_DO_RTCP', False)))
+                rtspsrc.set_property('do-retransmission', bool(_env_bool('DS_RTSP_RETRANS', False)))
+                rtspsrc.set_property('ntp-sync', bool(_env_bool('DS_RTSP_NTP_SYNC', False)))
+                rtspsrc.set_property('user-agent', _env_str('DS_RTSP_USER_AGENT', 'DeepStream/1.0'))
                 if rtspsrc.find_property('buffer-mode') is not None:
-                    rtspsrc.set_property('buffer-mode', 1)  # LOW_LATENCY mode
+                    rtspsrc.set_property('buffer-mode', _env_int('DS_RTSP_BUFFER_MODE', 1))  # LOW_LATENCY mode by default
                 if rtspsrc.find_property('drop-on-latency') is not None:
-                    rtspsrc.set_property('drop-on-latency', True)
-                # Additional real-time optimizations
+                    # Tri-state: env overrides; else tie to REALTIME_DROP
+                    _drop_val = _env_bool('DS_RTSP_DROP_ON_LATENCY', None)
+                    rtspsrc.set_property('drop-on-latency', bool(REALTIME_DROP) if _drop_val is None else bool(_drop_val))
+                # Additional real-time optimizations (timeouts/retries)
                 if rtspsrc.find_property('timeout') is not None:
-                    rtspsrc.set_property('timeout', 5000000)  # 5 seconds timeout
+                    rtspsrc.set_property('timeout', _env_int('DS_RTSP_TIMEOUT_US', 5000000))  # default 5s
                 if rtspsrc.find_property('retry') is not None:
-                    rtspsrc.set_property('retry', 3)  # Limit retries
+                    rtspsrc.set_property('retry', _env_int('DS_RTSP_RETRY', 3))  # default 3
             except Exception:
                 pass
             # Latency/env overrides - prioritize low latency
             try:
-                env_latency = os.getenv('DS_RTSP_LATENCY')
-                latency_val = int(env_latency) if env_latency and env_latency.isdigit() else 100  # Reduced from 150
+                latency_val = _env_int('DS_RTSP_LATENCY', 100)
                 if rtspsrc.find_property('latency') is not None:
                     rtspsrc.set_property('latency', latency_val)
                 # Additional buffer control
                 if rtspsrc.find_property('tcp-timeout') is not None:
-                    rtspsrc.set_property('tcp-timeout', 5000000)  # 5s TCP timeout
+                    rtspsrc.set_property('tcp-timeout', _env_int('DS_RTSP_TCP_TIMEOUT_US', 5000000))  # default 5s
             except Exception:
                 pass
-            if os.getenv('DS_RTSP_TCP','0') == '1' and rtspsrc.find_property('protocols') is not None:
+            if _env_bool('DS_RTSP_TCP', False) and rtspsrc.find_property('protocols') is not None:
                 try:
                     rtspsrc.set_property('protocols', 4)  # TCP
                 except Exception:
@@ -171,29 +178,55 @@ def create_source_bin(index, uri):
             
             # We'll detect codec dynamically in pad-added callback
             # For now, create a queue to buffer incoming data
+            # Make queue settings configurable via environment variables (using global helpers).
+
+            # Common/global defaults
+            q_leaky_g = _env_int('DS_RTSP_QUEUE_LEAKY', 2)
+            q_max_buf_g = _env_int('DS_RTSP_QUEUE_MAX_BUFFERS', 3)
+            q_max_bytes_g = _env_int('DS_RTSP_QUEUE_MAX_BYTES', 0)
+            q_max_time_g = _env_int('DS_RTSP_QUEUE_MAX_TIME', 0)
+            q_silent_g = bool(_env_bool('DS_RTSP_QUEUE_SILENT', True))
+            q_flush_g = bool(_env_bool('DS_RTSP_QUEUE_FLUSH_ON_EOS', True))
+
+            # Per-queue overrides with sensible defaults matching previous behavior
+            pre_leaky = _env_int('DS_RTSP_QUEUE_PRE_LEAKY', q_leaky_g)
+            pre_max_buf = _env_int('DS_RTSP_QUEUE_PRE_MAX_BUFFERS', q_max_buf_g)
+            pre_max_bytes = _env_int('DS_RTSP_QUEUE_PRE_MAX_BYTES', q_max_bytes_g)
+            pre_max_time = _env_int('DS_RTSP_QUEUE_PRE_MAX_TIME', q_max_time_g)
+            pre_silent = bool(_env_bool('DS_RTSP_QUEUE_PRE_SILENT', q_silent_g))
+            pre_flush = bool(_env_bool('DS_RTSP_QUEUE_PRE_FLUSH_ON_EOS', q_flush_g))
+
+            post_leaky = _env_int('DS_RTSP_QUEUE_POST_LEAKY', q_leaky_g)
+            # Historically, post queue had a stricter buffer size (2)
+            post_max_buf = _env_int('DS_RTSP_QUEUE_POST_MAX_BUFFERS', _env_int('DS_RTSP_QUEUE_MAX_BUFFERS', 2))
+            post_max_bytes = _env_int('DS_RTSP_QUEUE_POST_MAX_BYTES', q_max_bytes_g)
+            post_max_time = _env_int('DS_RTSP_QUEUE_POST_MAX_TIME', q_max_time_g)
+            post_silent = bool(_env_bool('DS_RTSP_QUEUE_POST_SILENT', q_silent_g))
+            post_flush = bool(_env_bool('DS_RTSP_QUEUE_POST_FLUSH_ON_EOS', q_flush_g))
+
             queue_pre = Gst.ElementFactory.make('queue', f'queue-pre-{index}')
             if queue_pre:
                 try:
-                    queue_pre.set_property('leaky', 2)           # Drop old buffers
-                    queue_pre.set_property('max-size-buffers', 3)  # Small buffer pool
-                    queue_pre.set_property('max-size-bytes', 0)
-                    queue_pre.set_property('max-size-time', 0)
-                    queue_pre.set_property('silent', True)
+                    queue_pre.set_property('leaky', pre_leaky)
+                    queue_pre.set_property('max-size-buffers', pre_max_buf)
+                    queue_pre.set_property('max-size-bytes', pre_max_bytes)
+                    queue_pre.set_property('max-size-time', pre_max_time)
+                    queue_pre.set_property('silent', pre_silent)
                     # Add overflow protection
-                    queue_pre.set_property('flush-on-eos', True)
+                    queue_pre.set_property('flush-on-eos', pre_flush)
                 except Exception:
                     pass
             queue_post = Gst.ElementFactory.make('queue', f'queue-postdec-{index}')
             if queue_post:
                 try:
-                    # Aggressive settings for real-time RTSP with buffer overflow protection
-                    queue_post.set_property('leaky', 2)          # Drop old buffers
-                    queue_post.set_property('max-size-buffers', 2)  # Very small buffer to force dropping
-                    queue_post.set_property('max-size-bytes', 0)
-                    queue_post.set_property('max-size-time', 0)
-                    queue_post.set_property('silent', True)
+                    # RTSP post-decode queue with overflow protection
+                    queue_post.set_property('leaky', post_leaky)
+                    queue_post.set_property('max-size-buffers', post_max_buf)
+                    queue_post.set_property('max-size-bytes', post_max_bytes)
+                    queue_post.set_property('max-size-time', post_max_time)
+                    queue_post.set_property('silent', post_silent)
                     # Force immediate flushing on overflow
-                    queue_post.set_property('flush-on-eos', True)
+                    queue_post.set_property('flush-on-eos', post_flush)
                 except Exception:
                     pass
             
@@ -232,7 +265,7 @@ def create_source_bin(index, uri):
                             if decoder:
                                 print(f"[RTSP] Using {cand} for H.264 decoding")
                                 # Configure decoder for real-time performance
-                                if 'nvv4l2decoder' in cand:
+                                if 'nvv4l2decoder' in cand and bool(REALTIME_DROP):
                                     try:
                                         if decoder.find_property('drop-frame-interval') is not None:
                                             decoder.set_property('drop-frame-interval', 1)
@@ -255,7 +288,7 @@ def create_source_bin(index, uri):
                             if decoder:
                                 print(f"[RTSP] Using {cand} for H.265 decoding")
                                 # Configure decoder for real-time performance
-                                if 'nvv4l2decoder' in cand:
+                                if 'nvv4l2decoder' in cand and bool(REALTIME_DROP):
                                     try:
                                         if decoder.find_property('drop-frame-interval') is not None:
                                             decoder.set_property('drop-frame-interval', 1)
@@ -380,7 +413,7 @@ def create_source_bin(index, uri):
         sys.stderr.write(" Unable to create uri decode bin \n")
     uri_decode_bin.set_property("uri", uri)
     try:
-        force_nvmm = os.getenv('DS_FORCE_NVMM', '0') == '1'
+        force_nvmm = bool(_env_bool('DS_FORCE_NVMM', False))
         if force_nvmm:
             print(f"[RTSP] Forcing NVMM caps for source index={index}")
             uri_decode_bin.set_property("caps", Gst.Caps.from_string("video/x-raw(memory:NVMM)"))
@@ -411,6 +444,15 @@ def main(cfg, run_duration=None):
     print(cfg)
     print("Load known faces features \n")
     known_face_features = load_faces(cfg['pipeline']['known_face_dir'])
+    # Decide realtime drop policy as early as possible so source creation honors it
+    try:
+        v = _env_bool('DS_REALTIME_DROP', None)
+        if v is not None:
+            REALTIME_DROP = bool(v)
+        else:
+            REALTIME_DROP = bool(cfg.get('pipeline', {}).get('realtime', 0))
+    except Exception:
+        pass
     # Load prebuilt vector index (FAISS) if available and enabled (no building at runtime)
     try:
         recog_cfg = cfg.get('recognition', {})
@@ -426,7 +468,7 @@ def main(cfg, run_duration=None):
         else:
             reason = []
             try:
-                if os.getenv('DS_DISABLE_FAISS', '0') == '1':
+                if bool(_env_bool('DS_DISABLE_FAISS', False)):
                     reason.append('env DS_DISABLE_FAISS=1')
                 if not os.path.exists(str(recog_cfg.get('index_path', '')).strip()):
                     reason.append('missing index_path')
@@ -494,7 +536,7 @@ def main(cfg, run_duration=None):
     # Comment out a source entry in the TOML [source] table (best-effort)
     def _delete_source_in_config(cam_id: str):
         try:
-            cfg_path = os.getenv('DS_CONFIG_PATH', 'config/config_pipeline.toml')
+            cfg_path = _env_str('DS_CONFIG_PATH', 'config/config_pipeline.toml')
             if not os.path.exists(cfg_path):
                 return
             with open(cfg_path, 'r', encoding='utf-8') as f:
@@ -528,7 +570,7 @@ def main(cfg, run_duration=None):
     def _persist_source_update(cam_id: str, uri: str):
         # Re-write [source] section fully (sorted, compact)
         try:
-            cfg_path = os.getenv('DS_CONFIG_PATH', 'config/config_pipeline.toml')
+            cfg_path = _env_str('DS_CONFIG_PATH', 'config/config_pipeline.toml')
             if not os.path.exists(cfg_path):
                 return
             try:
@@ -1001,14 +1043,19 @@ def main(cfg, run_duration=None):
     pipeline.add(queue7)
     # Aggressive leaky queues for real-time performance
     # More aggressive settings to prevent frame accumulation and repetition
+    # Make core pipeline queues env-configurable, keep previous defaults
+    q_leaky = _env_int('DS_PIPE_QUEUE_LEAKY', 2)
+    q_max_buf = _env_int('DS_PIPE_QUEUE_MAX_BUFFERS', 3)
+    q_max_bytes = _env_int('DS_PIPE_QUEUE_MAX_BYTES', 0)
+    q_max_time = _env_int('DS_PIPE_QUEUE_MAX_TIME', 0)
+    q_silent = bool(_env_bool('DS_PIPE_QUEUE_SILENT', True))
     for q in (queue1, queue2, queue3, queue4, queue5, queue6, queue7):
         try:
-            q.set_property('leaky', 2)  # downstream: drop oldest when downstream is slow
-            q.set_property('max-size-buffers', 3)  # Reduced from 10 to 3 for minimal latency
-            q.set_property('max-size-bytes', 0)
-            q.set_property('max-size-time', 0)
-            # Enable silent drops to avoid console spam
-            q.set_property('silent', True)
+            q.set_property('leaky', q_leaky)
+            q.set_property('max-size-buffers', q_max_buf)
+            q.set_property('max-size-bytes', q_max_bytes)
+            q.set_property('max-size-time', q_max_time)
+            q.set_property('silent', q_silent)
         except Exception:
             pass
 
@@ -1117,7 +1164,7 @@ def main(cfg, run_duration=None):
     # Optional pre-SGIE colorspace conversion to RGBA for ROI helper compatibility
     conv_pre_sgie = None
     capsfilter_pre_sgie = None
-    force_rgba = os.getenv('DS_FORCE_CONVERT_RGBA','0') == '1'
+    force_rgba = bool(_env_bool('DS_FORCE_CONVERT_RGBA', False))
     if force_rgba:
         try:
             conv_pre_sgie = Gst.ElementFactory.make('nvvideoconvert', 'pre-sgie-conv')
@@ -1200,12 +1247,9 @@ def main(cfg, run_duration=None):
         recog_cfg = cfg.get('recognition', {})
         recog_thresh = recog_cfg.get('threshold', 0.3)
         # Env override for quick debug without editing config
-        _rt_env = os.getenv('RECOG_THRESH')
-        if _rt_env is not None:
-            try:
-                recog_thresh = float(_rt_env)
-            except Exception:
-                pass
+        _rt_env_f = _env_float('RECOG_THRESH', None)
+        if _rt_env_f is not None:
+            recog_thresh = float(_rt_env_f)
         recog_save_dir = recog_cfg.get('save_dir', '')
         recog_save_mode = str(recog_cfg.get('save_mode', 'all')).lower()
         recog_metric = str(recog_cfg.get('metric', 'cosine')).lower()
@@ -1445,18 +1489,9 @@ def main(cfg, run_duration=None):
                 pass
         return False
 
-    try:
-        interval_ms = int(os.getenv('DS_HEALTH_INTERVAL_MS', '5000'))
-    except Exception:
-        interval_ms = 5000
-    try:
-        timeout_sec = float(os.getenv('DS_HEALTH_TIMEOUT_SEC', '20'))
-    except Exception:
-        timeout_sec = 20.0
-    try:
-        max_retries = int(os.getenv('DS_HEALTH_MAX_RETRIES', '3'))
-    except Exception:
-        max_retries = 3
+    interval_ms = _env_int('DS_HEALTH_INTERVAL_MS', 5000)
+    timeout_sec = _env_float('DS_HEALTH_TIMEOUT_SEC', 20.0)
+    max_retries = _env_int('DS_HEALTH_MAX_RETRIES', 3)
 
     def _watchdog():
         now = time.time()
@@ -1674,7 +1709,7 @@ def main(cfg, run_duration=None):
             # Quality / blur check
             blur_val = enroll_ops.blur_variance(face112)
             try:
-                blur_min = float(os.getenv('DS_ENROLL_BLUR_VAR_MIN', '15'))
+                blur_min = float(_env_float('DS_ENROLL_BLUR_VAR_MIN', 15.0))
             except Exception:
                 blur_min = 15.0
             if blur_val < blur_min:
@@ -1707,14 +1742,14 @@ def main(cfg, run_duration=None):
             except Exception:
                 recog_thresh_local = 0.5
             try:
-                dup_thresh = float(os.getenv('DS_ENROLL_DUP_THRESHOLD', str(recog_thresh_local)))
+                dup_thresh = float(_env_float('DS_ENROLL_DUP_THRESHOLD', float(recog_thresh_local)))
             except Exception:
-                dup_thresh = recog_thresh_local
+                dup_thresh = float(recog_thresh_local)
             try:
-                intra_thresh = float(os.getenv('DS_ENROLL_INTRA_THRESHOLD', '0.35'))
+                intra_thresh = float(_env_float('DS_ENROLL_INTRA_THRESHOLD', 0.35))
             except Exception:
                 intra_thresh = 0.35
-            append_mode = os.getenv('DS_ENROLL_APPEND', '0') == '1'
+            append_mode = bool(_env_bool('DS_ENROLL_APPEND', False))
 
             # Existing metadata for user / persons
             labels_path_effective = lbl_path or str(recog_cfg.get('labels_path','')).strip()
@@ -1870,7 +1905,7 @@ def main(cfg, run_duration=None):
             idx = _ensure_index()
             labels_path_effective = lbl_path or str(recog_cfg.get('labels_path','')).strip()
             index_path_effective = idx_path or str(recog_cfg.get('index_path','')).strip()
-            remove_files = os.getenv('DS_ENROLL_REMOVE_FILES','1') == '1'
+            remove_files = bool(_env_bool('DS_ENROLL_REMOVE_FILES', True))
             # Deletion: allow operation if at least labels_path exists (index_path optional)
             if labels_path_effective:
                 removed = enroll_ops.delete_person(idx, uid, index_path_effective or '', labels_path_effective, remove_files=remove_files)
@@ -2066,8 +2101,8 @@ if __name__ == '__main__':
     # Optional runtime cap to avoid indefinite hangs (env: DS_RUN_DURATION_SEC)
     run_dur = None
     try:
-        _rd = os.getenv('DS_RUN_DURATION_SEC')
-        if _rd:
+        _rd = _env_float('DS_RUN_DURATION_SEC', None)
+        if _rd is not None:
             run_dur = float(_rd)
     except Exception:
         run_dur = None

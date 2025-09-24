@@ -99,7 +99,7 @@ recognize_once_per_track=1
 
 [thresholds]
 # Minimum PGIE detection confidence to keep faces (env PGIE_MIN_CONF overrides if set)
-pgie_min_conf=0.5
+pgie_min_conf=0.45
 
 [events]
 # Enable sending recognition events over Unix domain socket

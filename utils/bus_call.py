@@ -3,11 +3,12 @@ import sys
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst
 import os
+from utils.env import _env_bool
 def bus_call(bus, message, loop):
     t = message.type
     if t == Gst.MessageType.EOS:
         # Allow keeping loop alive if all dynamic sources were removed intentionally.
-        quit_on_empty = os.getenv('DS_QUIT_ON_EMPTY', '0') == '1'
+        quit_on_empty = bool(_env_bool('DS_QUIT_ON_EMPTY', False))
         if quit_on_empty:
             sys.stdout.write("End-of-stream (quit_on_empty=1)\n")
             loop.quit()

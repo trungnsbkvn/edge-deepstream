@@ -53,7 +53,8 @@ def safe_load_index(recog_cfg: dict):
     Returns None when disabled, files missing, or FAISS unavailable.
     """
     try:
-        dbg = os.getenv('DS_FAISS_DEBUG', '0') == '1'
+        from utils.env import _env_bool
+        dbg = bool(_env_bool('DS_FAISS_DEBUG', False))
         t0 = None
         if dbg:
             try:
@@ -65,7 +66,7 @@ def safe_load_index(recog_cfg: dict):
         if not isinstance(recog_cfg, dict):
             return None
         # Allow hard-disable via env to bypass any FAISS work
-        if os.getenv('DS_DISABLE_FAISS', '0') == '1':
+        if bool(_env_bool('DS_DISABLE_FAISS', False)):
             if dbg:
                 print('[FAISS] disabled by env DS_DISABLE_FAISS=1')
             return None
@@ -111,6 +112,11 @@ def safe_load_index(recog_cfg: dict):
                 print('[FAISS] files missing; skipping')
         return None
     except Exception:
-        if os.getenv('DS_FAISS_DEBUG', '0') == '1':
-            print('[FAISS] exception; skipping')
+        try:
+            from utils.env import _env_bool
+            if bool(_env_bool('DS_FAISS_DEBUG', False)):
+                print('[FAISS] exception; skipping')
+        except Exception:
+            pass
+        return None
         return None

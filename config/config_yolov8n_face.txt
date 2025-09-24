@@ -27,20 +27,18 @@ custom-lib-path=../models/yolov8n_face/nvdsinfer_custom_impl_Yolo/libnvdsinfer_c
 net-scale-factor=0.0039215697906911373
 force-implicit-batch-dim=0
 # number of consecutive batches to skip for inference
-# Optimized: Skip 1 frame for better throughput while maintaining detection quality
-interval=2
+interval=1
 
 enable-output-landmark=1
 
 # Detection filtering knobs to reduce noisy boxes
 # Apply to all classes (faces):
 [class-attrs-all]
-# Optimized: Slightly higher confidence threshold to reduce false positives
-pre-cluster-threshold=0.55
-# Optimized: Reduced top-K for better performance
+# Slightly higher confidence threshold to reduce false positives
+pre-cluster-threshold=0.50
+# Reduced top-K for better performance
 topk=15
 # Use NMS clustering with a slightly stricter IOU to reduce duplicates
-#cluster-mode=2
-nms-iou-threshold=0.50
-# Optimized: Match pre-cluster threshold for consistency
-post-cluster-threshold=0.55
+nms-iou-threshold=0.45
+# Match pre-cluster threshold for consistency
+post-cluster-threshold=0.50

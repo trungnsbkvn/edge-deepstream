@@ -68,14 +68,16 @@ class EventSender:
             assert self._sock is not None
             # Use sendall to avoid partial packet writes (critical for framing)
             self._sock.sendall(buf)
-            if os.getenv('EVENT_SENDER_DEBUG') == '1':
+            from utils.env import _env_bool
+            if bool(_env_bool('EVENT_SENDER_DEBUG', False)):
                 try:
                     print(f"[EVENT_SENDER] sent packet bytes={len(buf)} text_len={strLen} img_len={imgSize}", flush=True)
                 except Exception:
                     pass
             return True
         except Exception as e:
-            if os.getenv('EVENT_SENDER_DEBUG') == '1':
+            from utils.env import _env_bool
+            if bool(_env_bool('EVENT_SENDER_DEBUG', False)):
                 try:
                     print(f"[EVENT_SENDER] send error: {e}", flush=True)
                 except Exception:
