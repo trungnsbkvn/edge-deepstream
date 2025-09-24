@@ -477,11 +477,11 @@ def sgie_feature_extract_probe(pad,info, data):
                 oid = int(obj_meta.object_id)
                 # ---- Embedding history accumulation ----
                 try:
-                    # Load cache params lazily from config fields passed through data vector (reuse idx_path tuple space if needed)
-                    # We don't have direct config values here; fallback defaults then allow environment overrides.
-                    max_hist = int(os.getenv('TRACK_EMB_MAX','5'))
-                    min_fuse = int(os.getenv('TRACK_EMB_MIN_FUSE','3'))
-                    fuse_mode = os.getenv('TRACK_EMB_FUSE_MODE','mean')
+                    max_hist = int(data[20]) if len(data) > 20 else 5
+                    min_fuse = int(data[21]) if len(data) > 21 else 3
+                    fuse_mode = str(data[22]) if len(data) > 22 else 'mean'
+                    if fuse_mode not in ('mean','median'):
+                        fuse_mode = 'mean'
                 except Exception:
                     max_hist, min_fuse, fuse_mode = 5, 3, 'mean'
                 hist = emb_hist.get(oid, [])

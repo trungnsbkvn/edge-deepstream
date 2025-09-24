@@ -10,13 +10,13 @@ realtime=1
 gpu_id=0
 batch-size=8                    # = number of sources (if all active simultaneously)
 # Optimized: Reduced resolution for better throughput (YOLOv8n works well at lower res)
-width=960                       # Reduced from 1920 for better performance
-height=540                      # Reduced from 1080 for better performance
+width=1280                      # Reduced from 1920 for better performance
+height=720                      # Reduced from 1080 for better performance
 # Optimized: Aggressive timeout for buffer overflow prevention
 batched-push-timeout=10000      # 10ms - Very aggressive to prevent decoder buffer accumulation
-enable-padding=1               # Keep aspect ratio, pad with black
-nvbuf-memory-type=0            # Use system memory (more stable for buffer overflow issues)
-live-source=1                  # Important for RTSP
+enable-padding=1                # Keep aspect ratio, pad with black
+nvbuf-memory-type=0             # Use system memory (more stable for buffer overflow issues)
+live-source=1                   # Important for RTSP
 sync-inputs=0                   # Critical: Don't wait for slow sources to prevent buffer backup
 
 [nvosd]
@@ -123,19 +123,10 @@ port = 1883
 request_topic = "/local/core/v2/ai/request"
 response_topic = "/local/core/v2/ai/response"
 
-# Additional optimizations
-[optimizations]
-# Enable frame dropping for real-time performance
-enable_frame_dropping=1
-# Queue management
-#max_queue_size=3
-# Memory management
-#use_nvmm=1
-
 [cache]
 # Maximum embeddings to keep per active track for fusion
-max_track_embeddings=1000
+max_track_embeddings=10
 # Minimum embeddings required before using fused embedding for recognition
-min_embeddings_for_fusion=3
+min_embeddings_for_fusion=2
 # Fusion mode: mean | median (mean is faster, median more robust to outliers)
-fusion_mode="mean"
+fusion_mode="median"

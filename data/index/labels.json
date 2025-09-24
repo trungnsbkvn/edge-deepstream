@@ -11,15 +11,6 @@
         "data/known_faces/91f441577bb547dfb080b3398195a3f0_1758613269.png"
       ]
     },
-    "3153a3d16aa943629a10cbc1c81fc870": {
-      "start_time": 0,
-      "end_time": 0,
-      "user_id": "3153a3d16aa943629a10cbc1c81fc870",
-      "name": "Daniel Nguyễn",
-      "aligned_paths": [
-        "data/known_faces/3153a3d16aa943629a10cbc1c81fc870_1758530262.png"
-      ]
-    },
     "df751c79451e4ecb997fe6f029c9cf23": {
       "start_time": 0,
       "end_time": 0,
@@ -127,12 +118,20 @@
       "aligned_paths": [
         "data/known_faces/Phoebe.png"
       ]
+    },
+    "4ab16c9e540e40648e28a01c1df786ac": {
+      "start_time": 0,
+      "end_time": 0,
+      "user_id": "4ab16c9e540e40648e28a01c1df786ac",
+      "name": "Daniel Nguyễn",
+      "aligned_paths": [
+        "data/known_faces/4ab16c9e540e40648e28a01c1df786ac_1758678414.png"
+      ]
     }
   },
   "version": 2,
   "labels": [
     "91f441577bb547dfb080b3398195a3f0",
-    "3153a3d16aa943629a10cbc1c81fc870",
     "df751c79451e4ecb997fe6f029c9cf23",
     "ff455ec98ff740a38132edfd7f9c2794",
     "4b85888d97cb4b41a6548658d4b10f80",
@@ -146,6 +145,7 @@
     "rachel",
     "phoebe",
     "91f441577bb547dfb080b3398195a3f0",
-    "91f441577bb547dfb080b3398195a3f0"
+    "91f441577bb547dfb080b3398195a3f0",
+    "4ab16c9e540e40648e28a01c1df786ac"
   ]
 }

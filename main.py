@@ -1248,6 +1248,17 @@ def main(cfg, run_duration=None):
         verbose = False
         perf_verbose = 0
 
+    # Cache / fusion configuration
+    try:
+        cache_cfg = cfg.get('cache', {})
+        max_track_embeddings = int(cache_cfg.get('max_track_embeddings', 5))
+        min_embeddings_for_fusion = int(cache_cfg.get('min_embeddings_for_fusion', 3))
+        fusion_mode = str(cache_cfg.get('fusion_mode', 'mean')).lower()
+        if fusion_mode not in ('mean','median'):
+            fusion_mode = 'mean'
+    except Exception:
+        max_track_embeddings, min_embeddings_for_fusion, fusion_mode = 5, 3, 'mean'
+
     # Indexing options for live updates
     try:
         idx_enable = int(recog_cfg.get('index_stream', 0)) == 1
@@ -1311,6 +1322,9 @@ def main(cfg, run_duration=None):
         event_sender,         # 17 EventSender or None
         send_images,          # 18 send image bytes flag
         perf_verbose          # 19 performance verbosity
+        ,max_track_embeddings # 20 cache: max per-track embeddings
+        ,min_embeddings_for_fusion # 21 cache: min fuse embeddings
+        ,fusion_mode          # 22 cache: fusion mode
     ]
     sgie_src_pad.add_probe(Gst.PadProbeType.BUFFER, sgie_feature_extract_probe, data)
 
