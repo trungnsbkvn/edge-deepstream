@@ -1,5 +1,5 @@
 [pipeline]
-display=1
+display=0
 is_aarch64=1
 known_face_dir="data/known_faces"
 save_feature_path="data/features"
@@ -9,15 +9,15 @@ realtime=1
 [streammux]
 gpu_id=0
 batch-size=8                    # = number of sources (if all active simultaneously)
-# Optimized: Reduced resolution for better throughput (YOLOv8n works well at lower res)
-width=1280                      # Reduced from 1920 for better performance
-height=720                      # Reduced from 1080 for better performance
-# Optimized: Aggressive timeout for buffer overflow prevention
-batched-push-timeout=15000      # 10ms - Very aggressive to prevent decoder buffer accumulation
+width=960
+height=540
+batched-push-timeout=15000      # 15ms - More aggressive for motion scenarios
 enable-padding=1                # Keep aspect ratio, pad with black
 nvbuf-memory-type=0             # Use system memory (more stable for buffer overflow issues)
 live-source=1                   # Important for RTSP
 sync-inputs=0                   # Critical: Don't wait for slow sources to prevent buffer backup
+# Motion-specific optimizations
+attach-sys-ts=1                 # Use system timestamps for better sync
 
 [nvosd]
 process-mode=0
@@ -29,7 +29,7 @@ display-text=1
 "6a887f101a204b3788e45b9d4cbcb84b" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/601"
 "93efaf1091cc4b83990619a17347879f" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/801"
 "c0fad364fd7345b1af2fe5a2f691e7f7" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/701"
-"c9bb715db20a489f94f58d36bb3602d0" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/301"
+"c9bb715db20a489f94f58d36bb3602d0" = "rtsp://admin:wesmart1@192.168.0.102:554/Streaming/Channels/101"
 "d73cf20e2aa544b7b352070f24bff721" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/401"
 
 [pgie]
@@ -43,8 +43,8 @@ config-file-path="config/config_arcface.txt"
 config-file-path="config/config_tracker_perf.txt"
 
 [tiler]
-width=1920
-height=1080
+width=1280
+height=720
 #enable-padding=1
 
 [sink]
@@ -94,8 +94,9 @@ index_label="name"
 stream_index_path="data/index/live.index"
 stream_labels_path="data/index/live_labels.json"
 
-# Recognize once per track: 1 enable, 0 disable
-recognize_once_per_track=1
+# Motion-optimized: Disable recognize-once for better motion tracking
+# This allows re-recognition during motion for better stability
+recognize_once_per_track=0
 
 [thresholds]
 # Minimum PGIE detection confidence to keep faces (env PGIE_MIN_CONF overrides if set)
@@ -118,15 +119,15 @@ request_topic = "/local/core/v2/ai/request"
 response_topic = "/local/core/v2/ai/response"
 
 [cache]
-# Maximum embeddings to keep per active track for fusion
-max_track_embeddings=60
-# Minimum embeddings required before using fused embedding for recognition
-min_embeddings_for_fusion=2
-# Fusion mode: mean | median (mean is faster, median more robust to outliers)
+# Motion-optimized: Reduced cache size for better performance
+max_track_embeddings=30
+# Motion-optimized: Require fewer embeddings for faster recognition
+min_embeddings_for_fusion=1
+# Fusion mode: mean | median is more robust to motion blur outliers
 fusion_mode="mean"
 
 [debug]
 # Verbose console prints (matching per-frame)
-verbose=1
+verbose=0
 ## Performance profiling verbosity: 0=quiet,1=periodic summary,2=include attach events
-perf_verbose=2
+perf_verbose=0

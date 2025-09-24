@@ -731,6 +731,13 @@ def sgie_feature_extract_probe(pad,info, data):
                                     print(f"[WARN] save_crop_from_frame failed: {_e}", flush=True)
                             return None
 
+                        # Allow disabling all disk writes via env to reduce latency
+                        try:
+                            from utils.env import _env_bool as __envb
+                            if bool(__envb('DS_DISABLE_SAVES', False)):
+                                recog_save_mode = 'none'
+                        except Exception:
+                            pass
                         # We will also control event emission based on save_mode.
                         # Mark whether this iteration produced a new "sendable" state.
                         st['emit_event'] = False

@@ -29,7 +29,7 @@ from typing import Any, Dict, Optional
 from utils.env import _env_bool, _env_int, _env_float, _env_str
 import configparser
 
-# Global realtime flag to allow decoder frame dropping
+# Global realtime flag to allow decoder frame dropping - ENHANCED for motion
 REALTIME_DROP = True  # Enable by default for better real-time performance
 
 """
@@ -180,9 +180,9 @@ def create_source_bin(index, uri):
             # For now, create a queue to buffer incoming data
             # Make queue settings configurable via environment variables (using global helpers).
 
-            # Common/global defaults
+            # Motion-optimized defaults for better real-time performance
             q_leaky_g = _env_int('DS_RTSP_QUEUE_LEAKY', 2)
-            q_max_buf_g = _env_int('DS_RTSP_QUEUE_MAX_BUFFERS', 3)
+            q_max_buf_g = _env_int('DS_RTSP_QUEUE_MAX_BUFFERS', 2)  # Reduced from 3 for motion
             q_max_bytes_g = _env_int('DS_RTSP_QUEUE_MAX_BYTES', 0)
             q_max_time_g = _env_int('DS_RTSP_QUEUE_MAX_TIME', 0)
             q_silent_g = bool(_env_bool('DS_RTSP_QUEUE_SILENT', True))
@@ -197,8 +197,8 @@ def create_source_bin(index, uri):
             pre_flush = bool(_env_bool('DS_RTSP_QUEUE_PRE_FLUSH_ON_EOS', q_flush_g))
 
             post_leaky = _env_int('DS_RTSP_QUEUE_POST_LEAKY', q_leaky_g)
-            # Historically, post queue had a stricter buffer size (2)
-            post_max_buf = _env_int('DS_RTSP_QUEUE_POST_MAX_BUFFERS', _env_int('DS_RTSP_QUEUE_MAX_BUFFERS', 2))
+            # Motion-optimized: Even stricter post-decode buffer (1 for immediate processing)
+            post_max_buf = _env_int('DS_RTSP_QUEUE_POST_MAX_BUFFERS', _env_int('DS_RTSP_QUEUE_MAX_BUFFERS', 1))
             post_max_bytes = _env_int('DS_RTSP_QUEUE_POST_MAX_BYTES', q_max_bytes_g)
             post_max_time = _env_int('DS_RTSP_QUEUE_POST_MAX_TIME', q_max_time_g)
             post_silent = bool(_env_bool('DS_RTSP_QUEUE_POST_SILENT', q_silent_g))
@@ -268,8 +268,8 @@ def create_source_bin(index, uri):
                                 if 'nvv4l2decoder' in cand and bool(REALTIME_DROP):
                                     try:
                                         if decoder.find_property('drop-frame-interval') is not None:
-                                            # Allow override via env
-                                            dfi = _env_int('DS_DEC_DROP_FRAME_INTERVAL', 1)
+                                            # Motion-optimized: More aggressive frame dropping
+                                            dfi = _env_int('DS_DEC_DROP_FRAME_INTERVAL', 0)  # 0 = drop when needed
                                             decoder.set_property('drop-frame-interval', dfi)
                                         if decoder.find_property('disable-dpb') is not None:
                                             decoder.set_property('disable-dpb', bool(_env_bool('DS_DEC_DISABLE_DPB', True)))
