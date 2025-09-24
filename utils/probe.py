@@ -512,6 +512,17 @@ def sgie_feature_extract_probe(pad,info, data):
                     cached = recognize_cache.get(oid)
                     if cached is not None:
                         top_name = cached.get('name')
+                        # If we cached a score, reuse it for display purposes
+                        try:
+                            cached_score = float(cached.get('score')) if 'score' in cached else None
+                        except Exception:
+                            cached_score = None
+                        if cached_score is not None:
+                            if recog_metric == 'l2':
+                                top_dist = cached_score
+                                top_sim = -top_dist
+                            else:
+                                top_sim = cached_score
                         match_ok = top_name is not None
                 # If not cached, perform matching once
                 if not match_ok:
@@ -555,7 +566,9 @@ def sgie_feature_extract_probe(pad,info, data):
                             if top_sim >= threshold:
                                 match_ok = True
                     if recognize_once and match_ok:
-                        recognize_cache[oid] = {'name': top_name}
+                        # Cache name and score for stable display on subsequent frames
+                        score_for_cache = (top_dist if recog_metric == 'l2' else top_sim)
+                        recognize_cache[oid] = {'name': top_name, 'score': float(score_for_cache)}
                 if match_ok:
                     display_name = _get_display_name(top_name, lbl_path) if top_name else None
                     if verbose:

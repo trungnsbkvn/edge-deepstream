@@ -114,6 +114,9 @@ export DS_FORCE_NVMM=1
 
 export EMBEDDING_CACHE_SIZE=1000
 
+#export GST_DEBUG="*:1,nvinfer:0"
+#export GST_DEBUG_NO_COLOR=1
+
 # Run the application
 echo "Starting edge-deepstream with real-time optimizations..."
 LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libgomp.so.1 python3 main.py "$CONFIG_FILE"
