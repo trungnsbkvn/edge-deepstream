@@ -268,13 +268,19 @@ def create_source_bin(index, uri):
                                 if 'nvv4l2decoder' in cand and bool(REALTIME_DROP):
                                     try:
                                         if decoder.find_property('drop-frame-interval') is not None:
-                                            decoder.set_property('drop-frame-interval', 1)
+                                            # Allow override via env
+                                            dfi = _env_int('DS_DEC_DROP_FRAME_INTERVAL', 1)
+                                            decoder.set_property('drop-frame-interval', dfi)
                                         if decoder.find_property('disable-dpb') is not None:
-                                            decoder.set_property('disable-dpb', True)
+                                            decoder.set_property('disable-dpb', bool(_env_bool('DS_DEC_DISABLE_DPB', True)))
                                         if decoder.find_property('max-pool-size') is not None:
-                                            decoder.set_property('max-pool-size', 4)
+                                            decoder.set_property('max-pool-size', _env_int('DS_DEC_MAX_POOL_SIZE', 4))
                                         if decoder.find_property('output-io-mode') is not None:
-                                            decoder.set_property('output-io-mode', 2)  # DMABUF
+                                            decoder.set_property('output-io-mode', _env_int('DS_DEC_OUTPUT_IO_MODE', 2))  # DMABUF
+                                        if decoder.find_property('num-extra-surfaces') is not None:
+                                            nes = _env_int('DS_DEC_NUM_EXTRA_SURFACES', -1)
+                                            if nes >= 0:
+                                                decoder.set_property('num-extra-surfaces', nes)
                                     except Exception as e:
                                         print(f"[RTSP] Decoder config warning: {e}")
                                 break
@@ -291,13 +297,17 @@ def create_source_bin(index, uri):
                                 if 'nvv4l2decoder' in cand and bool(REALTIME_DROP):
                                     try:
                                         if decoder.find_property('drop-frame-interval') is not None:
-                                            decoder.set_property('drop-frame-interval', 1)
+                                            decoder.set_property('drop-frame-interval', _env_int('DS_DEC_DROP_FRAME_INTERVAL', 1))
                                         if decoder.find_property('disable-dpb') is not None:
-                                            decoder.set_property('disable-dpb', True)
+                                            decoder.set_property('disable-dpb', bool(_env_bool('DS_DEC_DISABLE_DPB', True)))
                                         if decoder.find_property('max-pool-size') is not None:
-                                            decoder.set_property('max-pool-size', 4)
+                                            decoder.set_property('max-pool-size', _env_int('DS_DEC_MAX_POOL_SIZE', 4))
                                         if decoder.find_property('output-io-mode') is not None:
-                                            decoder.set_property('output-io-mode', 2)  # DMABUF
+                                            decoder.set_property('output-io-mode', _env_int('DS_DEC_OUTPUT_IO_MODE', 2))  # DMABUF
+                                        if decoder.find_property('num-extra-surfaces') is not None:
+                                            nes = _env_int('DS_DEC_NUM_EXTRA_SURFACES', -1)
+                                            if nes >= 0:
+                                                decoder.set_property('num-extra-surfaces', nes)
                                     except Exception as e:
                                         print(f"[RTSP] Decoder config warning: {e}")
                                 break
@@ -315,7 +325,28 @@ def create_source_bin(index, uri):
                     dynamic_elements['decoder'] = decoder
                     
                     # Add elements to bin
-                    for e in [depay, parse, decoder, queue_post]:
+                    # Optional caps filter after decoder to enforce progressive/format/PAR
+                    capsfilter = None
+                    try:
+                        caps_str_env = _env_str('DS_DEC_CAPS_STR', '').strip()
+                        force_prog = bool(_env_bool('DS_DEC_FORCE_PROGRESSIVE', False))
+                        force_fmt = _env_str('DS_DEC_FORCE_FORMAT', '').strip()
+                        if caps_str_env or force_prog or force_fmt:
+                            if not caps_str_env:
+                                parts = ["video/x-raw"]
+                                if force_fmt:
+                                    parts.append(f"format={force_fmt}")
+                                if force_prog:
+                                    parts.append("interlace-mode=progressive")
+                                    parts.append("pixel-aspect-ratio=1/1")
+                                caps_str_env = ', '.join(parts)
+                            capsfilter = Gst.ElementFactory.make('capsfilter', f'capsfilter-postdec-{index}')
+                            if capsfilter:
+                                capsfilter.set_property('caps', Gst.Caps.from_string(caps_str_env))
+                    except Exception:
+                        capsfilter = None
+
+                    for e in [depay, parse, decoder, capsfilter, queue_post]:
                         if e:
                             nbin.add(e)
                     
@@ -335,17 +366,26 @@ def create_source_bin(index, uri):
                     if not parse.link(decoder):
                         print(f"[RTSP] parse->decoder link failed index={index}")
                         return
-                    if queue_post and not decoder.link(queue_post):
-                        print(f"[RTSP] decoder->queue link failed index={index}")
-                        return
+                    # Link decoder -> (capsfilter?) -> queue_post
+                    if capsfilter:
+                        if not decoder.link(capsfilter):
+                            print(f"[RTSP] decoder->capsfilter link failed index={index}")
+                            return
+                        if queue_post and not capsfilter.link(queue_post):
+                            print(f"[RTSP] capsfilter->queue link failed index={index}")
+                            return
+                    else:
+                        if queue_post and not decoder.link(queue_post):
+                            print(f"[RTSP] decoder->queue link failed index={index}")
+                            return
                     
                     # Sync new elements with parent state
-                    for e in [depay, parse, decoder, queue_post]:
+                    for e in [depay, parse, decoder, capsfilter, queue_post]:
                         if e:
                             e.sync_state_with_parent()
                     
                     # Create ghost pad from last element src
-                    last = queue_post or decoder
+                    last = queue_post or capsfilter or decoder
                     ghost_src = last.get_static_pad('src')
                     if not ghost_src:
                         print(f"[RTSP] No src pad for ghost pad creation, source {index}")

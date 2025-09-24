@@ -22,8 +22,8 @@ export GST_DEBUG=3  # Minimal debug output / "*:1,nvinfer:0"
 export GST_PLUGIN_FEATURE_RANK="nvv4l2decoder:MAX"
 
 # RTSP optimizations
-export DS_FORCE_CONVERT_RGBA=1          # Force RGBA conversion for compatibility
-export DS_RTSP_LATENCY=150              # Jitter buffer latency (ms)
+export DS_FORCE_CONVERT_RGBA=0          # Force RGBA conversion for compatibility
+export DS_RTSP_LATENCY=200              # Jitter buffer latency (ms)
 export DS_RTSP_TCP=1                    # Force TCP for reliability
 export DS_RTSP_DROP_ON_LATENCY=1        # Drop frames when late
 export DS_RTSP_RETRANS=0                # Disable retransmission
@@ -37,6 +37,16 @@ export DS_RTSP_RETRANS=0                # Disable retransmission
 # export DS_RTSP_TCP_TIMEOUT_US=5000000
 # export DS_REALTIME_DROP=1             # Global realtime drop policy
 
+# Decoder tuning (optional overrides)
+# export DS_DEC_DROP_FRAME_INTERVAL=1   # Drop N-1 frames to keep realtime
+# export DS_DEC_DISABLE_DPB=1           # Disable DPB to reduce latency
+# export DS_DEC_MAX_POOL_SIZE=4         # Limit decoder buffer pool
+# export DS_DEC_OUTPUT_IO_MODE=2        # 2=DMABUF_IMPORT
+# export DS_DEC_NUM_EXTRA_SURFACES=0    # Extra decoder surfaces (>=0 to set)
+# export DS_DEC_FORCE_PROGRESSIVE=1     # Force interlace-mode=progressive
+# export DS_DEC_FORCE_FORMAT=NV12       # Force output format
+# export DS_DEC_CAPS_STR="video/x-raw, format=NV12, interlace-mode=progressive, pixel-aspect-ratio=1/1" # full custom caps
+
 # Queue settings (RTSP pre/post)
 # Global defaults (apply to both unless overridden):
 export DS_RTSP_QUEUE_LEAKY=2
@@ -47,14 +57,14 @@ export DS_RTSP_QUEUE_SILENT=true
 export DS_RTSP_QUEUE_FLUSH_ON_EOS=true
 # Pre-queue overrides (before depay/parse):
 # export DS_RTSP_QUEUE_PRE_LEAKY=2
-export DS_RTSP_QUEUE_PRE_MAX_BUFFERS=5
+#export DS_RTSP_QUEUE_PRE_MAX_BUFFERS=5
 # export DS_RTSP_QUEUE_PRE_MAX_BYTES=0
 # export DS_RTSP_QUEUE_PRE_MAX_TIME=0
 # export DS_RTSP_QUEUE_PRE_SILENT=true
 # export DS_RTSP_QUEUE_PRE_FLUSH_ON_EOS=true
 # Post-decode queue overrides:
 # export DS_RTSP_QUEUE_POST_LEAKY=2
-export DS_RTSP_QUEUE_POST_MAX_BUFFERS=4
+#export DS_RTSP_QUEUE_POST_MAX_BUFFERS=4
 # export DS_RTSP_QUEUE_POST_MAX_BYTES=0
 # export DS_RTSP_QUEUE_POST_MAX_TIME=0
 # export DS_RTSP_QUEUE_POST_SILENT=true
@@ -113,7 +123,7 @@ export DS_FORCE_NVMM=1
 # export DS_RUN_DURATION_SEC=0       # Auto-quit after N seconds (0 = disabled)
 # export EVENT_SENDER_DEBUG=0
 
-export EMBEDDING_CACHE_SIZE=1000
+export EMBEDDING_CACHE_SIZE=100
 
 # Run the application
 echo "Starting edge-deepstream with real-time optimizations..."
