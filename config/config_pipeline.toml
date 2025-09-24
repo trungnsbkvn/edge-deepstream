@@ -97,12 +97,6 @@ stream_labels_path="data/index/live_labels.json"
 # Recognize once per track: 1 enable, 0 disable
 recognize_once_per_track=1
 
-[debug]
-# Verbose console prints (matching per-frame)
-verbose=0
-## Performance profiling verbosity: 0=quiet,1=periodic summary,2=include attach events
-perf_verbose=0
-
 [thresholds]
 # Minimum PGIE detection confidence to keep faces (env PGIE_MIN_CONF overrides if set)
 pgie_min_conf=0.5
@@ -125,8 +119,14 @@ response_topic = "/local/core/v2/ai/response"
 
 [cache]
 # Maximum embeddings to keep per active track for fusion
-max_track_embeddings=10
+max_track_embeddings=60
 # Minimum embeddings required before using fused embedding for recognition
 min_embeddings_for_fusion=2
 # Fusion mode: mean | median (mean is faster, median more robust to outliers)
-fusion_mode="median"
+fusion_mode="mean"
+
+[debug]
+# Verbose console prints (matching per-frame)
+verbose=0
+## Performance profiling verbosity: 0=quiet,1=periodic summary,2=include attach events
+perf_verbose=0
