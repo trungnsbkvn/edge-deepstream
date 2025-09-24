@@ -28,7 +28,7 @@ alignment-type=1
 alignment-pics-path=/dev/shm/edge-deepstream/aligned
 #alignment-pics-path=data/faces/aligned
 # Optimized: Reduced interval for better recognition accuracy
-interval=1
+interval=0
 
 # OPTIMIZED: Performance tuning
 # Enable TensorRT optimization hints

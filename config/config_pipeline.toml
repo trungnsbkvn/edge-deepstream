@@ -13,7 +13,7 @@ batch-size=8                    # = number of sources (if all active simultaneou
 width=1280                      # Reduced from 1920 for better performance
 height=720                      # Reduced from 1080 for better performance
 # Optimized: Aggressive timeout for buffer overflow prevention
-batched-push-timeout=10000      # 10ms - Very aggressive to prevent decoder buffer accumulation
+batched-push-timeout=15000      # 10ms - Very aggressive to prevent decoder buffer accumulation
 enable-padding=1                # Keep aspect ratio, pad with black
 nvbuf-memory-type=0             # Use system memory (more stable for buffer overflow issues)
 live-source=1                   # Important for RTSP

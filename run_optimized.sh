@@ -18,23 +18,24 @@ export NVDS_DISABLE_ERROR_DISPLAY=1
 
 # GStreamer optimizations for real-time performance
 export GST_DEBUG_NO_COLOR=1
-export GST_DEBUG=1  # Minimal debug output
+export GST_DEBUG=3  # Minimal debug output / "*:1,nvinfer:0"
 export GST_PLUGIN_FEATURE_RANK="nvv4l2decoder:MAX"
 
 # RTSP optimizations
-export DS_RTSP_LATENCY=150            # Jitter buffer latency (ms)
-export DS_RTSP_TCP=1                  # Force TCP for reliability
-export DS_RTSP_DROP_ON_LATENCY=1      # Drop frames when late
-export DS_RTSP_RETRANS=0              # Disable retransmission
+export DS_FORCE_CONVERT_RGBA=1          # Force RGBA conversion for compatibility
+export DS_RTSP_LATENCY=150              # Jitter buffer latency (ms)
+export DS_RTSP_TCP=1                    # Force TCP for reliability
+export DS_RTSP_DROP_ON_LATENCY=1        # Drop frames when late
+export DS_RTSP_RETRANS=0                # Disable retransmission
 # Advanced rtspsrc knobs (uncomment to adjust)
-# export DS_RTSP_DO_RTCP=0             # Disable RTCP (default 0)
-# export DS_RTSP_NTP_SYNC=0            # Disable NTP sync (default 0)
+# export DS_RTSP_DO_RTCP=0              # Disable RTCP (default 0)
+# export DS_RTSP_NTP_SYNC=0             # Disable NTP sync (default 0)
 # export DS_RTSP_USER_AGENT="DeepStream/1.0"
-# export DS_RTSP_BUFFER_MODE=1         # 1 = LOW_LATENCY
-# export DS_RTSP_TIMEOUT_US=5000000    # 5s timeout
-# export DS_RTSP_RETRY=3               # Retry count
+# export DS_RTSP_BUFFER_MODE=1          # 1 = LOW_LATENCY
+# export DS_RTSP_TIMEOUT_US=5000000     # 5s timeout
+# export DS_RTSP_RETRY=3                # Retry count
 # export DS_RTSP_TCP_TIMEOUT_US=5000000
-# export DS_REALTIME_DROP=1            # Global realtime drop policy
+# export DS_REALTIME_DROP=1             # Global realtime drop policy
 
 # Queue settings (RTSP pre/post)
 # Global defaults (apply to both unless overridden):
@@ -113,9 +114,6 @@ export DS_FORCE_NVMM=1
 # export EVENT_SENDER_DEBUG=0
 
 export EMBEDDING_CACHE_SIZE=1000
-
-#export GST_DEBUG="*:1,nvinfer:0"
-#export GST_DEBUG_NO_COLOR=1
 
 # Run the application
 echo "Starting edge-deepstream with real-time optimizations..."
