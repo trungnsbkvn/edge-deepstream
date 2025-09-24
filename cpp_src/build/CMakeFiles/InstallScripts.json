@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/m2n/edge-deepstream/cpp_src/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

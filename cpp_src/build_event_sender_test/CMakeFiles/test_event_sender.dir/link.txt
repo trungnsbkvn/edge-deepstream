@@ -1,0 +1,1 @@
+/usr/bin/c++ "CMakeFiles/test_event_sender.dir/home/m2n/edge-deepstream/cpp_src/test_event_sender.cpp.o" "CMakeFiles/test_event_sender.dir/home/m2n/edge-deepstream/cpp_src/utils/env_utils.cpp.o" "CMakeFiles/test_event_sender.dir/home/m2n/edge-deepstream/cpp_src/utils/event_sender.cpp.o" -o test_event_sender  -lpthread

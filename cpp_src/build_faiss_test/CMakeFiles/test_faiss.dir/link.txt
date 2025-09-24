@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG "CMakeFiles/test_faiss.dir/home/m2n/edge-deepstream/cpp_src/test_faiss.cpp.o" "CMakeFiles/test_faiss.dir/home/m2n/edge-deepstream/cpp_src/utils/faiss_index.cpp.o" -o test_faiss  -Wl,-rpath,/usr/local/lib /usr/local/lib/libfaiss.so -lpthread

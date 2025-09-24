@@ -1,0 +1,46 @@
+cmake_minimum_required(VERSION 3.16)
+project(EdgeDeepStream VERSION 1.0.0 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Find required packages
+find_package(PkgConfig REQUIRED)
+
+# GStreamer packages
+pkg_check_modules(GST REQUIRED gstreamer-1.0)
+pkg_check_modules(GST_APP REQUIRED gstreamer-app-1.0)
+pkg_check_modules(GST_VIDEO REQUIRED gstreamer-video-1.0)
+
+# Include directories
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${GST_INCLUDE_DIRS}
+)
+
+# Compiler flags
+add_compile_options(
+    ${GST_CFLAGS}
+    -Wall
+    -Wextra
+    -O2
+    -g
+)
+
+# Simple main executable (minimal version first)
+add_executable(edge_deepstream_simple
+    ../src/simple_main.cpp
+    ../utils/env_utils.cpp
+    ../utils/status_codes.cpp
+    ../utils/config_parser.cpp
+)
+
+target_link_libraries(edge_deepstream_simple
+    ${GST_LIBRARIES}
+    pthread
+)
+
+# Print configuration summary
+message(STATUS "EdgeDeepStream Simple Configuration:")
+message(STATUS "  GStreamer found: ${GST_FOUND}")
+message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")

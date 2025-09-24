@@ -1,0 +1,3 @@
+/home/m2n/edge-deepstream/cpp_src/build_faiss_test/CMakeFiles/test_faiss.dir
+/home/m2n/edge-deepstream/cpp_src/build_faiss_test/CMakeFiles/edit_cache.dir
+/home/m2n/edge-deepstream/cpp_src/build_faiss_test/CMakeFiles/rebuild_cache.dir

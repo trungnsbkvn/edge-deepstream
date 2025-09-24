@@ -1,135 +1,4 @@
 {
-  "persons": {
-    "91f441577bb547dfb080b3398195a3f0": {
-      "start_time": 0,
-      "end_time": 0,
-      "user_id": "91f441577bb547dfb080b3398195a3f0",
-      "name": "Dienws",
-      "aligned_paths": [
-        "data/known_faces/91f441577bb547dfb080b3398195a3f0_1758529671.png",
-        "data/known_faces/91f441577bb547dfb080b3398195a3f0_1758612946.png",
-        "data/known_faces/91f441577bb547dfb080b3398195a3f0_1758613269.png"
-      ]
-    },
-    "df751c79451e4ecb997fe6f029c9cf23": {
-      "start_time": 0,
-      "end_time": 0,
-      "user_id": "df751c79451e4ecb997fe6f029c9cf23",
-      "name": "Hiếu",
-      "aligned_paths": [
-        "data/known_faces/df751c79451e4ecb997fe6f029c9cf23_1758530981.png"
-      ]
-    },
-    "ff455ec98ff740a38132edfd7f9c2794": {
-      "start_time": 0,
-      "end_time": 0,
-      "user_id": "ff455ec98ff740a38132edfd7f9c2794",
-      "name": "Vịnh",
-      "aligned_paths": [
-        "data/known_faces/ff455ec98ff740a38132edfd7f9c2794_1758530994.png"
-      ]
-    },
-    "4b85888d97cb4b41a6548658d4b10f80": {
-      "start_time": 0,
-      "end_time": 0,
-      "user_id": "4b85888d97cb4b41a6548658d4b10f80",
-      "name": "Lương Đức Toàn",
-      "aligned_paths": [
-        "data/known_faces/4b85888d97cb4b41a6548658d4b10f80_1758531009.png"
-      ]
-    },
-    "98f34d90ad474e048ee2c8af5f7e0937": {
-      "start_time": 0,
-      "end_time": 0,
-      "user_id": "98f34d90ad474e048ee2c8af5f7e0937",
-      "name": "Nguyễn Văn Thành",
-      "aligned_paths": [
-        "data/known_faces/98f34d90ad474e048ee2c8af5f7e0937_1758531034.png"
-      ]
-    },
-    "a71249260dc941ba82f289a03531566a": {
-      "start_time": 0,
-      "end_time": 0,
-      "user_id": "a71249260dc941ba82f289a03531566a",
-      "name": "Trang",
-      "aligned_paths": [
-        "data/known_faces/a71249260dc941ba82f289a03531566a_1758531045.png"
-      ]
-    },
-    "5ca1f0a649a5414ebce3fdc31fcf46ab": {
-      "start_time": 0,
-      "end_time": 0,
-      "user_id": "5ca1f0a649a5414ebce3fdc31fcf46ab",
-      "name": "Dung",
-      "aligned_paths": [
-        "data/known_faces/5ca1f0a649a5414ebce3fdc31fcf46ab_1758531060.png"
-      ]
-    },
-    "d56ff1df49d044d885778def94ff3a01": {
-      "start_time": 0,
-      "end_time": 0,
-      "user_id": "d56ff1df49d044d885778def94ff3a01",
-      "name": "Lâm Nguyễn",
-      "aligned_paths": [
-        "data/known_faces/d56ff1df49d044d885778def94ff3a01_1758531191.png"
-      ]
-    },
-    "ross": {
-      "user_id": "ross",
-      "name": "Ross",
-      "start_time": 1758543475,
-      "end_time": 1758543475,
-      "aligned_paths": [
-        "data/known_faces/Ross.png"
-      ]
-    },
-    "chandler": {
-      "user_id": "chandler",
-      "name": "Chandler",
-      "start_time": 1758543558,
-      "end_time": 1758543558,
-      "aligned_paths": [
-        "data/known_faces/Chandler.png"
-      ]
-    },
-    "monica": {
-      "user_id": "monica",
-      "name": "Monica",
-      "start_time": 1758543592,
-      "end_time": 1758543592,
-      "aligned_paths": [
-        "data/known_faces/Monica.png"
-      ]
-    },
-    "rachel": {
-      "user_id": "rachel",
-      "name": "Rachel",
-      "start_time": 1758543621,
-      "end_time": 1758543621,
-      "aligned_paths": [
-        "data/known_faces/Rachel.png"
-      ]
-    },
-    "phoebe": {
-      "user_id": "phoebe",
-      "name": "Phoebe",
-      "start_time": 1758543660,
-      "end_time": 1758543660,
-      "aligned_paths": [
-        "data/known_faces/Phoebe.png"
-      ]
-    },
-    "4ab16c9e540e40648e28a01c1df786ac": {
-      "start_time": 0,
-      "end_time": 0,
-      "user_id": "4ab16c9e540e40648e28a01c1df786ac",
-      "name": "Daniel Nguyễn",
-      "aligned_paths": [
-        "data/known_faces/4ab16c9e540e40648e28a01c1df786ac_1758678414.png"
-      ]
-    }
-  },
-  "version": 2,
   "labels": [
     "91f441577bb547dfb080b3398195a3f0",
     "df751c79451e4ecb997fe6f029c9cf23",
@@ -147,5 +16,136 @@
     "91f441577bb547dfb080b3398195a3f0",
     "91f441577bb547dfb080b3398195a3f0",
     "4ab16c9e540e40648e28a01c1df786ac"
-  ]
+  ],
+  "persons": {
+    "4ab16c9e540e40648e28a01c1df786ac": {
+      "aligned_paths": [
+        "data/known_faces/4ab16c9e540e40648e28a01c1df786ac_1758678414.png"
+      ],
+      "end_time": 0,
+      "name": "Daniel Nguyễn",
+      "start_time": 0,
+      "user_id": "4ab16c9e540e40648e28a01c1df786ac"
+    },
+    "4b85888d97cb4b41a6548658d4b10f80": {
+      "aligned_paths": [
+        "data/known_faces/4b85888d97cb4b41a6548658d4b10f80_1758531009.png"
+      ],
+      "end_time": 0,
+      "name": "Lương Đức Toàn",
+      "start_time": 0,
+      "user_id": "4b85888d97cb4b41a6548658d4b10f80"
+    },
+    "5ca1f0a649a5414ebce3fdc31fcf46ab": {
+      "aligned_paths": [
+        "data/known_faces/5ca1f0a649a5414ebce3fdc31fcf46ab_1758531060.png"
+      ],
+      "end_time": 0,
+      "name": "Dung",
+      "start_time": 0,
+      "user_id": "5ca1f0a649a5414ebce3fdc31fcf46ab"
+    },
+    "91f441577bb547dfb080b3398195a3f0": {
+      "aligned_paths": [
+        "data/known_faces/91f441577bb547dfb080b3398195a3f0_1758529671.png",
+        "data/known_faces/91f441577bb547dfb080b3398195a3f0_1758612946.png",
+        "data/known_faces/91f441577bb547dfb080b3398195a3f0_1758613269.png"
+      ],
+      "end_time": 0,
+      "name": "Dienws",
+      "start_time": 0,
+      "user_id": "91f441577bb547dfb080b3398195a3f0"
+    },
+    "98f34d90ad474e048ee2c8af5f7e0937": {
+      "aligned_paths": [
+        "data/known_faces/98f34d90ad474e048ee2c8af5f7e0937_1758531034.png"
+      ],
+      "end_time": 0,
+      "name": "Nguyễn Văn Thành",
+      "start_time": 0,
+      "user_id": "98f34d90ad474e048ee2c8af5f7e0937"
+    },
+    "a71249260dc941ba82f289a03531566a": {
+      "aligned_paths": [
+        "data/known_faces/a71249260dc941ba82f289a03531566a_1758531045.png"
+      ],
+      "end_time": 0,
+      "name": "Trang",
+      "start_time": 0,
+      "user_id": "a71249260dc941ba82f289a03531566a"
+    },
+    "chandler": {
+      "aligned_paths": [
+        "data/known_faces/Chandler.png"
+      ],
+      "end_time": 1758543558,
+      "name": "Chandler",
+      "start_time": 1758543558,
+      "user_id": "chandler"
+    },
+    "d56ff1df49d044d885778def94ff3a01": {
+      "aligned_paths": [
+        "data/known_faces/d56ff1df49d044d885778def94ff3a01_1758531191.png"
+      ],
+      "end_time": 0,
+      "name": "Lâm Nguyễn",
+      "start_time": 0,
+      "user_id": "d56ff1df49d044d885778def94ff3a01"
+    },
+    "df751c79451e4ecb997fe6f029c9cf23": {
+      "aligned_paths": [
+        "data/known_faces/df751c79451e4ecb997fe6f029c9cf23_1758530981.png"
+      ],
+      "end_time": 0,
+      "name": "Hiếu",
+      "start_time": 0,
+      "user_id": "df751c79451e4ecb997fe6f029c9cf23"
+    },
+    "ff455ec98ff740a38132edfd7f9c2794": {
+      "aligned_paths": [
+        "data/known_faces/ff455ec98ff740a38132edfd7f9c2794_1758530994.png"
+      ],
+      "end_time": 0,
+      "name": "Vịnh",
+      "start_time": 0,
+      "user_id": "ff455ec98ff740a38132edfd7f9c2794"
+    },
+    "monica": {
+      "aligned_paths": [
+        "data/known_faces/Monica.png"
+      ],
+      "end_time": 1758543592,
+      "name": "Monica",
+      "start_time": 1758543592,
+      "user_id": "monica"
+    },
+    "phoebe": {
+      "aligned_paths": [
+        "data/known_faces/Phoebe.png"
+      ],
+      "end_time": 1758543660,
+      "name": "Phoebe",
+      "start_time": 1758543660,
+      "user_id": "phoebe"
+    },
+    "rachel": {
+      "aligned_paths": [
+        "data/known_faces/Rachel.png"
+      ],
+      "end_time": 1758543621,
+      "name": "Rachel",
+      "start_time": 1758543621,
+      "user_id": "rachel"
+    },
+    "ross": {
+      "aligned_paths": [
+        "data/known_faces/Ross.png"
+      ],
+      "end_time": 1758543475,
+      "name": "Ross",
+      "start_time": 1758543475,
+      "user_id": "ross"
+    }
+  },
+  "version": 2
 }
