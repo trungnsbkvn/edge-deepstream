@@ -1,0 +1,54 @@
+################################################################################
+# Copyright (c) 2023, NVIDIA CORPORATION. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+################################################################################
+
+[property]
+gpu-id=0
+net-scale-factor=0.0039215697906911373
+tlt-model-key=tlt_encode
+tlt-encoded-model=models/yolov8n_face/yolov8n_face.etlt
+model-engine-file=models/yolov8n_face/yolov8n_face.etlt_b4_gpu0_fp16.engine
+#int8-calib-file=models/yolov8n_face/cal_trt.bin
+labelfile-path=models/yolov8n_face/labels.txt
+batch-size=4
+network-mode=2
+num-detected-classes=1
+# Aggressive inference interval for max performance
+interval=3
+gie-unique-id=1
+network-type=0
+is-classifier=0
+maintain-aspect-ratio=1
+parse-bbox-func-name=NvDsInferParseYolo
+custom-lib-path=models/yolov8n_face/nvdsinfer_custom_impl_Yolo/libnvdsinfer_custom_impl_Yolo.so
+
+[class-attrs-all]
+# Lowered thresholds for faster processing with more permissive detection
+pre-cluster-threshold=0.25
+post-cluster-threshold=0.25
+eps=0.2
+minBoxes=3
+detected-min-w=20
+detected-min-h=20
+detected-max-w=2000
+detected-max-h=2000
+# Reduced topk for faster NMS
+topk=10

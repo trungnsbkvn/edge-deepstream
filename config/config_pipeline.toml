@@ -96,7 +96,7 @@ stream_labels_path="data/index/live_labels.json"
 
 # Motion-optimized: Disable recognize-once for better motion tracking
 # This allows re-recognition during motion for better stability
-recognize_once_per_track=0
+recognize_once_per_track=1
 
 [thresholds]
 # Minimum PGIE detection confidence to keep faces (env PGIE_MIN_CONF overrides if set)

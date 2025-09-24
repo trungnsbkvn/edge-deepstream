@@ -1,0 +1,73 @@
+[pipeline]
+display=0
+is_aarch64=1
+known_face_dir="data/known_faces"
+save_feature_path="data/features"
+save_feature=0
+realtime=1
+
+[streammux]
+gpu_id=0
+# Reduce batch size to prevent memory pressure and improve throughput
+batch-size=4                    # Reduced from 8 to 4 sources simultaneously
+width=640                       # Further reduced from 960 to 640 for better throughput
+height=360                      # Reduced from 540 to 360 (16:9 aspect ratio maintained)
+batched-push-timeout=10000      # Reduced from 15ms to 10ms for more aggressive processing
+enable-padding=1                
+nvbuf-memory-type=0             # Keep system memory for stability
+live-source=1                   
+sync-inputs=0                   # Critical: async processing
+attach-sys-ts=1                 
+# Additional threading optimizations
+num-surfaces-per-frame=4        # Increase buffer pool size
+interpolation-method=1          # Use bilinear (faster than bicubic)
+
+[nvosd]
+process-mode=0
+display-text=1
+
+[source]
+# Limit to 4 most critical sources to reduce load
+"621ca2e007e648f898099597a078bccd" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/501"
+"625d66f10a0b4a0a920be73f705773bd" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
+"c9bb715db20a489f94f58d36bb3602d0" = "rtsp://admin:wesmart1@192.168.0.102:554/Streaming/Channels/101"
+"d73cf20e2aa544b7b352070f24bff721" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/401"
+
+[pgie]
+config-file-path="config/config_yolov8n_face_maxperf.txt"
+
+[sgie]
+config-file-path="config/config_arcface_maxperf.txt"
+
+[tracker]
+config-file-path="config/config_tracker_maxperf.txt"
+
+[tiler]
+width=1280
+height=720
+rows=2
+columns=2
+enable-padding=1
+
+[sink]
+qos=1
+sync=0
+
+[recognition]
+# Optimized for maximum throughput
+threshold=0.45                  # Slightly lower for better recall during fast processing
+save_dir="/dev/shm/edge-deepstream/recognized"
+save_mode="first"               
+backend="faiss"
+feature_dir="data/known_faces"
+use_index=1
+metric="cosine"
+index_type="flat"               # Keep flat for fastest search
+use_gpu=0                       # CPU FAISS for memory efficiency
+gpu_id=0
+index_path="data/index/faiss.index"
+labels_path="data/index/labels.json"
+
+# Disable live indexing to reduce processing load
+index_stream=0
+recognize_once_per_track=1      # Enable for better performance

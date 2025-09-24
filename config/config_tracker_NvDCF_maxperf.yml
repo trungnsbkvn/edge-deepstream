@@ -1,0 +1,72 @@
+%YAML:1.0
+################################################################################
+# SPDX-FileCopyrightText: Copyright (c) 2019-2021 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+################################################################################
+
+BaseConfig:
+  minDetectorConfidence: 0.3   # Lowered for better recall during fast processing
+
+TargetManagement:
+  enableBboxUnClipping: 1   
+  maxTargetsPerStream: 75   # Reduced from 150 to 75 for better performance
+  
+  # [Creation & Termination Policy]
+  minIouDiff4NewTarget: 0.6   # Increased to reduce false new targets
+  minTrackerConfidence: 0.15  # Lowered for better tracking continuity
+  probationAge: 2             # Reduced from 3 to 2 for faster target validation
+  maxShadowTrackingAge: 20    # Reduced from 30 to 20 for faster cleanup
+  earlyTerminationAge: 1      # Keep same for quick cleanup
+
+TrajectoryManagement:
+  useUniqueID: 0   
+
+DataAssociator:
+  dataAssociatorType: 0 
+  associationMatcherType: 0 # Use greedy matcher (faster than global)
+  checkClassMatch: 1  
+
+  # [Association Metric: Relaxed thresholds for faster matching]
+  minMatchingScore4Overall: 0.0   
+  minMatchingScore4SizeSimilarity: 0.5  # Reduced from 0.6
+  minMatchingScore4Iou: 0.0       
+  minMatchingScore4VisualSimilarity: 0.6  # Reduced from 0.7
+
+  # [Association Metric: Balanced weights for performance]
+  matchingScoreWeight4VisualSimilarity: 0.5  # Reduced from 0.6
+  matchingScoreWeight4SizeSimilarity: 0.1    # Increased from 0.0 for better size matching
+  matchingScoreWeight4Iou: 0.4   
+
+StateEstimator:
+  stateEstimatorType: 1  # Use REGULAR (1) instead of SIMPLE (0) for better motion handling
+  
+  # Process noise for location (higher = more responsive to motion changes)
+  processNoiseVar4Loc: 3.0      # Increased from 2.0 for better motion adaptation
+  processNoiseVar4Vel: 0.3      # Increased from 0.1 for better velocity tracking
+  
+  # Measurement noise (lower = trust measurements more)
+  measurementNoiseVar4Detector: 9.0
+  measurementNoiseVar4Tracker: 16.0
+
+FeatureExtractor:
+  featureImgSizeLevel: 3
+  useColorNames: 1       
+  useAdaBoost: 0
+  colorFormat: 1
+  featureMatching: 0
+  featureMatchingIndices: [2, 3]
+
+FeatureMatcher:
+  maxCosineDistance: 0.45  # Slightly increased for faster matching
