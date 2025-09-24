@@ -103,18 +103,16 @@ std::optional<cv::Mat> EnrollOps::crop_align_112(const cv::Mat& bgr_image, float
     cv::Mat crop;
     
     if (bbox) {
-        // Use detected face
-        int x = bbox->x, y = bbox->y, w = bbox->width, h = bbox->height;
-        int side0 = std::max(w, h);
-        int side = static_cast<int>((1.0f + 2.0f * std::max(0.0f, margin)) * side0);
-        int cx = x + w / 2;
-        int cy = y + h / 2;
-        int x0 = std::max(0, cx - side / 2);
-        int y0 = std::max(0, cy - side / 2);
-        int x1 = std::min(W, x0 + side);
-        int y1 = std::min(H, y0 + side);
+        // Use detected face bounding box EXACTLY as detected
+        // This matches what's shown in original_with_detection.png from crop analysis
+        cv::Rect crop_rect(*bbox);
         
-        cv::Rect crop_rect(x0, y0, x1 - x0, y1 - y0);
+        // Ensure the crop rect is within image bounds
+        crop_rect.x = std::max(0, crop_rect.x);
+        crop_rect.y = std::max(0, crop_rect.y);
+        crop_rect.width = std::min(crop_rect.width, W - crop_rect.x);
+        crop_rect.height = std::min(crop_rect.height, H - crop_rect.y);
+        
         if (crop_rect.width > 0 && crop_rect.height > 0) {
             crop = bgr_image(crop_rect).clone();
         }
@@ -129,11 +127,11 @@ std::optional<cv::Mat> EnrollOps::crop_align_112(const cv::Mat& bgr_image, float
         cv::Rect crop_rect(x0, y0, side, side);
         crop = bgr_image(crop_rect).clone();
     }
-    
+
     if (crop.empty()) {
         return std::nullopt;
     }
-    
+
     try {
         cv::Mat face112;
         cv::resize(crop, face112, cv::Size(112, 112), 0, 0, cv::INTER_LINEAR);

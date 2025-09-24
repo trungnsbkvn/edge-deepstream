@@ -87,16 +87,22 @@ def crop_align_112(bgr, margin: float=0.10):
         x0 = max(0, cx - side//2); y0 = max(0, cy - side//2)
         crop = bgr[y0:y0+side, x0:x0+side]
     else:
-        x,y,w,h = box
-        side0 = max(w,h)
-        side = int((1+2*max(0.0, margin))*side0)
-        cx = x + w//2; cy = y + h//2
-        x0 = max(0, cx - side//2); y0 = max(0, cy - side//2)
-        x1 = min(W, x0 + side); y1 = min(H, y0 + side)
-        crop = bgr[y0:y1, x0:x1]
-        if crop.size == 0:
+        # Use detected face bounding box EXACTLY as detected
+        # This preserves the mouth region and matches the good detection shown in crop analysis
+        x, y, w, h = box
+        
+        # Ensure the crop rect is within image bounds
+        x = max(0, x)
+        y = max(0, y)
+        w = min(w, W - x)
+        h = min(h, H - y)
+        
+        if w > 0 and h > 0:
             crop = bgr[y:y+h, x:x+w]
-    if crop.size == 0:
+        else:
+            crop = None
+    
+    if crop is None or crop.size == 0:
         return None
     try:
         face112 = cv2.resize(crop, (112,112), interpolation=cv2.INTER_LINEAR)

@@ -1,0 +1,3 @@
+/home/m2n/edge-deepstream/cpp_src/build_crop_analysis/CMakeFiles/test_crop_analysis.dir
+/home/m2n/edge-deepstream/cpp_src/build_crop_analysis/CMakeFiles/edit_cache.dir
+/home/m2n/edge-deepstream/cpp_src/build_crop_analysis/CMakeFiles/rebuild_cache.dir

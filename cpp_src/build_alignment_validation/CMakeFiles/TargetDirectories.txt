@@ -1,0 +1,3 @@
+/home/m2n/edge-deepstream/cpp_src/build_alignment_validation/CMakeFiles/test_alignment_validation.dir
+/home/m2n/edge-deepstream/cpp_src/build_alignment_validation/CMakeFiles/edit_cache.dir
+/home/m2n/edge-deepstream/cpp_src/build_alignment_validation/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,3 @@
+/home/m2n/edge-deepstream/cpp_src/build_bbox_debug/CMakeFiles/debug_bbox_usage.dir
+/home/m2n/edge-deepstream/cpp_src/build_bbox_debug/CMakeFiles/edit_cache.dir
+/home/m2n/edge-deepstream/cpp_src/build_bbox_debug/CMakeFiles/rebuild_cache.dir
