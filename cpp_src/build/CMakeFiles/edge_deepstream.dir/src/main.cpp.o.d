@@ -623,6 +623,7 @@ CMakeFiles/edge_deepstream.dir/src/main.cpp.o: \
  /usr/local/include/faiss/index_io.h \
  /home/m2n/edge-deepstream/cpp_src/include/placeholders.h \
  /home/m2n/edge-deepstream/cpp_src/include/pipeline.h \
+ /home/m2n/edge-deepstream/cpp_src/include/source_bin.h \
  /home/m2n/edge-deepstream/cpp_src/include/event_sender.h \
  /home/m2n/edge-deepstream/cpp_src/include/mqtt_listener.h \
  /usr/include/c++/9/filesystem /usr/include/c++/9/bits/fs_fwd.h \

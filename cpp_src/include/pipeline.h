@@ -81,6 +81,9 @@ private:
     guint bus_watch_id_;
     BusMessageCallback bus_callback_;
     
+    // Configuration
+    Config config_;
+    
     // Sources
     std::map<std::string, SourceInfo> sources_;
     int next_source_index_;

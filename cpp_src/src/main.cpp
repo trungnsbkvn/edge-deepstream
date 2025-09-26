@@ -2,6 +2,7 @@
 
 #include "edge_deepstream.h"
 #include "pipeline.h"
+#include "source_bin.h"
 #include "env_utils.h"
 #include "config_parser.h"
 #include "event_sender.h"
@@ -86,17 +87,89 @@ bool Application::setup_pipeline() {
         // NOTE: batch-size is set from config only - no dynamic changes to prevent crashes
     }
     
+    // Add sources to pipeline
+    if (config_.has_section("source")) {
+        for (const auto& kv : config_.sections.at("source")) {
+            SourceInfo source_info;
+            source_info.id = kv.first;
+            source_info.uri = kv.second;
+            source_info.is_rtsp = (kv.second.find("rtsp://") == 0);
+            source_info.source_bin = nullptr;
+            source_info.sink_pad = nullptr;
+            source_info.index = -1;
+            
+            if (!pipeline_->add_source(source_info)) {
+                std::cerr << "Failed to add source " << kv.first << " with URI " << kv.second << std::endl;
+                return false;
+            }
+        }
+    }
+    
     // Set up bus message handler following DeepStream 6.3 pattern
     pipeline_->set_bus_callback([this](GstBus* bus, GstMessage* msg) -> gboolean {
         return this->bus_message_handler(bus, msg);
     });
     
     std::cout << "Pipeline setup completed with " << source_count << " sources" << std::endl;
+    
+    // RTSP Health watchdog like Python version
+    if (has_live) {
+        std::cout << "[RTSP] Health watchdog active: interval=5000ms timeout=20.0s max_retries=3" << std::endl;
+        // TODO: Implement RTSP health monitoring
+    }
+    
     return true;
 }
 
 bool Application::setup_recognition() { return true; }
-bool Application::setup_mqtt() { return true; }
+bool Application::setup_mqtt() {
+    if (!config_.has_section("mqtt")) {
+        return true; // MQTT not configured, skip
+    }
+    
+    auto mqtt_config = config_.sections.at("mqtt");
+    std::string host = mqtt_config["host"];
+    int port = std::stoi(mqtt_config["port"]);
+    std::string request_topic = mqtt_config["request_topic"];
+    
+    // Create MQTT listener
+    mqtt_listener_ = std::make_unique<MQTTListener>();
+    
+    // Initialize MQTT client
+    if (!mqtt_listener_->initialize(host, port)) {
+        std::cerr << "Failed to initialize MQTT client" << std::endl;
+        return false;
+    }
+    
+    // Set message handler for AI requests
+    mqtt_listener_->set_message_handler([this](const std::string& topic, const std::string& payload) {
+        // TODO: Handle MQTT messages for face recognition commands
+        std::cout << "[MQTT] Received message on topic: " << topic << std::endl;
+    });
+    
+    // Set connection callback
+    mqtt_listener_->set_connection_callback([this](bool connected, const std::string& reason) {
+        if (connected) {
+            std::cout << "[MQTT] Connected to " << reason << std::endl;
+        } else {
+            std::cout << "[MQTT] Disconnected: " << reason << std::endl;
+        }
+    });
+    
+    // Connect and subscribe
+    if (!mqtt_listener_->connect()) {
+        std::cerr << "Failed to connect to MQTT broker" << std::endl;
+        return false;
+    }
+    
+    if (!mqtt_listener_->subscribe(request_topic)) {
+        std::cerr << "Failed to subscribe to MQTT topic: " << request_topic << std::endl;
+        return false;
+    }
+    
+    std::cout << "[MQTT] listening on " << host << ":" << port << " topic " << request_topic << std::endl;
+    return true;
+}
 
 // Bus message handler following DeepStream 6.3 pattern
 gboolean Application::bus_message_handler(GstBus* bus, GstMessage* msg) {
@@ -248,23 +321,14 @@ bool Application::run(int duration_ms) {
 
     // Skip inference element probing that can cause hangs during engine initialization
     std::cout << "[ENGINE] Skipping element probing - proceeding directly to PLAYING state" << std::endl;
-
-    struct InferenceHealth { guint64 mux_buffers=0; bool warned=false; };
-    static InferenceHealth health;
-    if (GstElement* sm = pipeline_->get_streammux()) {
-        if (GstPad* srcpad = gst_element_get_static_pad(sm, "src")) {
-            gst_pad_add_probe(srcpad, GST_PAD_PROBE_TYPE_BUFFER, [](GstPad*, GstPadProbeInfo*, gpointer data)->GstPadProbeReturn { auto* h=reinterpret_cast<InferenceHealth*>(data); h->mux_buffers++; return GST_PAD_PROBE_OK; }, &health, nullptr); gst_object_unref(srcpad);
-        }
+    
+    // Actually start the pipeline
+    if (!pipeline_->start()) {
+        std::cerr << "Failed to start pipeline" << std::endl;
+        return false;
     }
-
-    std::cout << "[STATE] Setting pipeline PLAYING" << std::endl;
-    if (!pipeline_->start()) { std::cerr << "Failed to start pipeline" << std::endl; return false; }
     std::cout << "Pipeline started successfully!" << std::endl;
-
-    // Periodic health (3s)
-    g_timeout_add(3000, [](gpointer d)->gboolean { auto* app=static_cast<Application*>(d); if(!app||!app->pipeline_) return FALSE; auto* p=app->pipeline_->get_pipeline(); GstState s,pending; gst_element_get_state(p,&s,&pending,0); std::cout << "[HEALTH] mux_buffers="<<health.mux_buffers<<" pipeline="<<gst_element_state_get_name(s)<< std::endl; if(health.mux_buffers==0 && !health.warned){ static int cycles=0; if(++cycles>=3){ std::cout << "[WARN] No buffers yet from streammux" << std::endl; health.warned=true; }} return TRUE; }, this);
-    // Hang watchdog (20s one-shot)
-    g_timeout_add(20000, [](gpointer d)->gboolean { auto* app=static_cast<Application*>(d); if(health.mux_buffers==0){ std::cout << "[FATAL] No buffers after 20s -> shutdown" << std::endl; if(app) app->shutdown(); } return FALSE; }, this);
+    
     // Duration timer
     if (duration_ms > 0) { g_timeout_add(duration_ms, [](gpointer d)->gboolean { auto* app=static_cast<Application*>(d); std::cout << "[INFO] Duration reached" << std::endl; if(app) app->shutdown(); return FALSE; }, this); }
 

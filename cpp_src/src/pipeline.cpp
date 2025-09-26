@@ -4,13 +4,18 @@
 #include "env_utils.h"
 #include <iostream>
 #include <memory>
+#include <algorithm>
+#include <cctype>
+#include <filesystem>
+#include <unistd.h>
 
 namespace EdgeDeepStream {
 
 Pipeline::Pipeline() 
     : pipeline_(nullptr), streammux_(nullptr), pgie_(nullptr), sgie_(nullptr),
-      tracker_(nullptr), tiler_(nullptr), osd_(nullptr), sink_(nullptr),
+      tracker_(nullptr), tiler_(nullptr), nvvidconv_(nullptr), osd_(nullptr), sink_(nullptr),
       queue1_(nullptr), queue2_(nullptr), queue3_(nullptr), queue4_(nullptr), queue5_(nullptr),
+      queue6_(nullptr), queue7_(nullptr),
       bus_(nullptr), bus_watch_id_(0), next_source_index_(0), frame_count_(0) {
 }
 
@@ -20,6 +25,9 @@ Pipeline::~Pipeline() {
 
 bool Pipeline::create(const Config& config) {
     try {
+        // Store config for later use
+        config_ = config;
+        
         // Create main pipeline
         pipeline_ = gst_pipeline_new("deepstream-pipeline");
         if (!pipeline_) {
@@ -33,13 +41,45 @@ bool Pipeline::create(const Config& config) {
             return false;
         }
         
-        // Add elements to pipeline
-        gst_bin_add_many(GST_BIN(pipeline_), 
-                         streammux_, queue1_, pgie_, queue2_,
-                         tracker_, queue3_, sgie_, queue4_,
-                         tiler_, osd_, queue5_, sink_, NULL);
-        
-        // Link elements
+    // Add elements to pipeline - only add elements that were created
+    // COMMENTED OUT PGIE/SGIE/TRACKER: only add streammux, queues, tiler, nvvidconv, osd, sink
+    if (!gst_bin_add(GST_BIN(pipeline_), streammux_)) {
+        std::cerr << "Failed to add streammux to pipeline" << std::endl;
+        return false;
+    }
+    if (!gst_bin_add(GST_BIN(pipeline_), queue1_)) {
+        std::cerr << "Failed to add queue1 to pipeline" << std::endl;
+        return false;
+    }
+    // pgie_, queue2_, tracker_, queue3_, sgie_, queue4_ are commented out
+    if (!gst_bin_add(GST_BIN(pipeline_), tiler_)) {
+        std::cerr << "Failed to add tiler to pipeline" << std::endl;
+        return false;
+    }
+    if (!gst_bin_add(GST_BIN(pipeline_), queue5_)) {
+        std::cerr << "Failed to add queue5 to pipeline" << std::endl;
+        return false;
+    }
+    if (!gst_bin_add(GST_BIN(pipeline_), nvvidconv_)) {
+        std::cerr << "Failed to add nvvidconv to pipeline" << std::endl;
+        return false;
+    }
+    if (!gst_bin_add(GST_BIN(pipeline_), queue6_)) {
+        std::cerr << "Failed to add queue6 to pipeline" << std::endl;
+        return false;
+    }
+    if (!gst_bin_add(GST_BIN(pipeline_), osd_)) {
+        std::cerr << "Failed to add osd to pipeline" << std::endl;
+        return false;
+    }
+    if (!gst_bin_add(GST_BIN(pipeline_), queue7_)) {
+        std::cerr << "Failed to add queue7 to pipeline" << std::endl;
+        return false;
+    }
+    if (!gst_bin_add(GST_BIN(pipeline_), sink_)) {
+        std::cerr << "Failed to add sink to pipeline" << std::endl;
+        return false;
+    }        // Link elements
         if (!link_elements()) {
             std::cerr << "Failed to link pipeline elements" << std::endl;
             return false;
@@ -51,15 +91,17 @@ bool Pipeline::create(const Config& config) {
             return false;
         }
         
-        // Setup bus callback
-        bus_ = gst_pipeline_get_bus(GST_PIPELINE(pipeline_));
-        bus_watch_id_ = gst_bus_add_watch(bus_, bus_call_wrapper, this);
-        gst_object_unref(bus_);
-        
-        std::cout << "Pipeline created successfully" << std::endl;
-        return true;
-        
-    } catch (const std::exception& e) {
+    // Setup bus callback
+    bus_ = gst_pipeline_get_bus(GST_PIPELINE(pipeline_));
+    bus_watch_id_ = gst_bus_add_watch(bus_, bus_call_wrapper, this);
+    gst_object_unref(bus_);
+    
+    // Create alignment directory like Python version
+    std::filesystem::create_directories("/dev/shm/edge-deepstream/aligned");
+    std::cout << "[PIPELINE] Alignment directory ensured: /dev/shm/edge-deepstream/aligned" << std::endl;
+    
+    std::cout << "Pipeline created successfully" << std::endl;
+    return true;    } catch (const std::exception& e) {
         std::cerr << "Exception in create_pipeline: " << e.what() << std::endl;
         return false;
     }
@@ -74,9 +116,61 @@ bool Pipeline::start() {
     std::cout << "Starting pipeline..." << std::endl;
     start_time_ = std::chrono::steady_clock::now();
     
-    GstStateChangeReturn ret = gst_element_set_state(pipeline_, GST_STATE_PLAYING);
+    // Go through READY state first (like Python version) to allow RTSP sources to initialize
+    std::cout << "[STATE] Setting pipeline to READY state first..." << std::endl;
+    GstStateChangeReturn ret = gst_element_set_state(pipeline_, GST_STATE_READY);
+    if (ret == GST_STATE_CHANGE_FAILURE) {
+        std::cerr << "Unable to set pipeline to ready state" << std::endl;
+        return false;
+    }
+    
+    // Wait for READY state to complete
+    if (ret == GST_STATE_CHANGE_ASYNC) {
+        std::cout << "Waiting for asynchronous READY state change..." << std::endl;
+        GstState current_state, pending_state;
+        ret = gst_element_get_state(pipeline_, &current_state, &pending_state, 3 * GST_SECOND);
+        if (ret == GST_STATE_CHANGE_FAILURE) {
+            std::cerr << "Failed to complete READY state change" << std::endl;
+            return false;
+        }
+    }
+    
+    // Small delay to allow sources to initialize
+    g_usleep(200000); // 200ms
+    
+    // Now go to PLAYING state
+    std::cout << "[STATE] Setting pipeline to PLAYING state..." << std::endl;
+    ret = gst_element_set_state(pipeline_, GST_STATE_PLAYING);
+    std::cout << "Pipeline state change result: " << ret << std::endl;
+    
     if (ret == GST_STATE_CHANGE_FAILURE) {
         std::cerr << "Unable to set pipeline to playing state" << std::endl;
+        return false;
+    }
+    
+    // If state change is asynchronous, wait for it to complete
+    if (ret == GST_STATE_CHANGE_ASYNC) {
+        std::cout << "Waiting for asynchronous state change to complete..." << std::endl;
+        GstState current_state, pending_state;
+        // Wait up to 10 seconds for the state change to complete (longer for RTSP)
+        ret = gst_element_get_state(pipeline_, &current_state, &pending_state, 10 * GST_SECOND);
+        std::cout << "State change completion result: " << ret << std::endl;
+        
+        if (ret == GST_STATE_CHANGE_FAILURE) {
+            std::cerr << "Failed to complete state change to playing" << std::endl;
+            return false;
+        }
+    }
+    
+    // Check actual state after transition
+    GstState current_state, pending_state;
+    gst_element_get_state(pipeline_, &current_state, &pending_state, GST_CLOCK_TIME_NONE);
+    std::cout << "Pipeline actual state: " << gst_element_state_get_name(current_state) 
+              << " (pending: " << gst_element_state_get_name(pending_state) << ")" << std::endl;
+    
+    if (current_state != GST_STATE_PLAYING) {
+        std::cerr << "Pipeline failed to reach PLAYING state, current state: " 
+                  << gst_element_state_get_name(current_state) << std::endl;
         return false;
     }
     
@@ -116,9 +210,10 @@ void Pipeline::destroy() {
     sgie_ = nullptr;
     tracker_ = nullptr;
     tiler_ = nullptr;
+    nvvidconv_ = nullptr;
     osd_ = nullptr;
     sink_ = nullptr;
-    queue1_ = queue2_ = queue3_ = queue4_ = queue5_ = nullptr;
+    queue1_ = queue2_ = queue3_ = queue4_ = queue5_ = queue6_ = queue7_ = nullptr;
     
     sources_.clear();
 }
@@ -263,37 +358,46 @@ bool Pipeline::create_elements(const Config& config) {
     queue3_ = gst_element_factory_make("queue", "queue3");
     queue4_ = gst_element_factory_make("queue", "queue4");
     queue5_ = gst_element_factory_make("queue", "queue5");
+    queue6_ = gst_element_factory_make("queue", "queue6");
+    queue7_ = gst_element_factory_make("queue", "queue7");
     
-    if (!queue1_ || !queue2_ || !queue3_ || !queue4_ || !queue5_) {
+    if (!queue1_ || !queue2_ || !queue3_ || !queue4_ || !queue5_ || !queue6_ || !queue7_) {
         std::cerr << "Failed to create queue elements" << std::endl;
         return false;
     }
     
-    // Create PGIE (Primary GStreamer Inference Engine)
-    pgie_ = create_pgie(config);
-    if (!pgie_) {
-        std::cerr << "Failed to create pgie" << std::endl;
-        return false;
-    }
+    // Create PGIE (Primary GStreamer Inference Engine) - COMMENTED OUT FOR TESTING
+    // pgie_ = create_pgie(config);
+    // if (!pgie_) {
+    //     std::cerr << "Failed to create pgie" << std::endl;
+    //     return false;
+    // }
     
-    // Create tracker
-    tracker_ = create_tracker(config);
-    if (!tracker_) {
-        std::cerr << "Failed to create tracker" << std::endl;
-        return false;
-    }
+    // Create tracker - COMMENTED OUT FOR TESTING
+    // tracker_ = create_tracker(config);
+    // if (!tracker_) {
+    //     std::cerr << "Failed to create tracker" << std::endl;
+    //     return false;
+    // }
     
-    // Create SGIE (Secondary GStreamer Inference Engine)
-    sgie_ = create_sgie(config);
-    if (!sgie_) {
-        std::cerr << "Failed to create sgie" << std::endl;
-        return false;
-    }
+    // Create SGIE (Secondary GStreamer Inference Engine) - COMMENTED OUT FOR TESTING
+    // sgie_ = create_sgie(config);
+    // if (!sgie_) {
+    //     std::cerr << "Failed to create sgie" << std::endl;
+    //     return false;
+    // }
     
     // Create tiler
     tiler_ = create_tiler(config);
     if (!tiler_) {
         std::cerr << "Failed to create tiler" << std::endl;
+        return false;
+    }
+    
+    // Create nvvidconv (video converter)
+    nvvidconv_ = create_nvvidconv(config);
+    if (!nvvidconv_) {
+        std::cerr << "Failed to create nvvidconv" << std::endl;
         return false;
     }
     
@@ -315,13 +419,35 @@ bool Pipeline::create_elements(const Config& config) {
 }
 
 bool Pipeline::link_elements() {
-    // Link: streammux -> queue1 -> pgie -> queue2 -> tracker -> queue3 -> sgie -> queue4 -> tiler -> osd -> queue5 -> sink
+    // Check display mode
+    int display = config_.get<int>("pipeline", "display", 0);
     
-    if (!gst_element_link_many(streammux_, queue1_, pgie_, queue2_, 
-                              tracker_, queue3_, sgie_, queue4_,
-                              tiler_, osd_, queue5_, sink_, NULL)) {
-        std::cerr << "Failed to link pipeline elements" << std::endl;
+    // Full pipeline flow: streammux -> queue1 -> pgie -> queue2 -> tracker -> queue3 -> sgie -> queue4 -> tiler -> queue5 -> nvvidconv -> queue6
+    // COMMENTED OUT PGIE/SGIE/TRACKER FOR TESTING: streammux -> queue1 -> tiler -> queue5 -> nvvidconv -> queue6
+    
+    // if (!gst_element_link_many(streammux_, queue1_, pgie_, queue2_, tracker_, queue3_, sgie_, queue4_, tiler_, queue5_, nvvidconv_, queue6_, NULL)) {
+    //     std::cerr << "Failed to link main pipeline elements" << std::endl;
+    //     return false;
+    // }
+    
+    // Simplified pipeline without inference for testing
+    if (!gst_element_link_many(streammux_, queue1_, tiler_, queue5_, nvvidconv_, queue6_, NULL)) {
+        std::cerr << "Failed to link simplified pipeline elements" << std::endl;
         return false;
+    }
+    
+    if (display) {
+        // Display mode: queue6 -> osd -> queue7 -> sink
+        if (!gst_element_link_many(queue6_, osd_, queue7_, sink_, NULL)) {
+            std::cerr << "Failed to link display pipeline elements" << std::endl;
+            return false;
+        }
+    } else {
+        // Headless mode: bypass OSD for better throughput - queue6 -> sink
+        if (!gst_element_link(queue6_, sink_)) {
+            std::cerr << "Failed to link headless pipeline elements" << std::endl;
+            return false;
+        }
     }
     
     std::cout << "Pipeline elements linked successfully" << std::endl;
@@ -334,17 +460,25 @@ bool Pipeline::setup_element_properties(const Config& config) {
         ConfigParser::set_element_properties(streammux_, config.sections.at("streammux"));
     }
     
-    // Setup PGIE properties
+    // PGIE properties
     if (config.has_section("pgie")) {
-        ConfigParser::set_element_properties(pgie_, config.sections.at("pgie"));
+        auto pgie_config = config.sections.at("pgie");
+        auto config_file_it = pgie_config.find("config-file-path");
+        if (config_file_it != pgie_config.end()) {
+            ConfigParser::set_element_properties(pgie_, pgie_config);
+        }
     }
     
-    // Setup SGIE properties
+    // SGIE properties
     if (config.has_section("sgie")) {
-        ConfigParser::set_element_properties(sgie_, config.sections.at("sgie"));
+        auto sgie_config = config.sections.at("sgie");
+        auto config_file_it = sgie_config.find("config-file-path");
+        if (config_file_it != sgie_config.end()) {
+            ConfigParser::set_element_properties(sgie_, sgie_config);
+        }
     }
     
-    // Setup tracker properties
+    // Tracker properties
     if (config.has_section("tracker")) {
         auto tracker_config = config.sections.at("tracker");
         auto config_file_it = tracker_config.find("config-file-path");
@@ -397,11 +531,8 @@ GstElement* Pipeline::create_pgie(const Config& config) {
         return nullptr;
     }
     
-    // Set default config file if not specified
-    std::string config_file = config.get<std::string>("pgie", "config-file-path", "config/config_yolov8n_face.txt");
-    g_object_set(G_OBJECT(element),
-                 "config-file-path", config_file.c_str(),
-                 NULL);
+    // Properties will be set later by setup_element_properties
+    // No need to set them here to avoid double-setting
     
     return element;
 }
@@ -413,11 +544,8 @@ GstElement* Pipeline::create_sgie(const Config& config) {
         return nullptr;
     }
     
-    // Set default config file if not specified
-    std::string config_file = config.get<std::string>("sgie", "config-file-path", "config/config_arcface.txt");
-    g_object_set(G_OBJECT(element),
-                 "config-file-path", config_file.c_str(),
-                 NULL);
+    // Properties will be set later by setup_element_properties
+    // No need to set them here to avoid double-setting
     
     return element;
 }
@@ -439,12 +567,38 @@ GstElement* Pipeline::create_tiler(const Config& config) {
         return nullptr;
     }
     
-    // Set default properties
+    // Calculate grid size based on number of sources
+    // We have 7 sources, so use 3x3 grid (9 tiles)
+    int rows = 3;
+    int columns = 3;
+    
+    // Get dimensions from config or use defaults
+    int width = config.get<int>("tiler", "width", 1280);
+    int height = config.get<int>("tiler", "height", 720);
+    
+    // Set properties
     g_object_set(G_OBJECT(element),
-                 "rows", 2,
-                 "columns", 2,
-                 "width", 1280,
-                 "height", 720,
+                 "rows", rows,
+                 "columns", columns,
+                 "width", width,
+                 "height", height,
+                 NULL);
+    
+    std::cout << "[TILER] Configured " << rows << "x" << columns << " grid (" << width << "x" << height << ")" << std::endl;
+    
+    return element;
+}
+
+GstElement* Pipeline::create_nvvidconv(const Config& config) {
+    GstElement* element = gst_element_factory_make("nvvideoconvert", "nvvidconv");
+    if (!element) {
+        std::cerr << "Failed to create nvvideoconvert element" << std::endl;
+        return nullptr;
+    }
+    
+    // Configure for display output - convert NVMM to RGBA
+    g_object_set(G_OBJECT(element),
+                 "nvbuf-memory-type", 0,  // Use system memory for output
                  NULL);
     
     return element;
@@ -470,25 +624,70 @@ GstElement* Pipeline::create_sink(const Config& config) {
     // Check if display is enabled
     int display = config.get<int>("pipeline", "display", 0);
     
+    // Check for GUI display like Python version - more robust detection
+    const char* display_env = getenv("DISPLAY");
+    const char* wayland_env = getenv("WAYLAND_DISPLAY");
+    bool has_display_env = (display_env && strlen(display_env) > 0) || (wayland_env && strlen(wayland_env) > 0);
+    
+    // Additional check: try to detect if we're in a graphical environment
+    // by checking if we can access X11 or Wayland sockets
+    bool has_graphical_env = has_display_env;
+    if (!has_graphical_env) {
+        // Check for X11 socket
+        if (access("/tmp/.X11-unix", F_OK) == 0) {
+            has_graphical_env = true;
+        }
+        // Check for Wayland socket (common locations)
+        else if (access("/run/user/1000/wayland-0", F_OK) == 0 || 
+                 access("/tmp/wayland-0", F_OK) == 0) {
+            has_graphical_env = true;
+        }
+    }
+    
     GstElement* element;
-    if (display) {
-        // Use display sink
-        element = gst_element_factory_make("nveglglessink", "sink");
-        if (!element) {
-            element = gst_element_factory_make("xvimagesink", "sink");
-        }
-        if (!element) {
-            element = gst_element_factory_make("autovideosink", "sink");
-        }
+    if (display && has_graphical_env) {
+        // GUI display available - choose sink based on architecture like Python version
+        #ifdef __aarch64__
+            // On Jetson (aarch64), use nv3dsink
+            std::cout << "Creating nv3dsink for Jetson device" << std::endl;
+            element = gst_element_factory_make("nv3dsink", "sink");
+            if (!element) {
+                std::cerr << "Unable to create nv3dsink" << std::endl;
+                element = gst_element_factory_make("nveglglessink", "sink");
+            }
+        #else
+            // On x86, use nveglglessink with fallbacks
+            element = gst_element_factory_make("nveglglessink", "sink");
+            if (!element) {
+                element = gst_element_factory_make("xvimagesink", "sink");
+            }
+            if (!element) {
+                element = gst_element_factory_make("ximagesink", "sink");
+            }
+            if (!element) {
+                element = gst_element_factory_make("autovideosink", "sink");
+            }
+        #endif
     } else {
-        // Use fake sink for no display
-        element = gst_element_factory_make("fakesink", "sink");
-        if (element) {
-            g_object_set(G_OBJECT(element),
-                         "sync", 0,
-                         "enable-last-sample", 0,
-                         NULL);
+        // No GUI display or display disabled - use fakesink
+        if (display && !has_graphical_env) {
+            std::cout << "No GUI display detected. Falling back to fakesink for headless run." << std::endl;
         }
+        element = gst_element_factory_make("fakesink", "sink");
+    }
+    
+    if (element && gst_element_factory_make("fakesink", "sink") == element) {
+        // Configure fakesink
+        g_object_set(G_OBJECT(element),
+                     "sync", 0,
+                     "enable-last-sample", 0,
+                     NULL);
+    } else if (element) {
+        // Configure display sink
+        g_object_set(G_OBJECT(element),
+                     "sync", 0,
+                     "qos", 0,
+                     NULL);
     }
     
     if (!element) {

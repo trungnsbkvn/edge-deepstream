@@ -115,16 +115,19 @@ void SourceBin::source_setup(GstElement* uridecodebin, GstElement* source, gpoin
     if (g_str_has_prefix(GST_ELEMENT_NAME(source), "rtspsrc")) {
         std::cout << "Configuring RTSP source " << source_bin->index_ << " for multi-stream performance" << std::endl;
         
-        // Essential RTSP properties for 8-stream real-time performance
+        // Essential RTSP properties for 8-stream real-time performance with timeouts
         g_object_set(source,
                      "latency", 50,              // Very low latency for motion
                      "drop-on-latency", TRUE,    // Drop frames on latency buildup
                      "do-retransmission", FALSE, // Disable for performance
                      "protocols", 4,             // Force TCP (value 4) for reliability
                      "buffer-mode", 1,           // Low latency buffer mode
+                     "timeout", 10000000,        // 10 second connection timeout (microseconds)
+                     "tcp-timeout", 10000000,    // 10 second TCP timeout
+                     "retry", 3,                 // Retry failed connections 3 times
                      NULL);
         
-        std::cout << "RTSP source " << source_bin->index_ << " optimized for real-time processing" << std::endl;
+        std::cout << "RTSP source " << source_bin->index_ << " optimized for real-time processing with connection timeouts" << std::endl;
     }
 }
 
