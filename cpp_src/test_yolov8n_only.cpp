@@ -292,24 +292,46 @@ int main(int argc, char *argv[]) {
     // Get display mode from config
     bool enable_display = config->get<int>("pipeline", "display", 0);
 
-    // Create sink based on display mode
-    if (enable_display) {
-        // Try autovideosink first since it works on Jetson
-        sink = gst_element_factory_make("autovideosink", "sink");
-        if (!sink) {
-            g_printerr("Failed to create autovideosink, trying nvvideosink\n");
-            sink = gst_element_factory_make("nvvideosink", "sink");
-            if (!sink) {
-                g_printerr("Failed to create nvvideosink, trying nveglglessink\n");
-                sink = gst_element_factory_make("nveglglessink", "sink");
-                if (!sink) {
-                    g_printerr("Failed to create nveglglessink, using fakesink\n");
-                    sink = gst_element_factory_make("fakesink", "sink");
-                }
-            }
+    // Detect display availability; fallback to fakesink on headless/TTY sessions
+    const char* display_env = getenv("DISPLAY");
+    const char* wayland_env = getenv("WAYLAND_DISPLAY");
+    bool has_display = (display_env != nullptr && strlen(display_env) > 0) ||
+                      (wayland_env != nullptr && strlen(wayland_env) > 0);
+    bool headless = !has_display;
+
+    // Create sink based on display mode and platform
+    if (!enable_display || headless) {
+        if (headless && enable_display) {
+            g_print("No GUI display detected (DISPLAY/WAYLAND_DISPLAY unset). Falling back to fakesink for headless run.\n");
+        }
+        g_print("Creating Fakesink \n");
+        sink = gst_element_factory_make("fakesink", "fakesink");
+        if (sink) {
+            g_object_set(G_OBJECT(sink), "enable-last-sample", 0, "sync", 0, NULL);
         }
     } else {
-        sink = gst_element_factory_make("fakesink", "sink");
+        bool is_aarch64 = config->get<int>("pipeline", "is_aarch64", 0);
+        if (is_aarch64) {
+            g_print("Creating nv3dsink \n");
+            sink = gst_element_factory_make("nv3dsink", "nv3d-sink");
+            if (!sink) {
+                g_printerr("Failed to create nv3dsink \n");
+            }
+        } else {
+            g_print("Creating EGLSink \n");
+            sink = gst_element_factory_make("nveglglessink", "nvvideo-renderer");
+            if (!sink) {
+                g_printerr("Failed to create egl sink \n");
+            }
+        }
+    }
+
+    if (!sink) {
+        g_printerr("Unable to create sink element, using fakesink as fallback\n");
+        sink = gst_element_factory_make("fakesink", "fakesink");
+        if (sink) {
+            g_object_set(G_OBJECT(sink), "enable-last-sample", 0, "sync", 0, NULL);
+        }
     }
 
     if (!sink) {
