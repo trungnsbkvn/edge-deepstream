@@ -6,42 +6,42 @@
 #include <filesystem>
 #include <iostream>
 
-#ifdef HAVE_CPPTOML
-#include "cpptoml.h"
+#ifdef HAVE_TOML11
+#include <toml.hpp>
 #endif
 
 namespace EdgeDeepStream {
 
 std::unique_ptr<Config> ConfigParser::parse_toml(const std::string& file_path) {
-#ifdef HAVE_CPPTOML
+#ifdef HAVE_TOML11
     try {
         auto config = std::make_unique<Config>();
-        auto toml_config = cpptoml::parse_file(file_path);
+        auto toml_config = toml::parse(file_path);
         
-        // Convert cpptoml structure to our Config format
-        for (const auto& table_pair : *toml_config) {
+        // Convert toml11 structure to our Config format
+        for (const auto& table_pair : toml_config.as_table()) {
             const std::string& section_name = table_pair.first;
-            auto table = table_pair.second->as_table();
+            auto table = table_pair.second.as_table();
             
-            if (table) {
+            if (!table.empty()) {
                 std::map<std::string, std::string> section_map;
                 
-                for (const auto& entry : *table) {
+                for (const auto& entry : table) {
                     const std::string& key = entry.first;
                     auto value = entry.second;
                     
-                    if (auto str_val = value->as<std::string>()) {
-                        section_map[key] = str_val->get();
-                    } else if (auto int_val = value->as<int64_t>()) {
-                        section_map[key] = std::to_string(int_val->get());
-                    } else if (auto bool_val = value->as<bool>()) {
-                        section_map[key] = bool_val->get() ? "1" : "0";
-                    } else if (auto double_val = value->as<double>()) {
-                        section_map[key] = std::to_string(double_val->get());
+                    if (value.is_string()) {
+                        section_map[key] = value.as_string();
+                    } else if (value.is_integer()) {
+                        section_map[key] = std::to_string(value.as_integer());
+                    } else if (value.is_boolean()) {
+                        section_map[key] = value.as_boolean() ? "1" : "0";
+                    } else if (value.is_floating()) {
+                        section_map[key] = std::to_string(value.as_floating());
                     } else {
                         // Try to convert to string representation
                         std::stringstream ss;
-                        ss << *value;
+                        ss << value;
                         section_map[key] = ss.str();
                     }
                 }
@@ -166,8 +166,17 @@ void ConfigParser::set_element_properties(GstElement* element,
             } catch (...) {
                 std::cerr << "Error: Cannot convert '" << value << "' to uint64 for property '" << key << "'" << std::endl;
             }
+        } else if (G_TYPE_IS_ENUM(type)) {
+            // Handle enum properties
+            try {
+                int enum_val = std::stoi(value);
+                g_object_set(element, key.c_str(), enum_val, NULL);
+            } catch (...) {
+                std::cerr << "Error: Cannot convert '" << value << "' to enum for property '" << key << "'" << std::endl;
+            }
         } else {
             // Try setting as string for unknown types
+            std::cout << "Warning: Unknown property type for '" << key << "', trying as string" << std::endl;
             g_object_set(element, key.c_str(), value.c_str(), NULL);
         }
     }

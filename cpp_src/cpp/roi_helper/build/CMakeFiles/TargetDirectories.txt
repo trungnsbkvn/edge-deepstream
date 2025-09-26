@@ -1,0 +1,3 @@
+/home/m2n/edge-deepstream/cpp/roi_helper/build/CMakeFiles/roi_helper.dir
+/home/m2n/edge-deepstream/cpp/roi_helper/build/CMakeFiles/edit_cache.dir
+/home/m2n/edge-deepstream/cpp/roi_helper/build/CMakeFiles/rebuild_cache.dir

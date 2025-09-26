@@ -1057,8 +1057,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-VetbDm"
-      binary: "/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-VetbDm"
+      source: "/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-bxDvQL"
+      binary: "/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-bxDvQL"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -1068,21 +1068,21 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-VetbDm'
+        Change Dir: '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-bxDvQL'
         
-        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_928dc/fast
-        /usr/bin/make  -f CMakeFiles/cmTC_928dc.dir/build.make CMakeFiles/cmTC_928dc.dir/build
-        make[1]: Entering directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-VetbDm'
-        Building CXX object CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o
-        /usr/bin/c++   -v -o CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-4.1/Modules/CMakeCXXCompilerABI.cpp
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_164c1/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_164c1.dir/build.make CMakeFiles/cmTC_164c1.dir/build
+        make[1]: Entering directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-bxDvQL'
+        Building CXX object CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o
+        /usr/bin/c++   -v -o CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-4.1/Modules/CMakeCXXCompilerABI.cpp
         Using built-in specs.
         COLLECT_GCC=/usr/bin/c++
         Target: aarch64-linux-gnu
         Configured with: ../src/configure -v --with-pkgversion='Ubuntu 9.4.0-1ubuntu1~20.04.2' --with-bugurl=file:///usr/share/doc/gcc-9/README.Bugs --enable-languages=c,ada,c++,go,d,fortran,objc,obj-c++,gm2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-9 --program-prefix=aarch64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-libquadmath --disable-libquadmath-support --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --enable-fix-cortex-a53-843419 --disable-werror --enable-checking=release --build=aarch64-linux-gnu --host=aarch64-linux-gnu --target=aarch64-linux-gnu
         Thread model: posix
         gcc version 9.4.0 (Ubuntu 9.4.0-1ubuntu1~20.04.2) 
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64'
-         /usr/lib/gcc/aarch64-linux-gnu/9/cc1plus -quiet -v -imultiarch aarch64-linux-gnu -D_GNU_SOURCE /usr/share/cmake-4.1/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpbase CMakeCXXCompilerABI.cpp -mlittle-endian -mabi=lp64 -auxbase-strip CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -o /tmp/ccoBEMzn.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64'
+         /usr/lib/gcc/aarch64-linux-gnu/9/cc1plus -quiet -v -imultiarch aarch64-linux-gnu -D_GNU_SOURCE /usr/share/cmake-4.1/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpbase CMakeCXXCompilerABI.cpp -mlittle-endian -mabi=lp64 -auxbase-strip CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -o /tmp/ccuj21WI.s
         GNU C++14 (Ubuntu 9.4.0-1ubuntu1~20.04.2) version 9.4.0 (aarch64-linux-gnu)
         	compiled by GNU C version 9.4.0, GMP version 6.2.0, MPFR version 4.0.2, MPC version 1.1.0, isl version isl-0.22.1-GMP
         
@@ -1106,14 +1106,14 @@ events:
         
         GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
         Compiler executable checksum: 76f300a9566415b293c4e87b0a05621d
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64'
-         as -v -EL -mabi=lp64 -o CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o /tmp/ccoBEMzn.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64'
+         as -v -EL -mabi=lp64 -o CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o /tmp/ccuj21WI.s
         GNU assembler version 2.34 (aarch64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.34
         COMPILER_PATH=/usr/lib/gcc/aarch64-linux-gnu/9/:/usr/lib/gcc/aarch64-linux-gnu/9/:/usr/lib/gcc/aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/9/:/usr/lib/gcc/aarch64-linux-gnu/
         LIBRARY_PATH=/usr/lib/gcc/aarch64-linux-gnu/9/:/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/9/../../../../lib/:/lib/aarch64-linux-gnu/:/lib/../lib/:/usr/lib/aarch64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/aarch64-linux-gnu/9/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64'
-        Linking CXX executable cmTC_928dc
-        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_928dc.dir/link.txt --verbose=1
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64'
+        Linking CXX executable cmTC_164c1
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_164c1.dir/link.txt --verbose=1
         Using built-in specs.
         COLLECT_GCC=/usr/bin/c++
         COLLECT_LTO_WRAPPER=/usr/lib/gcc/aarch64-linux-gnu/9/lto-wrapper
@@ -1123,14 +1123,14 @@ events:
         gcc version 9.4.0 (Ubuntu 9.4.0-1ubuntu1~20.04.2) 
         COMPILER_PATH=/usr/lib/gcc/aarch64-linux-gnu/9/:/usr/lib/gcc/aarch64-linux-gnu/9/:/usr/lib/gcc/aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/9/:/usr/lib/gcc/aarch64-linux-gnu/
         LIBRARY_PATH=/usr/lib/gcc/aarch64-linux-gnu/9/:/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/9/../../../../lib/:/lib/aarch64-linux-gnu/:/lib/../lib/:/usr/lib/aarch64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/aarch64-linux-gnu/9/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_928dc' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64'
-         /usr/lib/gcc/aarch64-linux-gnu/9/collect2 -plugin /usr/lib/gcc/aarch64-linux-gnu/9/liblto_plugin.so -plugin-opt=/usr/lib/gcc/aarch64-linux-gnu/9/lto-wrapper -plugin-opt=-fresolution=/tmp/ccmvv8o4.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu --as-needed -dynamic-linker /lib/ld-linux-aarch64.so.1 -X -EL -maarch64linux --fix-cortex-a53-843419 -pie -z now -z relro -o cmTC_928dc /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/Scrt1.o /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crti.o /usr/lib/gcc/aarch64-linux-gnu/9/crtbeginS.o -L/usr/lib/gcc/aarch64-linux-gnu/9 -L/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu -L/usr/lib/gcc/aarch64-linux-gnu/9/../../../../lib -L/lib/aarch64-linux-gnu -L/lib/../lib -L/usr/lib/aarch64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/aarch64-linux-gnu/9/../../.. -v CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/aarch64-linux-gnu/9/crtendS.o /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crtn.o
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_164c1' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64'
+         /usr/lib/gcc/aarch64-linux-gnu/9/collect2 -plugin /usr/lib/gcc/aarch64-linux-gnu/9/liblto_plugin.so -plugin-opt=/usr/lib/gcc/aarch64-linux-gnu/9/lto-wrapper -plugin-opt=-fresolution=/tmp/ccpApIgu.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu --as-needed -dynamic-linker /lib/ld-linux-aarch64.so.1 -X -EL -maarch64linux --fix-cortex-a53-843419 -pie -z now -z relro -o cmTC_164c1 /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/Scrt1.o /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crti.o /usr/lib/gcc/aarch64-linux-gnu/9/crtbeginS.o -L/usr/lib/gcc/aarch64-linux-gnu/9 -L/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu -L/usr/lib/gcc/aarch64-linux-gnu/9/../../../../lib -L/lib/aarch64-linux-gnu -L/lib/../lib -L/usr/lib/aarch64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/aarch64-linux-gnu/9/../../.. -v CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/aarch64-linux-gnu/9/crtendS.o /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crtn.o
         collect2 version 9.4.0
-        /usr/bin/ld -plugin /usr/lib/gcc/aarch64-linux-gnu/9/liblto_plugin.so -plugin-opt=/usr/lib/gcc/aarch64-linux-gnu/9/lto-wrapper -plugin-opt=-fresolution=/tmp/ccmvv8o4.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu --as-needed -dynamic-linker /lib/ld-linux-aarch64.so.1 -X -EL -maarch64linux --fix-cortex-a53-843419 -pie -z now -z relro -o cmTC_928dc /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/Scrt1.o /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crti.o /usr/lib/gcc/aarch64-linux-gnu/9/crtbeginS.o -L/usr/lib/gcc/aarch64-linux-gnu/9 -L/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu -L/usr/lib/gcc/aarch64-linux-gnu/9/../../../../lib -L/lib/aarch64-linux-gnu -L/lib/../lib -L/usr/lib/aarch64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/aarch64-linux-gnu/9/../../.. -v CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/aarch64-linux-gnu/9/crtendS.o /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crtn.o
+        /usr/bin/ld -plugin /usr/lib/gcc/aarch64-linux-gnu/9/liblto_plugin.so -plugin-opt=/usr/lib/gcc/aarch64-linux-gnu/9/lto-wrapper -plugin-opt=-fresolution=/tmp/ccpApIgu.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu --as-needed -dynamic-linker /lib/ld-linux-aarch64.so.1 -X -EL -maarch64linux --fix-cortex-a53-843419 -pie -z now -z relro -o cmTC_164c1 /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/Scrt1.o /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crti.o /usr/lib/gcc/aarch64-linux-gnu/9/crtbeginS.o -L/usr/lib/gcc/aarch64-linux-gnu/9 -L/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu -L/usr/lib/gcc/aarch64-linux-gnu/9/../../../../lib -L/lib/aarch64-linux-gnu -L/lib/../lib -L/usr/lib/aarch64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/aarch64-linux-gnu/9/../../.. -v CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/aarch64-linux-gnu/9/crtendS.o /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crtn.o
         GNU ld (GNU Binutils for Ubuntu) 2.34
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_928dc' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64'
-        /usr/bin/c++  -v -Wl,-v CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_928dc
-        make[1]: Leaving directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-VetbDm'
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_164c1' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64'
+        /usr/bin/c++  -v -Wl,-v CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_164c1
+        make[1]: Leaving directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-bxDvQL'
         
       exitCode: 0
   -
@@ -1171,21 +1171,21 @@ events:
       Parsed CXX implicit link information:
         link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
         linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
-        ignore line: [Change Dir: '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-VetbDm']
+        ignore line: [Change Dir: '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-bxDvQL']
         ignore line: []
-        ignore line: [Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_928dc/fast]
-        ignore line: [/usr/bin/make  -f CMakeFiles/cmTC_928dc.dir/build.make CMakeFiles/cmTC_928dc.dir/build]
-        ignore line: [make[1]: Entering directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-VetbDm']
-        ignore line: [Building CXX object CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o]
-        ignore line: [/usr/bin/c++   -v -o CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-4.1/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_164c1/fast]
+        ignore line: [/usr/bin/make  -f CMakeFiles/cmTC_164c1.dir/build.make CMakeFiles/cmTC_164c1.dir/build]
+        ignore line: [make[1]: Entering directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-bxDvQL']
+        ignore line: [Building CXX object CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o]
+        ignore line: [/usr/bin/c++   -v -o CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-4.1/Modules/CMakeCXXCompilerABI.cpp]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/usr/bin/c++]
         ignore line: [Target: aarch64-linux-gnu]
         ignore line: [Configured with: ../src/configure -v --with-pkgversion='Ubuntu 9.4.0-1ubuntu1~20.04.2' --with-bugurl=file:///usr/share/doc/gcc-9/README.Bugs --enable-languages=c ada c++ go d fortran objc obj-c++ gm2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-9 --program-prefix=aarch64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-libquadmath --disable-libquadmath-support --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --enable-fix-cortex-a53-843419 --disable-werror --enable-checking=release --build=aarch64-linux-gnu --host=aarch64-linux-gnu --target=aarch64-linux-gnu]
         ignore line: [Thread model: posix]
         ignore line: [gcc version 9.4.0 (Ubuntu 9.4.0-1ubuntu1~20.04.2) ]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64']
-        ignore line: [ /usr/lib/gcc/aarch64-linux-gnu/9/cc1plus -quiet -v -imultiarch aarch64-linux-gnu -D_GNU_SOURCE /usr/share/cmake-4.1/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpbase CMakeCXXCompilerABI.cpp -mlittle-endian -mabi=lp64 -auxbase-strip CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -o /tmp/ccoBEMzn.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64']
+        ignore line: [ /usr/lib/gcc/aarch64-linux-gnu/9/cc1plus -quiet -v -imultiarch aarch64-linux-gnu -D_GNU_SOURCE /usr/share/cmake-4.1/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpbase CMakeCXXCompilerABI.cpp -mlittle-endian -mabi=lp64 -auxbase-strip CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -o /tmp/ccuj21WI.s]
         ignore line: [GNU C++14 (Ubuntu 9.4.0-1ubuntu1~20.04.2) version 9.4.0 (aarch64-linux-gnu)]
         ignore line: [	compiled by GNU C version 9.4.0  GMP version 6.2.0  MPFR version 4.0.2  MPC version 1.1.0  isl version isl-0.22.1-GMP]
         ignore line: []
@@ -1209,14 +1209,14 @@ events:
         ignore line: []
         ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
         ignore line: [Compiler executable checksum: 76f300a9566415b293c4e87b0a05621d]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64']
-        ignore line: [ as -v -EL -mabi=lp64 -o CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o /tmp/ccoBEMzn.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64']
+        ignore line: [ as -v -EL -mabi=lp64 -o CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o /tmp/ccuj21WI.s]
         ignore line: [GNU assembler version 2.34 (aarch64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.34]
         ignore line: [COMPILER_PATH=/usr/lib/gcc/aarch64-linux-gnu/9/:/usr/lib/gcc/aarch64-linux-gnu/9/:/usr/lib/gcc/aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/9/:/usr/lib/gcc/aarch64-linux-gnu/]
         ignore line: [LIBRARY_PATH=/usr/lib/gcc/aarch64-linux-gnu/9/:/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/9/../../../../lib/:/lib/aarch64-linux-gnu/:/lib/../lib/:/usr/lib/aarch64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/aarch64-linux-gnu/9/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64']
-        ignore line: [Linking CXX executable cmTC_928dc]
-        ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_928dc.dir/link.txt --verbose=1]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64']
+        ignore line: [Linking CXX executable cmTC_164c1]
+        ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_164c1.dir/link.txt --verbose=1]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/usr/bin/c++]
         ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/aarch64-linux-gnu/9/lto-wrapper]
@@ -1226,13 +1226,13 @@ events:
         ignore line: [gcc version 9.4.0 (Ubuntu 9.4.0-1ubuntu1~20.04.2) ]
         ignore line: [COMPILER_PATH=/usr/lib/gcc/aarch64-linux-gnu/9/:/usr/lib/gcc/aarch64-linux-gnu/9/:/usr/lib/gcc/aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/9/:/usr/lib/gcc/aarch64-linux-gnu/]
         ignore line: [LIBRARY_PATH=/usr/lib/gcc/aarch64-linux-gnu/9/:/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/9/../../../../lib/:/lib/aarch64-linux-gnu/:/lib/../lib/:/usr/lib/aarch64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/aarch64-linux-gnu/9/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_928dc' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64']
-        link line: [ /usr/lib/gcc/aarch64-linux-gnu/9/collect2 -plugin /usr/lib/gcc/aarch64-linux-gnu/9/liblto_plugin.so -plugin-opt=/usr/lib/gcc/aarch64-linux-gnu/9/lto-wrapper -plugin-opt=-fresolution=/tmp/ccmvv8o4.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu --as-needed -dynamic-linker /lib/ld-linux-aarch64.so.1 -X -EL -maarch64linux --fix-cortex-a53-843419 -pie -z now -z relro -o cmTC_928dc /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/Scrt1.o /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crti.o /usr/lib/gcc/aarch64-linux-gnu/9/crtbeginS.o -L/usr/lib/gcc/aarch64-linux-gnu/9 -L/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu -L/usr/lib/gcc/aarch64-linux-gnu/9/../../../../lib -L/lib/aarch64-linux-gnu -L/lib/../lib -L/usr/lib/aarch64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/aarch64-linux-gnu/9/../../.. -v CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/aarch64-linux-gnu/9/crtendS.o /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crtn.o]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_164c1' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64']
+        link line: [ /usr/lib/gcc/aarch64-linux-gnu/9/collect2 -plugin /usr/lib/gcc/aarch64-linux-gnu/9/liblto_plugin.so -plugin-opt=/usr/lib/gcc/aarch64-linux-gnu/9/lto-wrapper -plugin-opt=-fresolution=/tmp/ccpApIgu.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu --as-needed -dynamic-linker /lib/ld-linux-aarch64.so.1 -X -EL -maarch64linux --fix-cortex-a53-843419 -pie -z now -z relro -o cmTC_164c1 /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/Scrt1.o /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crti.o /usr/lib/gcc/aarch64-linux-gnu/9/crtbeginS.o -L/usr/lib/gcc/aarch64-linux-gnu/9 -L/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu -L/usr/lib/gcc/aarch64-linux-gnu/9/../../../../lib -L/lib/aarch64-linux-gnu -L/lib/../lib -L/usr/lib/aarch64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/aarch64-linux-gnu/9/../../.. -v CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/aarch64-linux-gnu/9/crtendS.o /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crtn.o]
           arg [/usr/lib/gcc/aarch64-linux-gnu/9/collect2] ==> ignore
           arg [-plugin] ==> ignore
           arg [/usr/lib/gcc/aarch64-linux-gnu/9/liblto_plugin.so] ==> ignore
           arg [-plugin-opt=/usr/lib/gcc/aarch64-linux-gnu/9/lto-wrapper] ==> ignore
-          arg [-plugin-opt=-fresolution=/tmp/ccmvv8o4.res] ==> ignore
+          arg [-plugin-opt=-fresolution=/tmp/ccpApIgu.res] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
           arg [-plugin-opt=-pass-through=-lc] ==> ignore
@@ -1252,7 +1252,7 @@ events:
           arg [-znow] ==> ignore
           arg [-zrelro] ==> ignore
           arg [-o] ==> ignore
-          arg [cmTC_928dc] ==> ignore
+          arg [cmTC_164c1] ==> ignore
           arg [/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/Scrt1.o] ==> obj [/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/Scrt1.o]
           arg [/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crti.o] ==> obj [/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crti.o]
           arg [/usr/lib/gcc/aarch64-linux-gnu/9/crtbeginS.o] ==> obj [/usr/lib/gcc/aarch64-linux-gnu/9/crtbeginS.o]
@@ -1265,7 +1265,7 @@ events:
           arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
           arg [-L/usr/lib/gcc/aarch64-linux-gnu/9/../../..] ==> dir [/usr/lib/gcc/aarch64-linux-gnu/9/../../..]
           arg [-v] ==> ignore
-          arg [CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+          arg [CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
           arg [-lstdc++] ==> lib [stdc++]
           arg [-lm] ==> lib [m]
           arg [-lgcc_s] ==> lib [gcc_s]
@@ -1276,7 +1276,7 @@ events:
           arg [/usr/lib/gcc/aarch64-linux-gnu/9/crtendS.o] ==> obj [/usr/lib/gcc/aarch64-linux-gnu/9/crtendS.o]
           arg [/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crtn.o] ==> obj [/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crtn.o]
         ignore line: [collect2 version 9.4.0]
-        ignore line: [/usr/bin/ld -plugin /usr/lib/gcc/aarch64-linux-gnu/9/liblto_plugin.so -plugin-opt=/usr/lib/gcc/aarch64-linux-gnu/9/lto-wrapper -plugin-opt=-fresolution=/tmp/ccmvv8o4.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu --as-needed -dynamic-linker /lib/ld-linux-aarch64.so.1 -X -EL -maarch64linux --fix-cortex-a53-843419 -pie -z now -z relro -o cmTC_928dc /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/Scrt1.o /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crti.o /usr/lib/gcc/aarch64-linux-gnu/9/crtbeginS.o -L/usr/lib/gcc/aarch64-linux-gnu/9 -L/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu -L/usr/lib/gcc/aarch64-linux-gnu/9/../../../../lib -L/lib/aarch64-linux-gnu -L/lib/../lib -L/usr/lib/aarch64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/aarch64-linux-gnu/9/../../.. -v CMakeFiles/cmTC_928dc.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/aarch64-linux-gnu/9/crtendS.o /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crtn.o]
+        ignore line: [/usr/bin/ld -plugin /usr/lib/gcc/aarch64-linux-gnu/9/liblto_plugin.so -plugin-opt=/usr/lib/gcc/aarch64-linux-gnu/9/lto-wrapper -plugin-opt=-fresolution=/tmp/ccpApIgu.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu --as-needed -dynamic-linker /lib/ld-linux-aarch64.so.1 -X -EL -maarch64linux --fix-cortex-a53-843419 -pie -z now -z relro -o cmTC_164c1 /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/Scrt1.o /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crti.o /usr/lib/gcc/aarch64-linux-gnu/9/crtbeginS.o -L/usr/lib/gcc/aarch64-linux-gnu/9 -L/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu -L/usr/lib/gcc/aarch64-linux-gnu/9/../../../../lib -L/lib/aarch64-linux-gnu -L/lib/../lib -L/usr/lib/aarch64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/aarch64-linux-gnu/9/../../.. -v CMakeFiles/cmTC_164c1.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/aarch64-linux-gnu/9/crtendS.o /usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crtn.o]
         linker tool for 'CXX': /usr/bin/ld
         collapse obj [/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/Scrt1.o] ==> [/usr/lib/aarch64-linux-gnu/Scrt1.o]
         collapse obj [/usr/lib/gcc/aarch64-linux-gnu/9/../../../aarch64-linux-gnu/crti.o] ==> [/usr/lib/aarch64-linux-gnu/crti.o]
@@ -3053,8 +3053,8 @@ events:
     checks:
       - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
     directories:
-      source: "/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-y4vpAp"
-      binary: "/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-y4vpAp"
+      source: "/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-9Tu1ZM"
+      binary: "/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-9Tu1ZM"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3063,25 +3063,25 @@ events:
       variable: "CMAKE_HAVE_LIBC_PTHREAD"
       cached: true
       stdout: |
-        Change Dir: '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-y4vpAp'
+        Change Dir: '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-9Tu1ZM'
         
-        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_bcce1/fast
-        /usr/bin/make  -f CMakeFiles/cmTC_bcce1.dir/build.make CMakeFiles/cmTC_bcce1.dir/build
-        make[1]: Entering directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-y4vpAp'
-        Building CXX object CMakeFiles/cmTC_bcce1.dir/src.cxx.o
-        /usr/bin/c++ -DCMAKE_HAVE_LIBC_PTHREAD  -std=gnu++17 -o CMakeFiles/cmTC_bcce1.dir/src.cxx.o -c /home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-y4vpAp/src.cxx
-        Linking CXX executable cmTC_bcce1
-        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bcce1.dir/link.txt --verbose=1
-        /usr/bin/ld: CMakeFiles/cmTC_bcce1.dir/src.cxx.o: in function `main':
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_8d22d/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_8d22d.dir/build.make CMakeFiles/cmTC_8d22d.dir/build
+        make[1]: Entering directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-9Tu1ZM'
+        Building CXX object CMakeFiles/cmTC_8d22d.dir/src.cxx.o
+        /usr/bin/c++ -DCMAKE_HAVE_LIBC_PTHREAD  -std=gnu++17 -o CMakeFiles/cmTC_8d22d.dir/src.cxx.o -c /home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-9Tu1ZM/src.cxx
+        Linking CXX executable cmTC_8d22d
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8d22d.dir/link.txt --verbose=1
+        /usr/bin/ld: CMakeFiles/cmTC_8d22d.dir/src.cxx.o: in function `main':
         src.cxx:(.text+0x48): undefined reference to `pthread_create'
         /usr/bin/ld: src.cxx:(.text+0x50): undefined reference to `pthread_detach'
         /usr/bin/ld: src.cxx:(.text+0x58): undefined reference to `pthread_cancel'
         /usr/bin/ld: src.cxx:(.text+0x64): undefined reference to `pthread_join'
         collect2: error: ld returned 1 exit status
-        /usr/bin/c++ CMakeFiles/cmTC_bcce1.dir/src.cxx.o -o cmTC_bcce1
-        make[1]: *** [CMakeFiles/cmTC_bcce1.dir/build.make:102: cmTC_bcce1] Error 1
-        make[1]: Leaving directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-y4vpAp'
-        make: *** [Makefile:134: cmTC_bcce1/fast] Error 2
+        /usr/bin/c++ CMakeFiles/cmTC_8d22d.dir/src.cxx.o -o cmTC_8d22d
+        make[1]: *** [CMakeFiles/cmTC_8d22d.dir/build.make:102: cmTC_8d22d] Error 1
+        make[1]: Leaving directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-9Tu1ZM'
+        make: *** [Makefile:134: cmTC_8d22d/fast] Error 2
         
       exitCode: 2
   -
@@ -3095,8 +3095,8 @@ events:
     checks:
       - "Looking for pthread_create in pthreads"
     directories:
-      source: "/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-zbXRil"
-      binary: "/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-zbXRil"
+      source: "/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-yt03AJ"
+      binary: "/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-yt03AJ"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3105,21 +3105,21 @@ events:
       variable: "CMAKE_HAVE_PTHREADS_CREATE"
       cached: true
       stdout: |
-        Change Dir: '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-zbXRil'
+        Change Dir: '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-yt03AJ'
         
-        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_cee9f/fast
-        /usr/bin/make  -f CMakeFiles/cmTC_cee9f.dir/build.make CMakeFiles/cmTC_cee9f.dir/build
-        make[1]: Entering directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-zbXRil'
-        Building CXX object CMakeFiles/cmTC_cee9f.dir/CheckFunctionExists.cxx.o
-        /usr/bin/c++   -DCHECK_FUNCTION_EXISTS=pthread_create -std=gnu++17 -o CMakeFiles/cmTC_cee9f.dir/CheckFunctionExists.cxx.o -c /home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-zbXRil/CheckFunctionExists.cxx
-        Linking CXX executable cmTC_cee9f
-        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cee9f.dir/link.txt --verbose=1
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_fb56c/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_fb56c.dir/build.make CMakeFiles/cmTC_fb56c.dir/build
+        make[1]: Entering directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-yt03AJ'
+        Building CXX object CMakeFiles/cmTC_fb56c.dir/CheckFunctionExists.cxx.o
+        /usr/bin/c++   -DCHECK_FUNCTION_EXISTS=pthread_create -std=gnu++17 -o CMakeFiles/cmTC_fb56c.dir/CheckFunctionExists.cxx.o -c /home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-yt03AJ/CheckFunctionExists.cxx
+        Linking CXX executable cmTC_fb56c
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fb56c.dir/link.txt --verbose=1
         /usr/bin/ld: cannot find -lpthreads
         collect2: error: ld returned 1 exit status
-        /usr/bin/c++  -DCHECK_FUNCTION_EXISTS=pthread_create CMakeFiles/cmTC_cee9f.dir/CheckFunctionExists.cxx.o -o cmTC_cee9f  -lpthreads
-        make[1]: *** [CMakeFiles/cmTC_cee9f.dir/build.make:102: cmTC_cee9f] Error 1
-        make[1]: Leaving directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-zbXRil'
-        make: *** [Makefile:134: cmTC_cee9f/fast] Error 2
+        /usr/bin/c++  -DCHECK_FUNCTION_EXISTS=pthread_create CMakeFiles/cmTC_fb56c.dir/CheckFunctionExists.cxx.o -o cmTC_fb56c  -lpthreads
+        make[1]: *** [CMakeFiles/cmTC_fb56c.dir/build.make:102: cmTC_fb56c] Error 1
+        make[1]: Leaving directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-yt03AJ'
+        make: *** [Makefile:134: cmTC_fb56c/fast] Error 2
         
       exitCode: 2
   -
@@ -3133,8 +3133,8 @@ events:
     checks:
       - "Looking for pthread_create in pthread"
     directories:
-      source: "/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-rZzWIm"
-      binary: "/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-rZzWIm"
+      source: "/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-Gk2GDN"
+      binary: "/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-Gk2GDN"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3143,17 +3143,17 @@ events:
       variable: "CMAKE_HAVE_PTHREAD_CREATE"
       cached: true
       stdout: |
-        Change Dir: '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-rZzWIm'
+        Change Dir: '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-Gk2GDN'
         
-        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_e649a/fast
-        /usr/bin/make  -f CMakeFiles/cmTC_e649a.dir/build.make CMakeFiles/cmTC_e649a.dir/build
-        make[1]: Entering directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-rZzWIm'
-        Building CXX object CMakeFiles/cmTC_e649a.dir/CheckFunctionExists.cxx.o
-        /usr/bin/c++   -DCHECK_FUNCTION_EXISTS=pthread_create -std=gnu++17 -o CMakeFiles/cmTC_e649a.dir/CheckFunctionExists.cxx.o -c /home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-rZzWIm/CheckFunctionExists.cxx
-        Linking CXX executable cmTC_e649a
-        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e649a.dir/link.txt --verbose=1
-        /usr/bin/c++  -DCHECK_FUNCTION_EXISTS=pthread_create CMakeFiles/cmTC_e649a.dir/CheckFunctionExists.cxx.o -o cmTC_e649a  -lpthread
-        make[1]: Leaving directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-rZzWIm'
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_9d16e/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_9d16e.dir/build.make CMakeFiles/cmTC_9d16e.dir/build
+        make[1]: Entering directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-Gk2GDN'
+        Building CXX object CMakeFiles/cmTC_9d16e.dir/CheckFunctionExists.cxx.o
+        /usr/bin/c++   -DCHECK_FUNCTION_EXISTS=pthread_create -std=gnu++17 -o CMakeFiles/cmTC_9d16e.dir/CheckFunctionExists.cxx.o -c /home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-Gk2GDN/CheckFunctionExists.cxx
+        Linking CXX executable cmTC_9d16e
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9d16e.dir/link.txt --verbose=1
+        /usr/bin/c++  -DCHECK_FUNCTION_EXISTS=pthread_create CMakeFiles/cmTC_9d16e.dir/CheckFunctionExists.cxx.o -o cmTC_9d16e  -lpthread
+        make[1]: Leaving directory '/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/CMakeScratch/TryCompile-Gk2GDN'
         
       exitCode: 0
   -
@@ -4924,7 +4924,7 @@ events:
       - "/usr/include/X11/"
       - "/usr/local/include/"
       - "/usr/include/"
-      - "/home/m2n/edge-deepstream/cpp_src/third_party/faiss/include/"
+      - "/home/m2n/edge-deepstream/third_party/faiss/include/"
     searched_directories:
       - "/home/m2n/.local/bin/faiss/IndexFlat.h"
       - "/usr/local/cuda-11.4/bin/faiss/IndexFlat.h"
@@ -5025,7 +5025,7 @@ events:
       - "/usr/lib/X11/"
       - "/usr/local/lib/"
       - "/usr/lib/"
-      - "/home/m2n/edge-deepstream/cpp_src/third_party/faiss/lib/"
+      - "/home/m2n/edge-deepstream/third_party/faiss/lib/"
     searched_directories:
       - "/home/m2n/.local/bin/"
       - "/usr/local/cuda-11.4/bin/"
@@ -5079,7 +5079,7 @@ events:
     backtrace:
       - "CMakeLists.txt:60 (find_path)"
     mode: "path"
-    variable: "CPPTOML_INCLUDE_DIR"
+    variable: "TOML11_INCLUDE_DIR"
     description: "Path to a file."
     settings:
       SearchFramework: "NEVER"
@@ -5090,7 +5090,7 @@ events:
       CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
       CMAKE_FIND_USE_INSTALL_PREFIX: true
     names:
-      - "cpptoml.h"
+      - "toml.hpp"
     candidate_directories:
       - "/home/m2n/.local/bin/"
       - "/usr/local/cuda-11.4/bin/"
@@ -5126,44 +5126,43 @@ events:
       - "/usr/include/X11/"
       - "/usr/local/include/"
       - "/usr/include/"
-      - "/home/m2n/edge-deepstream/cpp_src/third_party/cpptoml/"
+      - "/home/m2n/edge-deepstream/third_party/toml11/single_include/"
     searched_directories:
-      - "/home/m2n/.local/bin/cpptoml.h"
-      - "/usr/local/cuda-11.4/bin/cpptoml.h"
-      - "/home/m2n/.vscode-server/cli/servers/Stable-0f0d87fa9e96c856c5212fc86db137ac0d783365/server/bin/remote-cli/cpptoml.h"
-      - "/usr/local/sbin/cpptoml.h"
-      - "/usr/local/bin/cpptoml.h"
-      - "/usr/sbin/cpptoml.h"
-      - "/usr/bin/cpptoml.h"
-      - "/sbin/cpptoml.h"
-      - "/bin/cpptoml.h"
-      - "/usr/games/cpptoml.h"
-      - "/usr/local/games/cpptoml.h"
-      - "/snap/bin/cpptoml.h"
-      - "/home/m2n/.vscode-server/extensions/ms-python.debugpy-2025.10.0-linux-arm64/bundled/scripts/noConfigScripts/cpptoml.h"
-      - "/home/m2n/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand/cpptoml.h"
-      - "/usr/local/include/aarch64-linux-gnu/cpptoml.h"
-      - "/usr/local/include/cpptoml.h"
-      - "/usr/local/cpptoml.h"
-      - "/usr/include/aarch64-linux-gnu/cpptoml.h"
-      - "/usr/include/cpptoml.h"
-      - "/usr/cpptoml.h"
-      - "/include/aarch64-linux-gnu/cpptoml.h"
-      - "/include/cpptoml.h"
-      - "/usr/X11R6/include/aarch64-linux-gnu/cpptoml.h"
-      - "/usr/X11R6/include/cpptoml.h"
-      - "/usr/X11R6/cpptoml.h"
-      - "/usr/pkg/include/aarch64-linux-gnu/cpptoml.h"
-      - "/usr/pkg/include/cpptoml.h"
-      - "/usr/pkg/cpptoml.h"
-      - "/opt/include/aarch64-linux-gnu/cpptoml.h"
-      - "/opt/include/cpptoml.h"
-      - "/opt/cpptoml.h"
-      - "/usr/include/X11/cpptoml.h"
-      - "/usr/local/include/cpptoml.h"
-      - "/usr/include/cpptoml.h"
-      - "/home/m2n/edge-deepstream/cpp_src/third_party/cpptoml/cpptoml.h"
-    found: false
+      - "/home/m2n/.local/bin/toml.hpp"
+      - "/usr/local/cuda-11.4/bin/toml.hpp"
+      - "/home/m2n/.vscode-server/cli/servers/Stable-0f0d87fa9e96c856c5212fc86db137ac0d783365/server/bin/remote-cli/toml.hpp"
+      - "/usr/local/sbin/toml.hpp"
+      - "/usr/local/bin/toml.hpp"
+      - "/usr/sbin/toml.hpp"
+      - "/usr/bin/toml.hpp"
+      - "/sbin/toml.hpp"
+      - "/bin/toml.hpp"
+      - "/usr/games/toml.hpp"
+      - "/usr/local/games/toml.hpp"
+      - "/snap/bin/toml.hpp"
+      - "/home/m2n/.vscode-server/extensions/ms-python.debugpy-2025.10.0-linux-arm64/bundled/scripts/noConfigScripts/toml.hpp"
+      - "/home/m2n/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand/toml.hpp"
+      - "/usr/local/include/aarch64-linux-gnu/toml.hpp"
+      - "/usr/local/include/toml.hpp"
+      - "/usr/local/toml.hpp"
+      - "/usr/include/aarch64-linux-gnu/toml.hpp"
+      - "/usr/include/toml.hpp"
+      - "/usr/toml.hpp"
+      - "/include/aarch64-linux-gnu/toml.hpp"
+      - "/include/toml.hpp"
+      - "/usr/X11R6/include/aarch64-linux-gnu/toml.hpp"
+      - "/usr/X11R6/include/toml.hpp"
+      - "/usr/X11R6/toml.hpp"
+      - "/usr/pkg/include/aarch64-linux-gnu/toml.hpp"
+      - "/usr/pkg/include/toml.hpp"
+      - "/usr/pkg/toml.hpp"
+      - "/opt/include/aarch64-linux-gnu/toml.hpp"
+      - "/opt/include/toml.hpp"
+      - "/opt/toml.hpp"
+      - "/usr/include/X11/toml.hpp"
+      - "/usr/local/include/toml.hpp"
+      - "/usr/include/toml.hpp"
+    found: "/home/m2n/edge-deepstream/third_party/toml11/single_include/"
     search_context:
       ENV{PATH}:
         - "/home/m2n/.local/bin"
@@ -5247,7 +5246,7 @@ events:
       - "/usr/include/X11/"
       - "/usr/local/include/"
       - "/usr/include/"
-      - "/home/m2n/edge-deepstream/cpp_src/third_party/json/single_include/"
+      - "/home/m2n/edge-deepstream/third_party/json/single_include/"
     searched_directories:
       - "/home/m2n/.local/bin/nlohmann/json.hpp"
       - "/usr/local/cuda-11.4/bin/nlohmann/json.hpp"
@@ -5506,6 +5505,504 @@ events:
       - "/usr/local/lib/"
       - "/usr/lib/"
     found: false
+    search_context:
+      ENV{PATH}:
+        - "/home/m2n/.local/bin"
+        - "/usr/local/cuda-11.4/bin"
+        - "/home/m2n/.vscode-server/cli/servers/Stable-0f0d87fa9e96c856c5212fc86db137ac0d783365/server/bin/remote-cli"
+        - "/home/m2n/.local/bin"
+        - "/home/m2n/.local/bin"
+        - "/usr/local/cuda-11.4/bin"
+        - "/usr/local/sbin"
+        - "/usr/local/bin"
+        - "/usr/sbin"
+        - "/usr/bin"
+        - "/sbin"
+        - "/bin"
+        - "/usr/games"
+        - "/usr/local/games"
+        - "/snap/bin"
+        - "/home/m2n/.vscode-server/extensions/ms-python.debugpy-2025.10.0-linux-arm64/bundled/scripts/noConfigScripts"
+        - "/home/m2n/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/usr"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+      CMAKE_SYSTEM_LIBRARY_PATH:
+        - "/usr/lib/X11"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:307 (find_library)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:357 (_pkg_find_libs)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:695 (_pkg_recalculate)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:867 (_pkg_check_modules_internal)"
+      - "cpp/roi_helper/CMakeLists.txt:17 (pkg_check_modules)"
+    mode: "library"
+    variable: "pkgcfg_lib_GSTREAMER_gstreamer-1.0"
+    description: "Path to a library."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "gstreamer-1.0"
+    candidate_directories:
+      - "/usr/lib/aarch64-linux-gnu/"
+    found: "/usr/lib/aarch64-linux-gnu/libgstreamer-1.0.so"
+    search_context:
+      ENV{PATH}:
+        - "/home/m2n/.local/bin"
+        - "/usr/local/cuda-11.4/bin"
+        - "/home/m2n/.vscode-server/cli/servers/Stable-0f0d87fa9e96c856c5212fc86db137ac0d783365/server/bin/remote-cli"
+        - "/home/m2n/.local/bin"
+        - "/home/m2n/.local/bin"
+        - "/usr/local/cuda-11.4/bin"
+        - "/usr/local/sbin"
+        - "/usr/local/bin"
+        - "/usr/sbin"
+        - "/usr/bin"
+        - "/sbin"
+        - "/bin"
+        - "/usr/games"
+        - "/usr/local/games"
+        - "/snap/bin"
+        - "/home/m2n/.vscode-server/extensions/ms-python.debugpy-2025.10.0-linux-arm64/bundled/scripts/noConfigScripts"
+        - "/home/m2n/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/usr"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+      CMAKE_SYSTEM_LIBRARY_PATH:
+        - "/usr/lib/X11"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:307 (find_library)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:357 (_pkg_find_libs)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:695 (_pkg_recalculate)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:867 (_pkg_check_modules_internal)"
+      - "cpp/roi_helper/CMakeLists.txt:17 (pkg_check_modules)"
+    mode: "library"
+    variable: "pkgcfg_lib_GSTREAMER_gobject-2.0"
+    description: "Path to a library."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "gobject-2.0"
+    candidate_directories:
+      - "/usr/lib/aarch64-linux-gnu/"
+    found: "/usr/lib/aarch64-linux-gnu/libgobject-2.0.so"
+    search_context:
+      ENV{PATH}:
+        - "/home/m2n/.local/bin"
+        - "/usr/local/cuda-11.4/bin"
+        - "/home/m2n/.vscode-server/cli/servers/Stable-0f0d87fa9e96c856c5212fc86db137ac0d783365/server/bin/remote-cli"
+        - "/home/m2n/.local/bin"
+        - "/home/m2n/.local/bin"
+        - "/usr/local/cuda-11.4/bin"
+        - "/usr/local/sbin"
+        - "/usr/local/bin"
+        - "/usr/sbin"
+        - "/usr/bin"
+        - "/sbin"
+        - "/bin"
+        - "/usr/games"
+        - "/usr/local/games"
+        - "/snap/bin"
+        - "/home/m2n/.vscode-server/extensions/ms-python.debugpy-2025.10.0-linux-arm64/bundled/scripts/noConfigScripts"
+        - "/home/m2n/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/usr"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+      CMAKE_SYSTEM_LIBRARY_PATH:
+        - "/usr/lib/X11"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:307 (find_library)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:357 (_pkg_find_libs)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:695 (_pkg_recalculate)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:867 (_pkg_check_modules_internal)"
+      - "cpp/roi_helper/CMakeLists.txt:17 (pkg_check_modules)"
+    mode: "library"
+    variable: "pkgcfg_lib_GSTREAMER_glib-2.0"
+    description: "Path to a library."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "glib-2.0"
+    candidate_directories:
+      - "/usr/lib/aarch64-linux-gnu/"
+    found: "/usr/lib/aarch64-linux-gnu/libglib-2.0.so"
+    search_context:
+      ENV{PATH}:
+        - "/home/m2n/.local/bin"
+        - "/usr/local/cuda-11.4/bin"
+        - "/home/m2n/.vscode-server/cli/servers/Stable-0f0d87fa9e96c856c5212fc86db137ac0d783365/server/bin/remote-cli"
+        - "/home/m2n/.local/bin"
+        - "/home/m2n/.local/bin"
+        - "/usr/local/cuda-11.4/bin"
+        - "/usr/local/sbin"
+        - "/usr/local/bin"
+        - "/usr/sbin"
+        - "/usr/bin"
+        - "/sbin"
+        - "/bin"
+        - "/usr/games"
+        - "/usr/local/games"
+        - "/snap/bin"
+        - "/home/m2n/.vscode-server/extensions/ms-python.debugpy-2025.10.0-linux-arm64/bundled/scripts/noConfigScripts"
+        - "/home/m2n/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/usr"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+      CMAKE_SYSTEM_LIBRARY_PATH:
+        - "/usr/lib/X11"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:307 (find_library)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:357 (_pkg_find_libs)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:695 (_pkg_recalculate)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:867 (_pkg_check_modules_internal)"
+      - "cpp/roi_helper/CMakeLists.txt:18 (pkg_check_modules)"
+    mode: "library"
+    variable: "pkgcfg_lib_GLIB2_glib-2.0"
+    description: "Path to a library."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "glib-2.0"
+    candidate_directories:
+      - "/usr/lib/aarch64-linux-gnu/"
+    found: "/usr/lib/aarch64-linux-gnu/libglib-2.0.so"
+    search_context:
+      ENV{PATH}:
+        - "/home/m2n/.local/bin"
+        - "/usr/local/cuda-11.4/bin"
+        - "/home/m2n/.vscode-server/cli/servers/Stable-0f0d87fa9e96c856c5212fc86db137ac0d783365/server/bin/remote-cli"
+        - "/home/m2n/.local/bin"
+        - "/home/m2n/.local/bin"
+        - "/usr/local/cuda-11.4/bin"
+        - "/usr/local/sbin"
+        - "/usr/local/bin"
+        - "/usr/sbin"
+        - "/usr/bin"
+        - "/sbin"
+        - "/bin"
+        - "/usr/games"
+        - "/usr/local/games"
+        - "/snap/bin"
+        - "/home/m2n/.vscode-server/extensions/ms-python.debugpy-2025.10.0-linux-arm64/bundled/scripts/noConfigScripts"
+        - "/home/m2n/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/usr"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+      CMAKE_SYSTEM_LIBRARY_PATH:
+        - "/usr/lib/X11"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:307 (find_library)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:357 (_pkg_find_libs)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:695 (_pkg_recalculate)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:867 (_pkg_check_modules_internal)"
+      - "cpp/roi_helper/CMakeLists.txt:19 (pkg_check_modules)"
+    mode: "library"
+    variable: "pkgcfg_lib_GOBJECT_gobject-2.0"
+    description: "Path to a library."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "gobject-2.0"
+    candidate_directories:
+      - "/usr/lib/aarch64-linux-gnu/"
+    found: "/usr/lib/aarch64-linux-gnu/libgobject-2.0.so"
+    search_context:
+      ENV{PATH}:
+        - "/home/m2n/.local/bin"
+        - "/usr/local/cuda-11.4/bin"
+        - "/home/m2n/.vscode-server/cli/servers/Stable-0f0d87fa9e96c856c5212fc86db137ac0d783365/server/bin/remote-cli"
+        - "/home/m2n/.local/bin"
+        - "/home/m2n/.local/bin"
+        - "/usr/local/cuda-11.4/bin"
+        - "/usr/local/sbin"
+        - "/usr/local/bin"
+        - "/usr/sbin"
+        - "/usr/bin"
+        - "/sbin"
+        - "/bin"
+        - "/usr/games"
+        - "/usr/local/games"
+        - "/snap/bin"
+        - "/home/m2n/.vscode-server/extensions/ms-python.debugpy-2025.10.0-linux-arm64/bundled/scripts/noConfigScripts"
+        - "/home/m2n/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/usr"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+      CMAKE_SYSTEM_LIBRARY_PATH:
+        - "/usr/lib/X11"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:307 (find_library)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:357 (_pkg_find_libs)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:695 (_pkg_recalculate)"
+      - "/usr/share/cmake-4.1/Modules/FindPkgConfig.cmake:867 (_pkg_check_modules_internal)"
+      - "cpp/roi_helper/CMakeLists.txt:19 (pkg_check_modules)"
+    mode: "library"
+    variable: "pkgcfg_lib_GOBJECT_glib-2.0"
+    description: "Path to a library."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "glib-2.0"
+    candidate_directories:
+      - "/usr/lib/aarch64-linux-gnu/"
+    found: "/usr/lib/aarch64-linux-gnu/libglib-2.0.so"
+    search_context:
+      ENV{PATH}:
+        - "/home/m2n/.local/bin"
+        - "/usr/local/cuda-11.4/bin"
+        - "/home/m2n/.vscode-server/cli/servers/Stable-0f0d87fa9e96c856c5212fc86db137ac0d783365/server/bin/remote-cli"
+        - "/home/m2n/.local/bin"
+        - "/home/m2n/.local/bin"
+        - "/usr/local/cuda-11.4/bin"
+        - "/usr/local/sbin"
+        - "/usr/local/bin"
+        - "/usr/sbin"
+        - "/usr/bin"
+        - "/sbin"
+        - "/bin"
+        - "/usr/games"
+        - "/usr/local/games"
+        - "/snap/bin"
+        - "/home/m2n/.vscode-server/extensions/ms-python.debugpy-2025.10.0-linux-arm64/bundled/scripts/noConfigScripts"
+        - "/home/m2n/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/usr"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+      CMAKE_SYSTEM_LIBRARY_PATH:
+        - "/usr/lib/X11"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "cpp/roi_helper/CMakeLists.txt:40 (find_library)"
+    mode: "library"
+    variable: "NVBUFSURFACE"
+    description: "Path to a library."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "nvbufsurface"
+    candidate_directories:
+      - "/opt/nvidia/deepstream/deepstream/lib/"
+      - "/opt/nvidia/deepstream/deepstream/lib/aarch64-linux-gnu/"
+      - "/home/m2n/.local/bin/"
+      - "/usr/local/cuda-11.4/bin/"
+      - "/home/m2n/.vscode-server/cli/servers/Stable-0f0d87fa9e96c856c5212fc86db137ac0d783365/server/bin/remote-cli/"
+      - "/usr/local/sbin/"
+      - "/usr/local/bin/"
+      - "/usr/sbin/"
+      - "/usr/bin/"
+      - "/sbin/"
+      - "/bin/"
+      - "/usr/games/"
+      - "/usr/local/games/"
+      - "/snap/bin/"
+      - "/home/m2n/.vscode-server/extensions/ms-python.debugpy-2025.10.0-linux-arm64/bundled/scripts/noConfigScripts/"
+      - "/home/m2n/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "/usr/local/lib/aarch64-linux-gnu/"
+      - "/usr/local/lib/"
+      - "/usr/local/"
+      - "/usr/lib/aarch64-linux-gnu/"
+      - "/usr/lib/"
+      - "/usr/"
+      - "/lib/aarch64-linux-gnu/"
+      - "/lib/"
+      - "/usr/X11R6/lib/aarch64-linux-gnu/"
+      - "/usr/X11R6/lib/"
+      - "/usr/X11R6/"
+      - "/usr/pkg/lib/aarch64-linux-gnu/"
+      - "/usr/pkg/lib/"
+      - "/usr/pkg/"
+      - "/opt/lib/aarch64-linux-gnu/"
+      - "/opt/lib/"
+      - "/opt/"
+      - "/usr/lib/X11/"
+    found: "/opt/nvidia/deepstream/deepstream/lib/libnvbufsurface.so"
+    search_context:
+      ENV{PATH}:
+        - "/home/m2n/.local/bin"
+        - "/usr/local/cuda-11.4/bin"
+        - "/home/m2n/.vscode-server/cli/servers/Stable-0f0d87fa9e96c856c5212fc86db137ac0d783365/server/bin/remote-cli"
+        - "/home/m2n/.local/bin"
+        - "/home/m2n/.local/bin"
+        - "/usr/local/cuda-11.4/bin"
+        - "/usr/local/sbin"
+        - "/usr/local/bin"
+        - "/usr/sbin"
+        - "/usr/bin"
+        - "/sbin"
+        - "/bin"
+        - "/usr/games"
+        - "/usr/local/games"
+        - "/snap/bin"
+        - "/home/m2n/.vscode-server/extensions/ms-python.debugpy-2025.10.0-linux-arm64/bundled/scripts/noConfigScripts"
+        - "/home/m2n/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/usr"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+      CMAKE_SYSTEM_LIBRARY_PATH:
+        - "/usr/lib/X11"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "cpp/roi_helper/CMakeLists.txt:41 (find_library)"
+    mode: "library"
+    variable: "NVBUFSURFTRANSFORM"
+    description: "Path to a library."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "nvbufsurftransform"
+    candidate_directories:
+      - "/opt/nvidia/deepstream/deepstream/lib/"
+      - "/opt/nvidia/deepstream/deepstream/lib/aarch64-linux-gnu/"
+      - "/home/m2n/.local/bin/"
+      - "/usr/local/cuda-11.4/bin/"
+      - "/home/m2n/.vscode-server/cli/servers/Stable-0f0d87fa9e96c856c5212fc86db137ac0d783365/server/bin/remote-cli/"
+      - "/usr/local/sbin/"
+      - "/usr/local/bin/"
+      - "/usr/sbin/"
+      - "/usr/bin/"
+      - "/sbin/"
+      - "/bin/"
+      - "/usr/games/"
+      - "/usr/local/games/"
+      - "/snap/bin/"
+      - "/home/m2n/.vscode-server/extensions/ms-python.debugpy-2025.10.0-linux-arm64/bundled/scripts/noConfigScripts/"
+      - "/home/m2n/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "/usr/local/lib/aarch64-linux-gnu/"
+      - "/usr/local/lib/"
+      - "/usr/local/"
+      - "/usr/lib/aarch64-linux-gnu/"
+      - "/usr/lib/"
+      - "/usr/"
+      - "/lib/aarch64-linux-gnu/"
+      - "/lib/"
+      - "/usr/X11R6/lib/aarch64-linux-gnu/"
+      - "/usr/X11R6/lib/"
+      - "/usr/X11R6/"
+      - "/usr/pkg/lib/aarch64-linux-gnu/"
+      - "/usr/pkg/lib/"
+      - "/usr/pkg/"
+      - "/opt/lib/aarch64-linux-gnu/"
+      - "/opt/lib/"
+      - "/opt/"
+      - "/usr/lib/X11/"
+    found: "/opt/nvidia/deepstream/deepstream/lib/libnvbufsurftransform.so"
     search_context:
       ENV{PATH}:
         - "/home/m2n/.local/bin"

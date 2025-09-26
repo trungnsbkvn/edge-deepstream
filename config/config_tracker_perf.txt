@@ -27,4 +27,4 @@ tracker-width=320
 tracker-height=320
 gpu-id=0
 ll-lib-file=/opt/nvidia/deepstream/deepstream/lib/libnvds_nvmultiobjecttracker.so
-ll-config-file=config/config_tracker_NvDCF_perf.yml
+ll-config-file=/home/m2n/edge-deepstream/config/config_tracker_NvDCF_perf.yml

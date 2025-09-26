@@ -21,8 +21,6 @@ file(REMOVE_RECURSE
   "CMakeFiles/edge_utils.dir/utils/probe.cpp.o.d"
   "CMakeFiles/edge_utils.dir/utils/status_codes.cpp.o"
   "CMakeFiles/edge_utils.dir/utils/status_codes.cpp.o.d"
-  "CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.o"
-  "CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.o.d"
   "libedge_utils.a"
   "libedge_utils.pdb"
 )

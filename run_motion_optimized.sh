@@ -42,6 +42,6 @@ echo "  - Detection confidence: ${PGIE_MIN_CONF}"
 echo "  - Performance monitoring: Enabled"
 
 # Run the pipeline with motion optimizations
-LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libgomp.so.1  python3 main.py
+LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libgomp.so.1 python3 main.py
 
 echo "Motion-optimized pipeline completed."

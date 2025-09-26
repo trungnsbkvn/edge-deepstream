@@ -46,6 +46,7 @@ private:
     bool create_elements(const Config& config);
     bool link_elements();
     bool setup_element_properties(const Config& config);
+    void setup_queue_properties();
     
     // Element creation helpers
     GstElement* create_streammux(const Config& config);
@@ -53,6 +54,7 @@ private:
     GstElement* create_sgie(const Config& config);
     GstElement* create_tracker(const Config& config);
     GstElement* create_tiler(const Config& config);
+    GstElement* create_nvvidconv(const Config& config);
     GstElement* create_sink(const Config& config);
     GstElement* create_osd(const Config& config);
     
@@ -63,6 +65,7 @@ private:
     GstElement* sgie_;
     GstElement* tracker_;
     GstElement* tiler_;
+    GstElement* nvvidconv_;  // nvvideoconvert element like Python version
     GstElement* osd_;
     GstElement* sink_;
     GstElement* queue1_;
@@ -70,6 +73,8 @@ private:
     GstElement* queue3_;
     GstElement* queue4_;
     GstElement* queue5_;
+    GstElement* queue6_;
+    GstElement* queue7_;
     
     // Bus and callbacks
     GstBus* bus_;

@@ -48,27 +48,27 @@ find_path(FAISS_INCLUDE_DIR
     NAMES faiss/IndexFlat.h
     PATHS /usr/local/include
           /usr/include
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/faiss/include)
+          ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/faiss/include)
 
 find_library(FAISS_LIBRARY
     NAMES faiss
     PATHS /usr/local/lib
           /usr/lib
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/faiss/lib)
+          ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/faiss/lib)
 
-# cpptoml for TOML parsing
-find_path(CPPTOML_INCLUDE_DIR
-    NAMES cpptoml.h
+# toml11 for TOML parsing
+find_path(TOML11_INCLUDE_DIR
+    NAMES toml.hpp
     PATHS /usr/local/include
           /usr/include
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/cpptoml)
+          ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/toml11/single_include)
 
 # nlohmann/json for JSON parsing
 find_path(JSON_INCLUDE_DIR
     NAMES nlohmann/json.hpp
     PATHS /usr/local/include
           /usr/include
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/json/single_include)
+          ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/json/single_include)
 
 # paho-mqtt for MQTT
 find_library(PAHO_MQTT_CPP_LIBRARY
@@ -94,9 +94,9 @@ if(FAISS_INCLUDE_DIR)
     add_compile_definitions(HAVE_FAISS)
 endif()
 
-if(CPPTOML_INCLUDE_DIR)
-    include_directories(${CPPTOML_INCLUDE_DIR})
-    add_compile_definitions(HAVE_CPPTOML)
+if(TOML11_INCLUDE_DIR)
+    include_directories(${TOML11_INCLUDE_DIR})
+    add_compile_definitions(HAVE_TOML11)
 endif()
 
 if(JSON_INCLUDE_DIR)
@@ -121,7 +121,6 @@ set(UTIL_SOURCES
     utils/bus_call.cpp
     utils/event_sender.cpp
     utils/mqtt_listener.cpp
-    utils/tensorrt_infer.cpp
     utils/faiss_index.cpp
     utils/gen_feature.cpp
     utils/enroll_ops.cpp
@@ -163,6 +162,7 @@ add_executable(edge_deepstream ${MAIN_SOURCES})
 target_link_libraries(edge_deepstream
     edge_utils
     ${GST_LIBRARIES}
+    ${GST_APP_LIBRARIES}
     ${DEEPSTREAM_NVDS_META}
     ${DEEPSTREAM_NVBUFSURFACE}
     ${DEEPSTREAM_NVDSGST_META}
@@ -186,5 +186,5 @@ message(STATUS "  CUDA found: ${CUDA_FOUND}")
 message(STATUS "  OpenCV found: ${OpenCV_FOUND}")
 message(STATUS "  FAISS found: ${FAISS_LIBRARY}")
 message(STATUS "  MQTT found: ${PAHO_MQTT_CPP_LIBRARY}")
-message(STATUS "  CPPTOML found: ${CPPTOML_INCLUDE_DIR}")
+message(STATUS "  TOML11 found: ${TOML11_INCLUDE_DIR}")
 message(STATUS "  JSON found: ${JSON_INCLUDE_DIR}")

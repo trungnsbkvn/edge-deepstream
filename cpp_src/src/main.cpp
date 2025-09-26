@@ -1,378 +1,375 @@
+// Clean reconstructed main.cpp implementing Application methods and entry point.
+
 #include "edge_deepstream.h"
-#include "pipeline.h"  // Include full definition after edge_deepstream.h
+#include "pipeline.h"
 #include "env_utils.h"
 #include "config_parser.h"
 #include "event_sender.h"
 #include "mqtt_listener.h"
-#include "tensorrt_infer.h"
 
-#include <iostream>
 #include <signal.h>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
 #include <algorithm>
-#include <cctype>
-
-using namespace EdgeDeepStream;
-
-// Global application instance for signal handling
-static Application* g_app = nullptr;
-
-// Signal handler
-void signal_handler(int sig) {
-    std::cout << "Received signal " << sig << ", shutting down..." << std::endl;
-    if (g_app) {
-        g_app->shutdown();
-    }
-}
-
-int main(int argc, char* argv[]) {
-    // Initialize GStreamer
-    gst_init(&argc, &argv);
-    
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <config_file> [duration_ms]" << std::endl;
-        return -1;
-    }
-    
-    std::string config_path = argv[1];
-    int duration_ms = -1;  // Run indefinitely by default
-    
-    if (argc >= 3) {
-        try {
-            duration_ms = std::stoi(argv[2]);
-        } catch (const std::exception& e) {
-            std::cerr << "Invalid duration: " << argv[2] << std::endl;
-            return -1;
-        }
-    }
-    
-    // Set up signal handlers
-    signal(SIGINT, signal_handler);
-    signal(SIGTERM, signal_handler);
-    
-    // Create and initialize application
-    Application app;
-    g_app = &app;
-    
-    std::cout << "EdgeDeepStream C++ Version" << std::endl;
-    std::cout << "Config: " << config_path << std::endl;
-    
-    if (!app.initialize(config_path)) {
-        std::cerr << "Failed to initialize application" << std::endl;
-        return -1;
-    }
-    
-    std::cout << "Application initialized successfully" << std::endl;
-    
-    // Setup GStreamer plugins
-    if (!setup_gstreamer_plugins()) {
-        std::cerr << "Failed to setup GStreamer plugins" << std::endl;
-        return -1;
-    }
-    
-    // Run the application
-    bool success = app.run(duration_ms);
-    
-    std::cout << "Application finished" << std::endl;
-    
-    g_app = nullptr;
-    return success ? 0 : -1;
-}
+#include <unistd.h>
+#include <atomic>
 
 namespace EdgeDeepStream {
 
-// Global realtime flag
-bool REALTIME_DROP = true;
+// Global realtime flag referenced by source_bin.cpp
+bool REALTIME_DROP = false;
 
-// Application implementation
-Application::Application() 
-    : running_(false), loop_(nullptr) {
-}
-
+// ---------------- Application lifecycle ----------------
+Application::Application() : running_(false), loop_(g_main_loop_new(nullptr, FALSE)) {}
 Application::~Application() {
     shutdown();
+    if (loop_) {
+        g_main_loop_unref(loop_);
+        loop_ = nullptr;
+    }
 }
 
 bool Application::initialize(const std::string& config_path) {
     try {
-        // Parse configuration
-        auto config = ConfigParser::parse_toml(config_path);
-        if (!config) {
-            std::cerr << "Failed to parse configuration file: " << config_path << std::endl;
-            return false;
-        }
-        config_ = *config;
-        
-        // Set realtime drop policy early
-        auto realtime_env = EnvUtils::env_bool("DS_REALTIME_DROP");
-        if (realtime_env.has_value()) {
-            REALTIME_DROP = realtime_env.value();
+        std::unique_ptr<Config> parsed;
+        if (config_path.size() >= 5 && config_path.substr(config_path.size()-5) == ".toml") {
+            parsed = ConfigParser::parse_toml(config_path);
         } else {
-            // Check config file
-            int realtime_config = 0;
-            try {
-                auto realtime_str = config_.get<std::string>("pipeline", "realtime", "0");
-                realtime_config = std::stoi(realtime_str);
-            } catch (...) {
-                realtime_config = 0;
-            }
-            REALTIME_DROP = (realtime_config != 0);
+            parsed = ConfigParser::parse_config_file(config_path);
         }
-        
-        std::cout << "REALTIME_DROP = " << (REALTIME_DROP ? "true" : "false") << std::endl;
-        
-        // Initialize GLib main loop
-        loop_ = g_main_loop_new(nullptr, FALSE);
-        if (!loop_) {
-            std::cerr << "Failed to create GLib main loop" << std::endl;
+        if (!parsed) {
+            std::cerr << "Failed to parse config: " << config_path << std::endl;
             return false;
         }
-        
-        // Setup pipeline
-        if (!setup_pipeline()) {
-            std::cerr << "Failed to setup pipeline" << std::endl;
-            return false;
-        }
-        
-        // Setup recognition system
-        if (!setup_recognition()) {
-            std::cerr << "Failed to setup recognition system" << std::endl;
-            return false;
-        }
-        
-        // Setup MQTT (optional)
-        setup_mqtt();  // Don't fail if MQTT setup fails
-        
+        config_ = *parsed; // copy
+
+        // Realtime drop flag (env overrides config)
+        REALTIME_DROP = EnvUtils::env_bool("DS_REALTIME_DROP").value_or(
+            config_.get<bool>("pipeline", "realtime", false));
+        std::cout << "REALTIME_DROP=" << (REALTIME_DROP?"true":"false") << std::endl;
+
+        if (!setup_pipeline()) return false;
+        setup_recognition(); // best-effort
+        setup_mqtt(); // best-effort
         return true;
-        
     } catch (const std::exception& e) {
-        std::cerr << "Exception during initialization: " << e.what() << std::endl;
+        std::cerr << "initialize exception: " << e.what() << std::endl;
         return false;
-    }
-}
-
-bool Application::run(int duration_ms) {
-    if (!pipeline_) {
-        std::cerr << "Pipeline not initialized" << std::endl;
-        return false;
-    }
-    
-    running_ = true;
-    
-    // Start the pipeline
-    if (!pipeline_->start()) {
-        std::cerr << "Failed to start pipeline" << std::endl;
-        return false;
-    }
-    
-    std::cout << "Pipeline started successfully" << std::endl;
-    
-    // Setup duration timer if specified
-    if (duration_ms > 0) {
-        g_timeout_add(duration_ms, [](gpointer data) -> gboolean {
-            Application* app = static_cast<Application*>(data);
-            std::cout << "Duration reached, shutting down..." << std::endl;
-            app->shutdown();
-            return FALSE;  // Remove timer
-        }, this);
-    }
-    
-    // Run main loop
-    if (loop_ && running_) {
-        std::cout << "Starting main loop..." << std::endl;
-        g_main_loop_run(loop_);
-    }
-    
-    // Stop pipeline
-    if (pipeline_) {
-        pipeline_->stop();
-    }
-    
-    return true;
-}
-
-void Application::shutdown() {
-    if (!running_) {
-        return;
-    }
-    
-    std::cout << "Shutting down application..." << std::endl;
-    running_ = false;
-    
-    if (loop_) {
-        g_main_loop_quit(loop_);
     }
 }
 
 bool Application::setup_pipeline() {
-    try {
-        pipeline_ = std::make_unique<EdgeDeepStream::Pipeline>();
-        
-        // Set bus callback for error handling
-        pipeline_->set_bus_callback([this](GstBus* bus, GstMessage* msg) -> gboolean {
-            // Handle bus messages (errors, warnings, EOS, etc.)
-            switch (GST_MESSAGE_TYPE(msg)) {
-                case GST_MESSAGE_ERROR: {
-                    GError* err = nullptr;
-                    gchar* debug_info = nullptr;
-                    gst_message_parse_error(msg, &err, &debug_info);
-                    std::cerr << "Error from " << GST_OBJECT_NAME(msg->src) 
-                             << ": " << err->message << std::endl;
-                    if (debug_info) {
-                        std::cerr << "Debug info: " << debug_info << std::endl;
-                        g_free(debug_info);
-                    }
-                    g_error_free(err);
-                    shutdown();
-                    return FALSE;
-                }
-                case GST_MESSAGE_WARNING: {
-                    GError* err = nullptr;
-                    gchar* debug_info = nullptr;
-                    gst_message_parse_warning(msg, &err, &debug_info);
-                    std::cout << "Warning from " << GST_OBJECT_NAME(msg->src) 
-                             << ": " << err->message << std::endl;
-                    if (debug_info) {
-                        std::cout << "Debug info: " << debug_info << std::endl;
-                        g_free(debug_info);
-                    }
-                    g_error_free(err);
-                    break;
-                }
-                case GST_MESSAGE_EOS:
-                    std::cout << "End-Of-Stream reached" << std::endl;
-                    shutdown();
-                    return FALSE;
-                case GST_MESSAGE_STATE_CHANGED: {
-                    if (GST_MESSAGE_SRC(msg) == GST_OBJECT(pipeline_->get_pipeline())) {
-                        GstState old_state, new_state, pending_state;
-                        gst_message_parse_state_changed(msg, &old_state, &new_state, &pending_state);
-                        std::cout << "Pipeline state changed from " 
-                                 << gst_element_state_get_name(old_state) << " to "
-                                 << gst_element_state_get_name(new_state) << std::endl;
-                    }
-                    break;
-                }
-                default:
-                    break;
-            }
-            return TRUE;  // Continue receiving messages
-        });
-        
-        if (!pipeline_->create(config_)) {
-            std::cerr << "Failed to create pipeline" << std::endl;
-            return false;
-        }
-        
-        // Add sources from config
-        if (config_.has_section("source")) {
-            auto& source_section = config_.sections.at("source");
-            for (const auto& [id, uri] : source_section) {
-                SourceInfo source_info;
-                source_info.id = id;
-                source_info.uri = uri;
-                source_info.is_rtsp = uri.find("rtsp://") == 0;
-                
-                std::cout << "Adding source: " << id << " -> " << uri << std::endl;
-                
-                if (!pipeline_->add_source(source_info)) {
-                    std::cerr << "Failed to add source: " << id << std::endl;
-                    // Continue with other sources
-                }
+    pipeline_ = std::make_unique<Pipeline>();
+    if (!pipeline_->create(config_)) {
+        std::cerr << "Pipeline creation failed" << std::endl;
+        return false;
+    }
+
+    // Count sources and set streammux properties
+    bool has_live = false;
+    int source_count = 0;
+    if (config_.has_section("source")) {
+        source_count = config_.sections.at("source").size();
+        for (const auto& kv : config_.sections.at("source")) {
+            if (kv.second.find("rtsp://") == 0) {
+                has_live = true;
+                break; // Just need to know if any are live
             }
         }
-        
-        return true;
-        
-    } catch (const std::exception& e) {
-        std::cerr << "Exception in setup_pipeline: " << e.what() << std::endl;
-        return false;
-    }
-}
-
-bool Application::setup_recognition() {
-    try {
-        // Load known faces
-        std::string known_faces_dir = config_.get<std::string>("pipeline", "known_face_dir", "data/known_faces");
-        auto known_faces = ConfigParser::load_faces(known_faces_dir);
-        std::cout << "Loaded " << known_faces.size() << " known faces" << std::endl;
-        
-        // Setup FAISS index if available
-        if (config_.has_section("recognition")) {
-            // TODO: Initialize FAISS index
-            // This would be implemented when FAISS integration is added
-        }
-        
-        // Setup TensorRT inference
-        // TODO: Initialize TensorRT inference engine
-        // This would be implemented when TensorRT integration is added
-        
-        return true;
-        
-    } catch (const std::exception& e) {
-        std::cerr << "Exception in setup_recognition: " << e.what() << std::endl;
-        return false;
-    }
-}
-
-bool Application::setup_mqtt() {
-    try {
-        // TODO: Initialize MQTT client
-        // This would be implemented when MQTT integration is added
-        std::cout << "MQTT setup (placeholder)" << std::endl;
-        return true;
-        
-    } catch (const std::exception& e) {
-        std::cerr << "Exception in setup_mqtt: " << e.what() << std::endl;
-        return false;
-    }
-}
-
-// Utility functions
-std::vector<std::string> load_known_faces(const std::string& path) {
-    std::vector<std::string> faces;
-    // TODO: Implement face loading logic
-    return faces;
-}
-
-bool setup_gstreamer_plugins() {
-    // Check for required GStreamer plugins
-    std::vector<std::string> required_plugins = {
-        "coreelements",     // queue, tee, etc.
-        "playback",         // uridecodebin
-        "videoparsersbad",  // h264parse, h265parse
-        "nvcodec",          // nvh264dec, nvh265dec (if available)
-        "rtp",              // rtph264depay, rtph265depay
-        "rtsp",             // rtspsrc
-        "videotestsrc",     // videotestsrc (for testing)
-    };
-    
-    for (const auto& plugin_name : required_plugins) {
-        GstPlugin* plugin = gst_plugin_load_by_name(plugin_name.c_str());
-        if (!plugin) {
-            std::cout << "Warning: Plugin '" << plugin_name << "' not available" << std::endl;
-            // Don't fail - some plugins are optional
-        } else {
-            gst_object_unref(plugin);
-        }
     }
     
-    // Check for DeepStream plugins
-    std::vector<std::string> deepstream_plugins = {
-        "nvdsgst_meta",
-        "nvdsgst_helper"
-    };
-    
-    for (const auto& plugin_name : deepstream_plugins) {
-        GstPlugin* plugin = gst_plugin_load_by_name(plugin_name.c_str());
-        if (!plugin) {
-            std::cerr << "Error: DeepStream plugin '" << plugin_name << "' not available" << std::endl;
-            return false;
-        }
-        gst_object_unref(plugin);
+    // streammux tweaks - batch-size should be fixed in config to prevent crashes
+    GstElement* streammux = pipeline_->get_streammux();
+    if (streammux) {
+        if (has_live) g_object_set(streammux, "live-source", 1, NULL);
+        // NOTE: batch-size is set from config only - no dynamic changes to prevent crashes
     }
     
-    std::cout << "GStreamer plugins setup completed" << std::endl;
+    // Set up bus message handler following DeepStream 6.3 pattern
+    pipeline_->set_bus_callback([this](GstBus* bus, GstMessage* msg) -> gboolean {
+        return this->bus_message_handler(bus, msg);
+    });
+    
+    std::cout << "Pipeline setup completed with " << source_count << " sources" << std::endl;
     return true;
 }
 
+bool Application::setup_recognition() { return true; }
+bool Application::setup_mqtt() { return true; }
+
+// Bus message handler following DeepStream 6.3 pattern
+gboolean Application::bus_message_handler(GstBus* bus, GstMessage* msg) {
+    switch (GST_MESSAGE_TYPE(msg)) {
+        case GST_MESSAGE_EOS:
+            std::cout << "[BUS] End of stream" << std::endl;
+            shutdown();
+            break;
+            
+        case GST_MESSAGE_ERROR: {
+            gchar *debug = nullptr;
+            GError *error = nullptr;
+            gst_message_parse_error(msg, &error, &debug);
+            std::cerr << "[BUS] ERROR from element " << GST_OBJECT_NAME(msg->src) 
+                      << ": " << error->message << std::endl;
+            if (debug) {
+                std::cerr << "[BUS] Error details: " << debug << std::endl;
+                g_free(debug);
+            }
+            g_error_free(error);
+            shutdown();
+            break;
+        }
+        
+        case GST_MESSAGE_WARNING: {
+            gchar *debug = nullptr;
+            GError *error = nullptr;
+            gst_message_parse_warning(msg, &error, &debug);
+            std::cerr << "[BUS] WARNING from element " << GST_OBJECT_NAME(msg->src) 
+                      << ": " << error->message << std::endl;
+            if (debug) {
+                std::cerr << "[BUS] Warning details: " << debug << std::endl;
+                g_free(debug);
+            }
+            g_error_free(error);
+            break;
+        }
+        
+        case GST_MESSAGE_INFO: {
+            gchar *debug = nullptr;
+            GError *error = nullptr;
+            gst_message_parse_info(msg, &error, &debug);
+            std::cout << "[BUS] INFO from element " << GST_OBJECT_NAME(msg->src) 
+                      << ": " << error->message << std::endl;
+            if (debug) {
+                std::cout << "[BUS] Info details: " << debug << std::endl;
+                g_free(debug);
+            }
+            g_error_free(error);
+            break;
+        }
+        
+        case GST_MESSAGE_ELEMENT: {
+            const GstStructure *s = gst_message_get_structure(msg);
+            if (s) {
+                const gchar *name = gst_structure_get_name(s);
+                std::cout << "[BUS] ELEMENT message from " << GST_OBJECT_NAME(msg->src) 
+                          << ": " << (name ? name : "unknown") << std::endl;
+                
+                // Print additional debug for stream status and RTSP events
+                if (name && (g_str_has_prefix(name, "rtsp") || 
+                           g_str_has_prefix(name, "rtspsrc") ||
+                           g_str_has_prefix(name, "GstRTSPSrc"))) {
+                    gchar *struct_str = gst_structure_to_string(s);
+                    std::cout << "[RTSP] Event: " << struct_str << std::endl;
+                    g_free(struct_str);
+                }
+            }
+            break;
+        }
+        
+        case GST_MESSAGE_STREAM_STATUS: {
+            GstStreamStatusType type;
+            GstElement *owner;
+            gst_message_parse_stream_status(msg, &type, &owner);
+            const gchar *element_name = GST_OBJECT_NAME(msg->src);
+            
+            switch (type) {
+                case GST_STREAM_STATUS_TYPE_CREATE:
+                    std::cout << "[STREAM] " << element_name << " - Stream CREATE" << std::endl;
+                    break;
+                case GST_STREAM_STATUS_TYPE_ENTER:
+                    std::cout << "[STREAM] " << element_name << " - Stream ENTER" << std::endl;
+                    break;
+                case GST_STREAM_STATUS_TYPE_LEAVE:
+                    std::cout << "[STREAM] " << element_name << " - Stream LEAVE" << std::endl;
+                    break;
+                case GST_STREAM_STATUS_TYPE_DESTROY:
+                    std::cout << "[STREAM] " << element_name << " - Stream DESTROY" << std::endl;
+                    break;
+                case GST_STREAM_STATUS_TYPE_START:
+                    std::cout << "[STREAM] " << element_name << " - Stream START" << std::endl;
+                    break;
+                case GST_STREAM_STATUS_TYPE_PAUSE:
+                    std::cout << "[STREAM] " << element_name << " - Stream PAUSE" << std::endl;
+                    break;
+                case GST_STREAM_STATUS_TYPE_STOP:
+                    std::cout << "[STREAM] " << element_name << " - Stream STOP" << std::endl;
+                    break;
+                default:
+                    std::cout << "[STREAM] " << element_name << " - Stream status: " << type << std::endl;
+                    break;
+            }
+            break;
+        }
+        
+        case GST_MESSAGE_STATE_CHANGED: {
+            if (pipeline_ && GST_MESSAGE_SRC(msg) == GST_OBJECT(pipeline_->get_pipeline())) {
+                GstState oldstate, newstate, pending;
+                gst_message_parse_state_changed(msg, &oldstate, &newstate, &pending);
+                std::cout << "[BUS] Pipeline state changed from " 
+                          << gst_element_state_get_name(oldstate) << " to " 
+                          << gst_element_state_get_name(newstate) << std::endl;
+                          
+                if (newstate == GST_STATE_PLAYING) {
+                    std::cout << "[BUS] Pipeline is now PLAYING - engines should initialize" << std::endl;
+                }
+            }
+            break;
+        }
+        
+        default:
+            break;
+    }
+    
+    return TRUE; // Continue receiving messages
+}
+
+// Static wrapper for bus callback
+static gboolean bus_call_wrapper(GstBus* bus, GstMessage* msg, gpointer data) {
+    Application* app = static_cast<Application*>(data);
+    if (app) {
+        return app->bus_message_handler(bus, msg);
+    }
+    return TRUE;
+}
+
+bool Application::run(int duration_ms) {
+    if (!pipeline_) { std::cerr << "Pipeline not initialized" << std::endl; return false; }
+    running_ = true;
+
+    std::cout << "Listing sources:" << std::endl;
+    if (config_.has_section("source")) {
+        for (auto& kv : config_.sections.at("source")) std::cout << "  " << kv.first << " -> " << kv.second << std::endl;
+    }
+
+    // Skip PAUSED state - go directly to PLAYING like Python version
+    std::cout << "[STATE] Going directly to PLAYING state (matching Python implementation)" << std::endl;
+
+    // Skip inference element probing that can cause hangs during engine initialization
+    std::cout << "[ENGINE] Skipping element probing - proceeding directly to PLAYING state" << std::endl;
+
+    struct InferenceHealth { guint64 mux_buffers=0; bool warned=false; };
+    static InferenceHealth health;
+    if (GstElement* sm = pipeline_->get_streammux()) {
+        if (GstPad* srcpad = gst_element_get_static_pad(sm, "src")) {
+            gst_pad_add_probe(srcpad, GST_PAD_PROBE_TYPE_BUFFER, [](GstPad*, GstPadProbeInfo*, gpointer data)->GstPadProbeReturn { auto* h=reinterpret_cast<InferenceHealth*>(data); h->mux_buffers++; return GST_PAD_PROBE_OK; }, &health, nullptr); gst_object_unref(srcpad);
+        }
+    }
+
+    std::cout << "[STATE] Setting pipeline PLAYING" << std::endl;
+    if (!pipeline_->start()) { std::cerr << "Failed to start pipeline" << std::endl; return false; }
+    std::cout << "Pipeline started successfully!" << std::endl;
+
+    // Periodic health (3s)
+    g_timeout_add(3000, [](gpointer d)->gboolean { auto* app=static_cast<Application*>(d); if(!app||!app->pipeline_) return FALSE; auto* p=app->pipeline_->get_pipeline(); GstState s,pending; gst_element_get_state(p,&s,&pending,0); std::cout << "[HEALTH] mux_buffers="<<health.mux_buffers<<" pipeline="<<gst_element_state_get_name(s)<< std::endl; if(health.mux_buffers==0 && !health.warned){ static int cycles=0; if(++cycles>=3){ std::cout << "[WARN] No buffers yet from streammux" << std::endl; health.warned=true; }} return TRUE; }, this);
+    // Hang watchdog (20s one-shot)
+    g_timeout_add(20000, [](gpointer d)->gboolean { auto* app=static_cast<Application*>(d); if(health.mux_buffers==0){ std::cout << "[FATAL] No buffers after 20s -> shutdown" << std::endl; if(app) app->shutdown(); } return FALSE; }, this);
+    // Duration timer
+    if (duration_ms > 0) { g_timeout_add(duration_ms, [](gpointer d)->gboolean { auto* app=static_cast<Application*>(d); std::cout << "[INFO] Duration reached" << std::endl; if(app) app->shutdown(); return FALSE; }, this); }
+
+    if (loop_ && running_) { std::cout << "Entering main loop" << std::endl; g_main_loop_run(loop_); }
+    if (pipeline_) pipeline_->stop();
+    return true;
+}
+
+void Application::shutdown() {
+    if (!running_) return; running_ = false; std::cout << "Shutdown requested" << std::endl; if (loop_) g_main_loop_quit(loop_); if (pipeline_) pipeline_->set_state(GST_STATE_NULL); }
+
+// Stub utility implementations (previously global). Keep minimal versions used elsewhere.
+std::vector<std::string> load_known_faces(const std::string& path) { std::vector<std::string> faces; try { if (std::filesystem::exists(path) && std::filesystem::is_directory(path)) { for (auto& e: std::filesystem::directory_iterator(path)) if (e.is_regular_file()) faces.push_back(e.path().string()); } } catch(...) {} return faces; }
+bool setup_gstreamer_plugins() { return true; }
+
 } // namespace EdgeDeepStream
+
+using namespace EdgeDeepStream;
+
+// Global pointer for signal handling
+static Application* g_app = nullptr;
+static std::atomic<int> g_sigcount{0};
+
+static void signal_handler(int sig) {
+    int c = ++g_sigcount;
+    std::cout << "Signal " << sig << " received (count=" << c << ")" << std::endl;
+    if (c == 1) {
+        if (g_app) g_app->shutdown(); else ::_exit(1);
+    } else {
+        std::cout << "Force exiting" << std::endl;
+        ::_exit(1);
+    }
+}
+
+int main(int argc, char* argv[]) {
+    gst_init(&argc, &argv);
+
+    std::string config_path;
+    int duration_ms = -1; // -1 = infinite
+
+    auto print_usage = [&](int code){
+        std::cerr << "Usage: " << argv[0] << " <config.toml> [duration_ms]\n"
+                  << "   or: " << argv[0] << " --config <file> [--seconds <s>]\n"
+                  << "   or: " << argv[0] << " --config=<file> [--seconds=<s>]\n"
+                  << "Optional flags:\n"
+                  << "  --seconds N        Run for N seconds (converted to ms)\n"
+                  << "  --duration-ms N    Run for N milliseconds\n"
+                  << "Notes:\n"
+                  << "  Positional second argument is treated as milliseconds; if <1000 it is assumed seconds.\n"
+                  << std::endl;
+        return code;
+    };
+
+    for (int i=1; i<argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "-h" || arg == "--help") return print_usage(0);
+        if (arg.rfind("--config=", 0) == 0) {
+            config_path = arg.substr(9);
+            continue;
+        }
+        if (arg == "--config" && i+1 < argc) {
+            config_path = argv[++i];
+            continue;
+        }
+        if (arg.rfind("--seconds=", 0) == 0) {
+            try { duration_ms = std::stoi(arg.substr(10)) * 1000; } catch(...) {}
+            continue;
+        }
+        if (arg == "--seconds" && i+1 < argc) {
+            try { duration_ms = std::stoi(argv[++i]) * 1000; } catch(...) {}
+            continue;
+        }
+        if (arg.rfind("--duration-ms=", 0) == 0) {
+            try { duration_ms = std::stoi(arg.substr(14)); } catch(...) {}
+            continue;
+        }
+        if (arg == "--duration-ms" && i+1 < argc) {
+            try { duration_ms = std::stoi(argv[++i]); } catch(...) {}
+            continue;
+        }
+        if (!arg.empty() && arg[0] == '-') {
+            std::cerr << "Unknown flag: " << arg << std::endl;
+            return print_usage(1);
+        }
+        // Positional
+        if (config_path.empty()) {
+            config_path = arg;
+        } else if (duration_ms < 0) {
+            try {
+                int v = std::stoi(arg);
+                duration_ms = (v < 1000 ? v * 1000 : v); // heuristic
+            } catch(...) {}
+        }
+    }
+
+    if (config_path.empty()) return print_usage(1);
+
+    std::cout << "[ARGS] config=" << config_path << " duration_ms=" << duration_ms << std::endl;
+
+    signal(SIGINT, signal_handler);
+    signal(SIGTERM, signal_handler);
+
+    Application app; g_app = &app;
+    if (!app.initialize(config_path)) { std::cerr << "Initialization failed" << std::endl; return 1; }
+    bool ok = app.run(duration_ms);
+    g_app = nullptr;
+    return ok ? 0 : 1;
+}

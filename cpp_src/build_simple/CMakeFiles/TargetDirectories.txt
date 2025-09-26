@@ -1,3 +1,0 @@
-/home/m2n/edge-deepstream/cpp_src/build_simple/CMakeFiles/edge_deepstream_minimal.dir
-/home/m2n/edge-deepstream/cpp_src/build_simple/CMakeFiles/edit_cache.dir
-/home/m2n/edge-deepstream/cpp_src/build_simple/CMakeFiles/rebuild_cache.dir

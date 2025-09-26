@@ -33,14 +33,14 @@ display-text=1
 "d73cf20e2aa544b7b352070f24bff721" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/401"
 
 [pgie]
-#config-file-path="config/config_retinaface.txt"
-config-file-path="config/config_yolov8n_face.txt"
+#config-file-path="/home/m2n/edge-deepstream/config/config_retinaface.txt"
+config-file-path="/home/m2n/edge-deepstream/config/config_yolov8n_face.txt"
 
 [sgie]
-config-file-path="config/config_arcface.txt"
+config-file-path="/home/m2n/edge-deepstream/config/config_arcface.txt"
 
 [tracker]
-config-file-path="config/config_tracker_perf.txt"
+config-file-path="/home/m2n/edge-deepstream/config/config_tracker_perf.txt"
 
 [tiler]
 width=1280

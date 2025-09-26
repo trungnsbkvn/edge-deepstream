@@ -10,6 +10,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/home/m2n/edge-deepstream/cpp_src/CMakeLists.txt"
   "CMakeFiles/4.1.1/CMakeCXXCompiler.cmake"
   "CMakeFiles/4.1.1/CMakeSystem.cmake"
+  "/home/m2n/edge-deepstream/cpp_src/cpp/roi_helper/CMakeLists.txt"
   "/usr/lib/aarch64-linux-gnu/cmake/opencv4/OpenCVConfig-version.cmake"
   "/usr/lib/aarch64-linux-gnu/cmake/opencv4/OpenCVConfig.cmake"
   "/usr/lib/aarch64-linux-gnu/cmake/opencv4/OpenCVModules-release.cmake"
@@ -124,10 +125,12 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "CMakeFiles/4.1.1/CMakeCXXCompiler.cmake"
   "CMakeFiles/4.1.1/CMakeCXXCompiler.cmake"
   "CMakeFiles/CMakeDirectoryInformation.cmake"
+  "cpp/roi_helper/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/edge_utils.dir/DependInfo.cmake"
   "CMakeFiles/edge_deepstream.dir/DependInfo.cmake"
+  "cpp/roi_helper/CMakeFiles/roi_helper.dir/DependInfo.cmake"
   )

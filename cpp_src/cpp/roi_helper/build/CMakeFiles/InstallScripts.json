@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/m2n/edge-deepstream/cpp/roi_helper/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

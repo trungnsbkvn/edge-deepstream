@@ -39,7 +39,6 @@ namespace EdgeDeepStream {
 class Pipeline;
 class EventSender;
 class MQTTListener;
-class TensorRTInfer;
 
 // Global configuration structure
 struct Config {
@@ -100,6 +99,7 @@ struct SourceInfo {
     std::string uri;
     bool is_rtsp;
     GstElement* source_bin;
+    GstPad* sink_pad;
     int index;
 };
 
@@ -125,7 +125,9 @@ public:
     
     // Face recognition
     FaceIndex* get_face_index() { return face_index_.get(); }
-    TensorRTInfer* get_tensorrt_infer() { return tensorrt_infer_.get(); }
+    
+    // Bus message handler
+    gboolean bus_message_handler(GstBus* bus, GstMessage* msg);
 
 private:
     bool setup_pipeline();
@@ -137,7 +139,6 @@ private:
     std::unique_ptr<EventSender> event_sender_;
     std::unique_ptr<MQTTListener> mqtt_listener_;
     std::unique_ptr<FaceIndex> face_index_;
-    std::unique_ptr<TensorRTInfer> tensorrt_infer_;
     
     std::atomic<bool> running_;
     GMainLoop* loop_;

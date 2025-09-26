@@ -149,6 +149,9 @@ edge_deepstream: /usr/lib/aarch64-linux-gnu/libopencv_imgcodecs.so.4.5.4
 edge_deepstream: /usr/lib/aarch64-linux-gnu/libopencv_imgproc.so.4.5.4
 edge_deepstream: /usr/lib/aarch64-linux-gnu/libopencv_core.so.4.5.4
 edge_deepstream: /usr/local/lib/libfaiss.so
+edge_deepstream: cpp/roi_helper/libroi_helper.so
+edge_deepstream: /opt/nvidia/deepstream/deepstream/lib/libnvbufsurftransform.so
+edge_deepstream: /opt/nvidia/deepstream/deepstream/lib/libnvbufsurface.so
 edge_deepstream: CMakeFiles/edge_deepstream.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable edge_deepstream"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/edge_deepstream.dir/link.txt --verbose=$(VERBOSE)

@@ -33,6 +33,36 @@
  * The pre- and post- processing implementations are also in this file.
  */
 
+/* Simple TensorRT Logger implementation */
+class TrtLogger : public nvinfer1::ILogger
+{
+public:
+    void log(Severity severity, const char* msg) noexcept override
+    {
+        switch (severity)
+        {
+        case Severity::kINTERNAL_ERROR:
+            nvdsinfer::dsInferLogPrint__(NVDSINFER_LOG_ERROR, "TensorRT INTERNAL_ERROR: %s", msg);
+            break;
+        case Severity::kERROR:
+            nvdsinfer::dsInferLogPrint__(NVDSINFER_LOG_ERROR, "TensorRT ERROR: %s", msg);
+            break;
+        case Severity::kWARNING:
+            nvdsinfer::dsInferLogPrint__(NVDSINFER_LOG_WARNING, "TensorRT WARNING: %s", msg);
+            break;
+        case Severity::kINFO:
+            nvdsinfer::dsInferLogPrint__(NVDSINFER_LOG_INFO, "TensorRT INFO: %s", msg);
+            break;
+        case Severity::kVERBOSE:
+            nvdsinfer::dsInferLogPrint__(NVDSINFER_LOG_DEBUG, "TensorRT VERBOSE: %s", msg);
+            break;
+        }
+    }
+};
+
+/* Global TensorRT Logger instance - must be initialized before any TensorRT usage */
+std::unique_ptr<nvinfer1::ILogger> gTrtLogger = std::make_unique<TrtLogger>();
+
 /* Pair data type for returning input back to caller. */
 using NvDsInferReturnInputPair = std::pair<NvDsInferContextReturnInputAsyncFunc, void *>;
 

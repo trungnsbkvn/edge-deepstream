@@ -187,6 +187,19 @@ edge_deepstream/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/edge_deepstream.dir/build.make CMakeFiles/edge_deepstream.dir/build
 .PHONY : edge_deepstream/fast
 
+#=============================================================================
+# Target rules for targets named roi_helper
+
+# Build rule for target.
+roi_helper: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 roi_helper
+.PHONY : roi_helper
+
+# fast build rule for target.
+roi_helper/fast:
+	$(MAKE) $(MAKESILENT) -f cpp/roi_helper/CMakeFiles/roi_helper.dir/build.make cpp/roi_helper/CMakeFiles/roi_helper.dir/build
+.PHONY : roi_helper/fast
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -523,30 +536,6 @@ utils/status_codes.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/edge_utils.dir/build.make CMakeFiles/edge_utils.dir/utils/status_codes.cpp.s
 .PHONY : utils/status_codes.cpp.s
 
-utils/tensorrt_infer.o: utils/tensorrt_infer.cpp.o
-.PHONY : utils/tensorrt_infer.o
-
-# target to build an object file
-utils/tensorrt_infer.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/edge_utils.dir/build.make CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.o
-.PHONY : utils/tensorrt_infer.cpp.o
-
-utils/tensorrt_infer.i: utils/tensorrt_infer.cpp.i
-.PHONY : utils/tensorrt_infer.i
-
-# target to preprocess a source file
-utils/tensorrt_infer.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/edge_utils.dir/build.make CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.i
-.PHONY : utils/tensorrt_infer.cpp.i
-
-utils/tensorrt_infer.s: utils/tensorrt_infer.cpp.s
-.PHONY : utils/tensorrt_infer.s
-
-# target to generate assembly for a file
-utils/tensorrt_infer.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/edge_utils.dir/build.make CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.s
-.PHONY : utils/tensorrt_infer.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -561,6 +550,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edge_deepstream"
 	@echo "... edge_utils"
+	@echo "... roi_helper"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
@@ -603,9 +593,6 @@ help:
 	@echo "... utils/status_codes.o"
 	@echo "... utils/status_codes.i"
 	@echo "... utils/status_codes.s"
-	@echo "... utils/tensorrt_infer.o"
-	@echo "... utils/tensorrt_infer.i"
-	@echo "... utils/tensorrt_infer.s"
 .PHONY : help
 
 

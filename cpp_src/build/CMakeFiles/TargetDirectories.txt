@@ -6,3 +6,10 @@
 /home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/install.dir
 /home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/install/local.dir
 /home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/install/strip.dir
+/home/m2n/edge-deepstream/cpp_src/build/cpp/roi_helper/CMakeFiles/roi_helper.dir
+/home/m2n/edge-deepstream/cpp_src/build/cpp/roi_helper/CMakeFiles/edit_cache.dir
+/home/m2n/edge-deepstream/cpp_src/build/cpp/roi_helper/CMakeFiles/rebuild_cache.dir
+/home/m2n/edge-deepstream/cpp_src/build/cpp/roi_helper/CMakeFiles/list_install_components.dir
+/home/m2n/edge-deepstream/cpp_src/build/cpp/roi_helper/CMakeFiles/install.dir
+/home/m2n/edge-deepstream/cpp_src/build/cpp/roi_helper/CMakeFiles/install/local.dir
+/home/m2n/edge-deepstream/cpp_src/build/cpp/roi_helper/CMakeFiles/install/strip.dir

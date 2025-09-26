@@ -1,3 +1,0 @@
-/home/m2n/edge-deepstream/cpp_src/build_enroll_ops_simple_test/CMakeFiles/test_enroll_ops_simple.dir
-/home/m2n/edge-deepstream/cpp_src/build_enroll_ops_simple_test/CMakeFiles/edit_cache.dir
-/home/m2n/edge-deepstream/cpp_src/build_enroll_ops_simple_test/CMakeFiles/rebuild_cache.dir

@@ -156,24 +156,10 @@ CMakeFiles/edge_utils.dir/utils/mqtt_listener.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/edge_utils.dir/utils/mqtt_listener.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/m2n/edge-deepstream/cpp_src/utils/mqtt_listener.cpp -o CMakeFiles/edge_utils.dir/utils/mqtt_listener.cpp.s
 
-CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.o: CMakeFiles/edge_utils.dir/flags.make
-CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.o: /home/m2n/edge-deepstream/cpp_src/utils/tensorrt_infer.cpp
-CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.o: CMakeFiles/edge_utils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.o -MF CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.o.d -o CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.o -c /home/m2n/edge-deepstream/cpp_src/utils/tensorrt_infer.cpp
-
-CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/m2n/edge-deepstream/cpp_src/utils/tensorrt_infer.cpp > CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.i
-
-CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/m2n/edge-deepstream/cpp_src/utils/tensorrt_infer.cpp -o CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.s
-
 CMakeFiles/edge_utils.dir/utils/faiss_index.cpp.o: CMakeFiles/edge_utils.dir/flags.make
 CMakeFiles/edge_utils.dir/utils/faiss_index.cpp.o: /home/m2n/edge-deepstream/cpp_src/utils/faiss_index.cpp
 CMakeFiles/edge_utils.dir/utils/faiss_index.cpp.o: CMakeFiles/edge_utils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/edge_utils.dir/utils/faiss_index.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/edge_utils.dir/utils/faiss_index.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/edge_utils.dir/utils/faiss_index.cpp.o -MF CMakeFiles/edge_utils.dir/utils/faiss_index.cpp.o.d -o CMakeFiles/edge_utils.dir/utils/faiss_index.cpp.o -c /home/m2n/edge-deepstream/cpp_src/utils/faiss_index.cpp
 
 CMakeFiles/edge_utils.dir/utils/faiss_index.cpp.i: cmake_force
@@ -187,7 +173,7 @@ CMakeFiles/edge_utils.dir/utils/faiss_index.cpp.s: cmake_force
 CMakeFiles/edge_utils.dir/utils/gen_feature.cpp.o: CMakeFiles/edge_utils.dir/flags.make
 CMakeFiles/edge_utils.dir/utils/gen_feature.cpp.o: /home/m2n/edge-deepstream/cpp_src/utils/gen_feature.cpp
 CMakeFiles/edge_utils.dir/utils/gen_feature.cpp.o: CMakeFiles/edge_utils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/edge_utils.dir/utils/gen_feature.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/edge_utils.dir/utils/gen_feature.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/edge_utils.dir/utils/gen_feature.cpp.o -MF CMakeFiles/edge_utils.dir/utils/gen_feature.cpp.o.d -o CMakeFiles/edge_utils.dir/utils/gen_feature.cpp.o -c /home/m2n/edge-deepstream/cpp_src/utils/gen_feature.cpp
 
 CMakeFiles/edge_utils.dir/utils/gen_feature.cpp.i: cmake_force
@@ -201,7 +187,7 @@ CMakeFiles/edge_utils.dir/utils/gen_feature.cpp.s: cmake_force
 CMakeFiles/edge_utils.dir/utils/enroll_ops.cpp.o: CMakeFiles/edge_utils.dir/flags.make
 CMakeFiles/edge_utils.dir/utils/enroll_ops.cpp.o: /home/m2n/edge-deepstream/cpp_src/utils/enroll_ops.cpp
 CMakeFiles/edge_utils.dir/utils/enroll_ops.cpp.o: CMakeFiles/edge_utils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/edge_utils.dir/utils/enroll_ops.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/edge_utils.dir/utils/enroll_ops.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/edge_utils.dir/utils/enroll_ops.cpp.o -MF CMakeFiles/edge_utils.dir/utils/enroll_ops.cpp.o.d -o CMakeFiles/edge_utils.dir/utils/enroll_ops.cpp.o -c /home/m2n/edge-deepstream/cpp_src/utils/enroll_ops.cpp
 
 CMakeFiles/edge_utils.dir/utils/enroll_ops.cpp.i: cmake_force
@@ -215,7 +201,7 @@ CMakeFiles/edge_utils.dir/utils/enroll_ops.cpp.s: cmake_force
 CMakeFiles/edge_utils.dir/utils/perf_stats.cpp.o: CMakeFiles/edge_utils.dir/flags.make
 CMakeFiles/edge_utils.dir/utils/perf_stats.cpp.o: /home/m2n/edge-deepstream/cpp_src/utils/perf_stats.cpp
 CMakeFiles/edge_utils.dir/utils/perf_stats.cpp.o: CMakeFiles/edge_utils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/edge_utils.dir/utils/perf_stats.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/edge_utils.dir/utils/perf_stats.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/edge_utils.dir/utils/perf_stats.cpp.o -MF CMakeFiles/edge_utils.dir/utils/perf_stats.cpp.o.d -o CMakeFiles/edge_utils.dir/utils/perf_stats.cpp.o -c /home/m2n/edge-deepstream/cpp_src/utils/perf_stats.cpp
 
 CMakeFiles/edge_utils.dir/utils/perf_stats.cpp.i: cmake_force
@@ -229,7 +215,7 @@ CMakeFiles/edge_utils.dir/utils/perf_stats.cpp.s: cmake_force
 CMakeFiles/edge_utils.dir/utils/probe.cpp.o: CMakeFiles/edge_utils.dir/flags.make
 CMakeFiles/edge_utils.dir/utils/probe.cpp.o: /home/m2n/edge-deepstream/cpp_src/utils/probe.cpp
 CMakeFiles/edge_utils.dir/utils/probe.cpp.o: CMakeFiles/edge_utils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/edge_utils.dir/utils/probe.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/edge_utils.dir/utils/probe.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/edge_utils.dir/utils/probe.cpp.o -MF CMakeFiles/edge_utils.dir/utils/probe.cpp.o.d -o CMakeFiles/edge_utils.dir/utils/probe.cpp.o -c /home/m2n/edge-deepstream/cpp_src/utils/probe.cpp
 
 CMakeFiles/edge_utils.dir/utils/probe.cpp.i: cmake_force
@@ -248,7 +234,6 @@ edge_utils_OBJECTS = \
 "CMakeFiles/edge_utils.dir/utils/bus_call.cpp.o" \
 "CMakeFiles/edge_utils.dir/utils/event_sender.cpp.o" \
 "CMakeFiles/edge_utils.dir/utils/mqtt_listener.cpp.o" \
-"CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.o" \
 "CMakeFiles/edge_utils.dir/utils/faiss_index.cpp.o" \
 "CMakeFiles/edge_utils.dir/utils/gen_feature.cpp.o" \
 "CMakeFiles/edge_utils.dir/utils/enroll_ops.cpp.o" \
@@ -264,7 +249,6 @@ libedge_utils.a: CMakeFiles/edge_utils.dir/utils/status_codes.cpp.o
 libedge_utils.a: CMakeFiles/edge_utils.dir/utils/bus_call.cpp.o
 libedge_utils.a: CMakeFiles/edge_utils.dir/utils/event_sender.cpp.o
 libedge_utils.a: CMakeFiles/edge_utils.dir/utils/mqtt_listener.cpp.o
-libedge_utils.a: CMakeFiles/edge_utils.dir/utils/tensorrt_infer.cpp.o
 libedge_utils.a: CMakeFiles/edge_utils.dir/utils/faiss_index.cpp.o
 libedge_utils.a: CMakeFiles/edge_utils.dir/utils/gen_feature.cpp.o
 libedge_utils.a: CMakeFiles/edge_utils.dir/utils/enroll_ops.cpp.o
@@ -272,7 +256,7 @@ libedge_utils.a: CMakeFiles/edge_utils.dir/utils/perf_stats.cpp.o
 libedge_utils.a: CMakeFiles/edge_utils.dir/utils/probe.cpp.o
 libedge_utils.a: CMakeFiles/edge_utils.dir/build.make
 libedge_utils.a: CMakeFiles/edge_utils.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Linking CXX static library libedge_utils.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX static library libedge_utils.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/edge_utils.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/edge_utils.dir/link.txt --verbose=$(VERBOSE)
 
