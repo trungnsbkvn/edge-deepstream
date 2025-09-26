@@ -243,19 +243,7 @@ int main(int argc, char *argv[]) {
 
     // Set streammux properties from config
     if (config->has_section("streammux")) {
-        auto& streammux_config = config->sections["streammux"];
-        g_object_set(G_OBJECT(streammux),
-                     "gpu-id", config->get<int>("streammux", "gpu_id", 0),
-                     "batch-size", config->get<int>("streammux", "batch-size", 1),
-                     "width", config->get<int>("streammux", "width", 960),
-                     "height", config->get<int>("streammux", "height", 540),
-                     "batched-push-timeout", config->get<int>("streammux", "batched-push-timeout", 15000),
-                     "enable-padding", config->get<int>("streammux", "enable-padding", 1),
-                     "nvbuf-memory-type", config->get<int>("streammux", "nvbuf-memory-type", 0),
-                     "live-source", config->get<int>("streammux", "live-source", 1),
-                     "sync-inputs", config->get<int>("streammux", "sync-inputs", 0),
-                     "attach-sys-ts", config->get<int>("streammux", "attach-sys-ts", 1),
-                     NULL);
+        EdgeDeepStream::ConfigParser::set_element_properties(streammux, config->sections["streammux"]);
     }
 
     // Create PGIE
@@ -267,11 +255,7 @@ int main(int argc, char *argv[]) {
 
     // Set PGIE properties from config
     if (config->has_section("pgie")) {
-        auto& pgie_config = config->sections["pgie"];
-        std::string config_file_path = config->get<std::string>("pgie", "config-file-path", "");
-        if (!config_file_path.empty()) {
-            g_object_set(G_OBJECT(pgie), "config-file-path", config_file_path.c_str(), NULL);
-        }
+        EdgeDeepStream::ConfigParser::set_element_properties(pgie, config->sections["pgie"]);
     }
 
     // Create SGIE
@@ -283,11 +267,7 @@ int main(int argc, char *argv[]) {
 
     // Set SGIE properties from config
     if (config->has_section("sgie")) {
-        auto& sgie_config = config->sections["sgie"];
-        std::string config_file_path = config->get<std::string>("sgie", "config-file-path", "");
-        if (!config_file_path.empty()) {
-            g_object_set(G_OBJECT(sgie), "config-file-path", config_file_path.c_str(), NULL);
-        }
+        EdgeDeepStream::ConfigParser::set_element_properties(sgie, config->sections["sgie"]);
     }
 
     // Create tracker
@@ -301,17 +281,10 @@ int main(int argc, char *argv[]) {
 
     // Set tracker properties from config
     if (config->has_section("tracker")) {
-        auto& tracker_config = config->sections["tracker"];
-        std::string config_file_path = config->get<std::string>("tracker", "config-file-path", "");
-        if (!config_file_path.empty()) {
-            // Set tracker properties directly
-            g_object_set(G_OBJECT(tracker),
-                        "ll-lib-file", "/opt/nvidia/deepstream/deepstream-6.3/lib/libnvds_nvmultiobjecttracker.so",
-                        "ll-config-file", config_file_path.c_str(),
-                        "tracker-width", 320,
-                        "tracker-height", 320,
-                        "gpu-id", 0,
-                        NULL);
+        auto tracker_config = config->sections["tracker"];
+        auto config_file_it = tracker_config.find("config-file-path");
+        if (config_file_it != tracker_config.end()) {
+            EdgeDeepStream::ConfigParser::set_tracker_properties(tracker, config_file_it->second);
             g_print("Tracker properties set from config\n");
         }
     }
@@ -349,11 +322,7 @@ int main(int argc, char *argv[]) {
 
     // Set sink properties from config
     if (config->has_section("sink")) {
-        auto& sink_config = config->sections["sink"];
-        g_object_set(G_OBJECT(sink),
-                     "qos", config->get<int>("sink", "qos", 1),
-                     "sync", config->get<int>("sink", "sync", 0),
-                     NULL);
+        EdgeDeepStream::ConfigParser::set_element_properties(sink, config->sections["sink"]);
     }
 
     // Additional sink properties for better visibility on Jetson
@@ -382,11 +351,7 @@ int main(int argc, char *argv[]) {
 
         // Set tiler properties from config
         if (config->has_section("tiler")) {
-            auto& tiler_config = config->sections["tiler"];
-            g_object_set(G_OBJECT(tiler),
-                         "width", config->get<int>("tiler", "width", 1280),
-                         "height", config->get<int>("tiler", "height", 720),
-                         NULL);
+            EdgeDeepStream::ConfigParser::set_element_properties(tiler, config->sections["tiler"]);
             g_print("Tiler properties set: width=%d, height=%d\n",
                     config->get<int>("tiler", "width", 1280),
                     config->get<int>("tiler", "height", 720));
@@ -403,11 +368,7 @@ int main(int argc, char *argv[]) {
 
         // Set nvosd properties from config
         if (config->has_section("nvosd")) {
-            auto& nvosd_config = config->sections["nvosd"];
-            g_object_set(G_OBJECT(nvosd),
-                         "process-mode", config->get<int>("nvosd", "process-mode", 0),
-                         "display-text", config->get<int>("nvosd", "display-text", 1),
-                         NULL);
+            EdgeDeepStream::ConfigParser::set_element_properties(nvosd, config->sections["nvosd"]);
             g_print("NVOSD properties set: process-mode=%d, display-text=%d\n",
                     config->get<int>("nvosd", "process-mode", 0),
                     config->get<int>("nvosd", "display-text", 1));

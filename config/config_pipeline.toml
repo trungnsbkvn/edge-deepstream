@@ -24,6 +24,7 @@ process-mode=0
 display-text=1
 
 [source]
+"video"="file:///home/m2n/edge-deepstream/data/media/friends_s1e1_cut.mp4"
 "621ca2e007e648f898099597a078bccd" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/501"
 "625d66f10a0b4a0a920be73f705773bd" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
 "c9bb715db20a489f94f58d36bb3602d0" = "rtsp://admin:wesmart1@192.168.0.102:554/Streaming/Channels/101"
