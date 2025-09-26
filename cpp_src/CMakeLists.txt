@@ -132,6 +132,7 @@ set(MAIN_SOURCES
     src/main.cpp
     src/pipeline.cpp
     src/source_bin.cpp
+    src/probe.cpp
 )
 
 # Create utility library
@@ -161,6 +162,26 @@ endif()
 add_executable(edge_deepstream ${MAIN_SOURCES})
 target_link_libraries(edge_deepstream
     edge_utils
+    ${GST_LIBRARIES}
+    ${GST_APP_LIBRARIES}
+    ${DEEPSTREAM_NVDS_META}
+    ${DEEPSTREAM_NVBUFSURFACE}
+    ${DEEPSTREAM_NVDSGST_META}
+    ${OpenCV_LIBS}
+    ${CUDA_LIBRARIES}
+    pthread
+)
+
+# YOLOv8n test executable
+add_executable(test_yolov8n_only test_yolov8n_only.cpp)
+target_include_directories(test_yolov8n_only PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${GST_INCLUDE_DIRS}
+    ${DEEPSTREAM_INCLUDE_DIR}
+    ${CUDA_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}
+)
+target_link_libraries(test_yolov8n_only
     ${GST_LIBRARIES}
     ${GST_APP_LIBRARIES}
     ${DEEPSTREAM_NVDS_META}

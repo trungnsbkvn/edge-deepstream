@@ -132,5 +132,6 @@ set(CMAKE_MAKEFILE_PRODUCTS
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/edge_utils.dir/DependInfo.cmake"
   "CMakeFiles/edge_deepstream.dir/DependInfo.cmake"
+  "CMakeFiles/test_yolov8n_only.dir/DependInfo.cmake"
   "cpp/roi_helper/CMakeFiles/roi_helper.dir/DependInfo.cmake"
   )

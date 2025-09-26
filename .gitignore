@@ -20,9 +20,9 @@ gst-nvinfer-custom/**/**/*.o
 gst-nvinfer-custom/**/**/test_align_compare
 third_party
 !third_party/faiss
-cpp/roi_helper/build/*
+cpp_src/cpp/roi_helper/build
 data/index/faiss.index
 data/index/labels.json
-cpp_src/build/*
-cpp_src/test/*
-cpp_src/build/*
+cpp_src/build
+cpp_src/test
+cpp_src/build

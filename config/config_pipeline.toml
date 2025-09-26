@@ -8,7 +8,7 @@ realtime=1
 
 [streammux]
 gpu_id=0
-batch-size=8                    # = number of sources (if all active simultaneously)
+batch-size=1                    # = number of sources (if all active simultaneously)
 width=960
 height=540
 batched-push-timeout=15000      # 15ms - More aggressive for motion scenarios
@@ -24,13 +24,7 @@ process-mode=0
 display-text=1
 
 [source]
-"621ca2e007e648f898099597a078bccd" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/501"
-"625d66f10a0b4a0a920be73f705773bd" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
-"6a887f101a204b3788e45b9d4cbcb84b" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/601"
-"93efaf1091cc4b83990619a17347879f" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/801"
-"c0fad364fd7345b1af2fe5a2f691e7f7" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/701"
-"c9bb715db20a489f94f58d36bb3602d0" = "rtsp://admin:wesmart1@192.168.0.102:554/Streaming/Channels/101"
-"d73cf20e2aa544b7b352070f24bff721" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/401"
+"test_video" = "data/media/friends_s1e1_cut.mp4"
 
 [pgie]
 #config-file-path="/home/m2n/edge-deepstream/config/config_retinaface.txt"

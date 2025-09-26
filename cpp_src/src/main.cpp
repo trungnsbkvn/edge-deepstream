@@ -7,6 +7,7 @@
 #include "config_parser.h"
 #include "event_sender.h"
 #include "mqtt_listener.h"
+#include "probe.h"
 
 #include <signal.h>
 #include <filesystem>
@@ -321,6 +322,14 @@ bool Application::run(int duration_ms) {
 
     // Skip inference element probing that can cause hangs during engine initialization
     std::cout << "[ENGINE] Skipping element probing - proceeding directly to PLAYING state" << std::endl;
+    
+    // Attach probe functions to process inference results and metadata
+    std::cout << "[PROBE] Attaching probe functions to pipeline elements..." << std::endl;
+    if (!attach_probes(pipeline_->get_pgie(), pipeline_->get_sgie(), nullptr)) {
+        std::cerr << "Failed to attach probe functions" << std::endl;
+        return false;
+    }
+    std::cout << "[PROBE] Probe functions attached successfully" << std::endl;
     
     // Actually start the pipeline
     if (!pipeline_->start()) {

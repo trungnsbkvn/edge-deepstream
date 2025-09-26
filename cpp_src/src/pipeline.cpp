@@ -2,6 +2,7 @@
 #include "source_bin.h"
 #include "config_parser.h"
 #include "env_utils.h"
+#include "probe.h"
 #include <iostream>
 #include <memory>
 #include <algorithm>
@@ -42,7 +43,7 @@ bool Pipeline::create(const Config& config) {
         }
         
     // Add elements to pipeline - only add elements that were created
-    // COMMENTED OUT PGIE/SGIE/TRACKER: only add streammux, queues, tiler, nvvidconv, osd, sink
+    // ADDING PGIE/TRACKER: add streammux, queue1, pgie, queue2, tracker, queue3, tiler, nvvidconv, osd, sink
     if (!gst_bin_add(GST_BIN(pipeline_), streammux_)) {
         std::cerr << "Failed to add streammux to pipeline" << std::endl;
         return false;
@@ -51,7 +52,23 @@ bool Pipeline::create(const Config& config) {
         std::cerr << "Failed to add queue1 to pipeline" << std::endl;
         return false;
     }
-    // pgie_, queue2_, tracker_, queue3_, sgie_, queue4_ are commented out
+    if (!gst_bin_add(GST_BIN(pipeline_), pgie_)) {
+        std::cerr << "Failed to add pgie to pipeline" << std::endl;
+        return false;
+    }
+    if (!gst_bin_add(GST_BIN(pipeline_), queue2_)) {
+        std::cerr << "Failed to add queue2 to pipeline" << std::endl;
+        return false;
+    }
+    // if (!gst_bin_add(GST_BIN(pipeline_), tracker_)) {
+    //     std::cerr << "Failed to add tracker to pipeline" << std::endl;
+    //     return false;
+    // }
+    // if (!gst_bin_add(GST_BIN(pipeline_), queue3_)) {
+    //     std::cerr << "Failed to add queue3 to pipeline" << std::endl;
+    //     return false;
+    // }
+    // sgie_, queue4_ are commented out
     if (!gst_bin_add(GST_BIN(pipeline_), tiler_)) {
         std::cerr << "Failed to add tiler to pipeline" << std::endl;
         return false;
@@ -116,31 +133,37 @@ bool Pipeline::start() {
     std::cout << "Starting pipeline..." << std::endl;
     start_time_ = std::chrono::steady_clock::now();
     
-    // Go through READY state first (like Python version) to allow RTSP sources to initialize
-    std::cout << "[STATE] Setting pipeline to READY state first..." << std::endl;
-    GstStateChangeReturn ret = gst_element_set_state(pipeline_, GST_STATE_READY);
-    if (ret == GST_STATE_CHANGE_FAILURE) {
-        std::cerr << "Unable to set pipeline to ready state" << std::endl;
-        return false;
+    // Follow Python version initial start sequence: set inference to READY, then pipeline directly to PLAYING
+    std::cout << "[STATE] Following Python initial start: inference READY -> pipeline PLAYING" << std::endl;
+    
+    // Step 1: Set inference elements to READY state (like Python version)
+    if (pgie_) {
+        std::cout << "[STATE] Setting PGIE to READY..." << std::endl;
+        gst_element_set_state(pgie_, GST_STATE_READY);
     }
     
-    // Wait for READY state to complete
-    if (ret == GST_STATE_CHANGE_ASYNC) {
-        std::cout << "Waiting for asynchronous READY state change..." << std::endl;
-        GstState current_state, pending_state;
-        ret = gst_element_get_state(pipeline_, &current_state, &pending_state, 3 * GST_SECOND);
-        if (ret == GST_STATE_CHANGE_FAILURE) {
-            std::cerr << "Failed to complete READY state change" << std::endl;
-            return false;
-        }
+    // if (tracker_) {
+    //     std::cout << "[STATE] Setting tracker to READY..." << std::endl;
+    //     gst_element_set_state(tracker_, GST_STATE_READY);
+    // }
+    
+    // Small delay like Python version
+    g_usleep(200000); // 200ms delay
+    
+    // Step 2: Set inference elements to PLAYING state
+    if (pgie_) {
+        std::cout << "[STATE] Setting PGIE to PLAYING..." << std::endl;
+        gst_element_set_state(pgie_, GST_STATE_PLAYING);
     }
     
-    // Small delay to allow sources to initialize
-    g_usleep(200000); // 200ms
+    if (tracker_) {
+        std::cout << "[STATE] Setting tracker to PLAYING..." << std::endl;
+        gst_element_set_state(tracker_, GST_STATE_PLAYING);
+    }
     
-    // Now go to PLAYING state
-    std::cout << "[STATE] Setting pipeline to PLAYING state..." << std::endl;
-    ret = gst_element_set_state(pipeline_, GST_STATE_PLAYING);
+    // Step 3: Set pipeline directly to PLAYING state (like Python initial start)
+    std::cout << "[STATE] Setting pipeline directly to PLAYING state..." << std::endl;
+    GstStateChangeReturn ret = gst_element_set_state(pipeline_, GST_STATE_PLAYING);
     std::cout << "Pipeline state change result: " << ret << std::endl;
     
     if (ret == GST_STATE_CHANGE_FAILURE) {
@@ -152,8 +175,8 @@ bool Pipeline::start() {
     if (ret == GST_STATE_CHANGE_ASYNC) {
         std::cout << "Waiting for asynchronous state change to complete..." << std::endl;
         GstState current_state, pending_state;
-        // Wait up to 10 seconds for the state change to complete (longer for RTSP)
-        ret = gst_element_get_state(pipeline_, &current_state, &pending_state, 10 * GST_SECOND);
+        // Wait up to 15 seconds for the state change to complete (longer for RTSP + inference)
+        ret = gst_element_get_state(pipeline_, &current_state, &pending_state, 15 * GST_SECOND);
         std::cout << "State change completion result: " << ret << std::endl;
         
         if (ret == GST_STATE_CHANGE_FAILURE) {
@@ -171,6 +194,12 @@ bool Pipeline::start() {
     if (current_state != GST_STATE_PLAYING) {
         std::cerr << "Pipeline failed to reach PLAYING state, current state: " 
                   << gst_element_state_get_name(current_state) << std::endl;
+        return false;
+    }
+    
+    // Attach probes to inference elements
+    if (!attach_probes(pgie_, sgie_, nullptr)) {
+        std::cerr << "Failed to attach probes to pipeline elements" << std::endl;
         return false;
     }
     
@@ -366,14 +395,14 @@ bool Pipeline::create_elements(const Config& config) {
         return false;
     }
     
-    // Create PGIE (Primary GStreamer Inference Engine) - COMMENTED OUT FOR TESTING
-    // pgie_ = create_pgie(config);
-    // if (!pgie_) {
-    //     std::cerr << "Failed to create pgie" << std::endl;
-    //     return false;
-    // }
+    // Create PGIE (Primary GStreamer Inference Engine)
+    pgie_ = create_pgie(config);
+    if (!pgie_) {
+        std::cerr << "Failed to create pgie" << std::endl;
+        return false;
+    }
     
-    // Create tracker - COMMENTED OUT FOR TESTING
+    // Create tracker
     // tracker_ = create_tracker(config);
     // if (!tracker_) {
     //     std::cerr << "Failed to create tracker" << std::endl;
@@ -423,16 +452,10 @@ bool Pipeline::link_elements() {
     int display = config_.get<int>("pipeline", "display", 0);
     
     // Full pipeline flow: streammux -> queue1 -> pgie -> queue2 -> tracker -> queue3 -> sgie -> queue4 -> tiler -> queue5 -> nvvidconv -> queue6
-    // COMMENTED OUT PGIE/SGIE/TRACKER FOR TESTING: streammux -> queue1 -> tiler -> queue5 -> nvvidconv -> queue6
+    // ADDING PGIE/TRACKER: streammux -> queue1 -> pgie -> queue2 -> tracker -> queue3 -> tiler -> queue5 -> nvvidconv -> queue6
     
-    // if (!gst_element_link_many(streammux_, queue1_, pgie_, queue2_, tracker_, queue3_, sgie_, queue4_, tiler_, queue5_, nvvidconv_, queue6_, NULL)) {
-    //     std::cerr << "Failed to link main pipeline elements" << std::endl;
-    //     return false;
-    // }
-    
-    // Simplified pipeline without inference for testing
-    if (!gst_element_link_many(streammux_, queue1_, tiler_, queue5_, nvvidconv_, queue6_, NULL)) {
-        std::cerr << "Failed to link simplified pipeline elements" << std::endl;
+    if (!gst_element_link_many(streammux_, queue1_, pgie_, queue2_, tiler_, queue5_, nvvidconv_, queue6_, NULL)) {
+        std::cerr << "Failed to link main pipeline elements" << std::endl;
         return false;
     }
     
