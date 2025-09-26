@@ -6,6 +6,7 @@
 #include <chrono>
 #include <iomanip>
 #include <map>
+#include <vector>
 
 // DeepStream includes
 #include "gstnvdsmeta.h"
@@ -25,7 +26,7 @@
 static GMainLoop *loop = NULL;
 static GstElement *pipeline = NULL;
 static GstElement *streammux = NULL;
-static GstElement *source_bin = NULL;
+static std::vector<GstElement*> source_bins;
 static GstElement *pgie = NULL;
 static GstElement *sgie = NULL;
 static GstElement *tracker = NULL;
@@ -112,6 +113,44 @@ static GstPadProbeReturn sgie_pad_probe(GstPad *pad, GstPadProbeInfo *info, gpoi
     }
 
     return GST_PAD_PROBE_OK;
+}
+
+static void source_pad_added_callback(GstElement *src, GstPad *new_pad, GstElement *mux) {
+    // Get the sink pad index from the source element
+    int sink_pad_index = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(src), "sink_pad_index"));
+    
+    g_print("Pad-added signal received for source %d\n", sink_pad_index);
+    // Check if pad is video
+    GstCaps *caps = gst_pad_get_current_caps(new_pad);
+    if (!caps) {
+        g_print("No caps on pad\n");
+        return;
+    }
+
+    const GstStructure *str = gst_caps_get_structure(caps, 0);
+    g_print("Pad caps: %s\n", gst_structure_get_name(str));
+    if (!g_str_has_prefix(gst_structure_get_name(str), "video/")) {
+        gst_caps_unref(caps);
+        g_print("Not a video pad, ignoring\n");
+        return;
+    }
+    gst_caps_unref(caps);
+
+    // Get sink pad from streammux with specific index
+    gchar *sink_pad_name = g_strdup_printf("sink_%d", sink_pad_index);
+    GstPad *sink_pad = gst_element_get_request_pad(mux, sink_pad_name);
+    g_free(sink_pad_name);
+    
+    if (!sink_pad) {
+        g_printerr("Failed to get sink pad sink_%d from streammux\n", sink_pad_index);
+        return;
+    }
+
+    g_print("Linking video pad to streammux sink_%d\n", sink_pad_index);
+    if (gst_pad_link(new_pad, sink_pad) != GST_PAD_LINK_OK) {
+        g_printerr("Failed to link source %d to mux\n", sink_pad_index);
+    }
+    gst_object_unref(sink_pad);
 }
 
 static gboolean bus_call(GstBus *bus, GstMessage *msg, gpointer data) {
@@ -246,60 +285,51 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    // Create source bin for video file from config
+    // Create source bins for all sources from config
     if (config->has_section("source")) {
         auto& source_config = config->sections["source"];
-        // Get the first source (for simplicity, using "test_video")
-        std::string video_path = config->get<std::string>("source", "test_video", "");
-        if (!video_path.empty()) {
-            g_print("Creating source for video: %s\n", video_path.c_str());
-            source_bin = gst_element_factory_make("uridecodebin", "source");
-            if (!source_bin) {
-                g_printerr("Failed to create source\n");
-                return -1;
+        
+        // Iterate through all sources in the config
+        int source_index = 0;
+        for (const auto& source_pair : source_config) {
+            std::string source_key = source_pair.first;
+            std::string source_uri = source_pair.second;
+            
+            if (source_uri.empty()) continue;
+            
+            g_print("Creating source '%s': %s\n", source_key.c_str(), source_uri.c_str());
+            
+            // Determine source type from URI
+            std::string source_type = "unknown";
+            if (source_uri.find("file://") == 0) {
+                source_type = "file";
+            } else if (source_uri.find("rtsp://") == 0) {
+                source_type = "rtsp";
             }
-
-            std::string full_path = video_path;
-            g_print("Full video path: %s\n", full_path.c_str());
-            g_object_set(G_OBJECT(source_bin),
-                         "uri", ("file://" + full_path).c_str(),
-                         NULL);
-
-            gst_bin_add(GST_BIN(pipeline), source_bin);
-
-            // Connect source to streammux
-            g_signal_connect(source_bin, "pad-added", G_CALLBACK(+[](GstElement *src, GstPad *new_pad, GstElement *mux) {
-                g_print("Pad-added signal received for source\n");
-                // Check if pad is video
-                GstCaps *caps = gst_pad_get_current_caps(new_pad);
-                if (!caps) {
-                    g_print("No caps on pad\n");
-                    return;
-                }
-
-                const GstStructure *str = gst_caps_get_structure(caps, 0);
-                g_print("Pad caps: %s\n", gst_structure_get_name(str));
-                if (!g_str_has_prefix(gst_structure_get_name(str), "video/")) {
-                    gst_caps_unref(caps);
-                    g_print("Not a video pad, ignoring\n");
-                    return;
-                }
-                gst_caps_unref(caps);
-
-                // Get sink pad from streammux
-                GstPad *sink_pad = gst_element_get_request_pad(mux, "sink_0");
-                if (!sink_pad) {
-                    g_printerr("Failed to get sink pad from streammux\n");
-                    return;
-                }
-
-                g_print("Linking video pad to streammux sink_0\n");
-                if (gst_pad_link(new_pad, sink_pad) != GST_PAD_LINK_OK) {
-                    g_printerr("Failed to link source to mux\n");
-                }
-                gst_object_unref(sink_pad);
-            }), streammux);
+            
+            g_print("Detected source type: %s\n", source_type.c_str());
+            
+            // Create source element
+            GstElement *src_bin = gst_element_factory_make("uridecodebin", source_key.c_str());
+            if (!src_bin) {
+                g_printerr("Failed to create source for %s\n", source_key.c_str());
+                continue;
+            }
+            
+            g_object_set(G_OBJECT(src_bin), "uri", source_uri.c_str(), NULL);
+            gst_bin_add(GST_BIN(pipeline), src_bin);
+            source_bins.push_back(src_bin);
+            
+            // Store the sink pad index for this source
+            g_object_set_data(G_OBJECT(src_bin), "sink_pad_index", GINT_TO_POINTER(source_index));
+            
+            // Connect source to streammux with unique sink pad index
+            g_signal_connect(src_bin, "pad-added", G_CALLBACK(source_pad_added_callback), streammux);
+            
+            source_index++;
         }
+        
+        g_print("Created %d sources\n", (int)source_bins.size());
     }
 
         // Add probe to PGIE src pad
