@@ -127,6 +127,6 @@ fusion_mode="mean"
 
 [debug]
 # Verbose console prints (matching per-frame)
-verbose=0
+verbose=1
 ## Performance profiling verbosity: 0=quiet,1=periodic summary,2=include attach events
 perf_verbose=0

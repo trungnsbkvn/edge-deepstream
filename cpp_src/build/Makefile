@@ -261,30 +261,6 @@ src/pipeline.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/edge_deepstream.dir/build.make CMakeFiles/edge_deepstream.dir/src/pipeline.cpp.s
 .PHONY : src/pipeline.cpp.s
 
-src/probe.o: src/probe.cpp.o
-.PHONY : src/probe.o
-
-# target to build an object file
-src/probe.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/edge_deepstream.dir/build.make CMakeFiles/edge_deepstream.dir/src/probe.cpp.o
-.PHONY : src/probe.cpp.o
-
-src/probe.i: src/probe.cpp.i
-.PHONY : src/probe.i
-
-# target to preprocess a source file
-src/probe.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/edge_deepstream.dir/build.make CMakeFiles/edge_deepstream.dir/src/probe.cpp.i
-.PHONY : src/probe.cpp.i
-
-src/probe.s: src/probe.cpp.s
-.PHONY : src/probe.s
-
-# target to generate assembly for a file
-src/probe.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/edge_deepstream.dir/build.make CMakeFiles/edge_deepstream.dir/src/probe.cpp.s
-.PHONY : src/probe.cpp.s
-
 src/source_bin.o: src/source_bin.cpp.o
 .PHONY : src/source_bin.o
 
@@ -619,9 +595,6 @@ help:
 	@echo "... src/pipeline.o"
 	@echo "... src/pipeline.i"
 	@echo "... src/pipeline.s"
-	@echo "... src/probe.o"
-	@echo "... src/probe.i"
-	@echo "... src/probe.s"
 	@echo "... src/source_bin.o"
 	@echo "... src/source_bin.i"
 	@echo "... src/source_bin.s"

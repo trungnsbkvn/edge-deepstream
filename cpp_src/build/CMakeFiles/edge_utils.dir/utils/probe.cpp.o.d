@@ -389,7 +389,12 @@ CMakeFiles/edge_utils.dir/utils/probe.cpp.o: \
  /usr/include/c++/9/bits/unordered_map.h \
  /usr/include/c++/9/bits/erase_if.h /usr/include/c++/9/chrono \
  /usr/include/c++/9/ratio /usr/include/c++/9/ctime \
- /usr/include/c++/9/bits/parse_numbers.h \
+ /usr/include/c++/9/bits/parse_numbers.h /usr/include/c++/9/functional \
+ /usr/include/c++/9/bits/std_function.h \
+ /usr/include/c++/9/bits/stl_algo.h \
+ /usr/include/c++/9/bits/algorithmfwd.h \
+ /usr/include/c++/9/bits/stl_heap.h \
+ /usr/include/c++/9/bits/uniform_int_dist.h \
  /opt/nvidia/deepstream/deepstream/sources/includes/gstnvdsmeta.h \
  /usr/include/gstreamer-1.0/gst/video/video.h \
  /usr/include/gstreamer-1.0/gst/video/video-prelude.h \

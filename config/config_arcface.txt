@@ -23,7 +23,7 @@ operate-on-class-ids=0
 #input-object-min-height=20
 
 # Alignment by custom gst-nvinfer
-# alignment-type=1
+alignment-type=1
 # Path to save pre/post-alignment crops
 alignment-pics-path=/dev/shm/edge-deepstream/aligned
 #alignment-pics-path=data/faces/aligned

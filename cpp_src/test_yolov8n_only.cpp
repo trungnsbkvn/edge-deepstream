@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <map>
 #include <vector>
+#include <unordered_map>
 
 // DeepStream includes
 #include "gstnvdsmeta.h"
@@ -15,6 +16,7 @@
 // Config parsing
 #include "config_parser.h"
 #include "edge_deepstream.h"
+#include "probe.h"
 
 #define CHECK_ERROR(error) \
     if (error) { \
@@ -34,87 +36,6 @@ static GstElement *tracker = NULL;
 static GstElement *nvosd = NULL;
 static GstElement *tiler = NULL;
 static GstElement *sink = NULL;
-
-static GstPadProbeReturn pgie_pad_probe(GstPad *pad, GstPadProbeInfo *info, gpointer u_data) {
-    static int frame_count = 0;
-    static int total_detections = 0;
-    frame_count++;
-
-    if (GST_IS_BUFFER(info->data)) {
-        GstBuffer *buf = GST_BUFFER(info->data);
-        NvDsBatchMeta *batch_meta = gst_buffer_get_nvds_batch_meta(buf);
-
-        if (batch_meta) {
-            int batch_detections = 0;
-            for (NvDsMetaList *l_frame = batch_meta->frame_meta_list; l_frame != NULL; l_frame = l_frame->next) {
-                NvDsFrameMeta *frame_meta = (NvDsFrameMeta *)l_frame->data;
-
-                batch_detections += frame_meta->num_obj_meta;
-
-                if (frame_meta->num_obj_meta > 0) {
-                    std::cout << "Frame " << frame_count << ": " << frame_meta->num_obj_meta << " faces detected" << std::endl;
-
-                    for (NvDsMetaList *l_obj = frame_meta->obj_meta_list; l_obj != NULL; l_obj = l_obj->next) {
-                        NvDsObjectMeta *obj_meta = (NvDsObjectMeta *)l_obj->data;
-                        std::cout << "  Face: confidence=" << std::fixed << std::setprecision(3) << obj_meta->confidence
-                                 << " bbox=(" << obj_meta->rect_params.left << ","
-                                 << obj_meta->rect_params.top << ","
-                                 << obj_meta->rect_params.width << ","
-                                 << obj_meta->rect_params.height << ")" << std::endl;
-                    }
-                }
-            }
-
-            total_detections += batch_detections;
-
-            // Print stats every 30 frames
-            if (frame_count % 30 == 0) {
-                std::cout << "=== Stats: Frame " << frame_count << ", Total detections: " << total_detections
-                         << ", Avg: " << std::fixed << std::setprecision(2) << (float)total_detections/frame_count << " faces/frame ===" << std::endl;
-            }
-        }
-    }
-
-    return GST_PAD_PROBE_OK;
-}
-
-static GstPadProbeReturn sgie_pad_probe(GstPad *pad, GstPadProbeInfo *info, gpointer u_data) {
-    static int sgie_frame_count = 0;
-    sgie_frame_count++;
-
-    if (GST_IS_BUFFER(info->data)) {
-        GstBuffer *buf = GST_BUFFER(info->data);
-        NvDsBatchMeta *batch_meta = gst_buffer_get_nvds_batch_meta(buf);
-
-        if (batch_meta) {
-            for (NvDsMetaList *l_frame = batch_meta->frame_meta_list; l_frame != NULL; l_frame = l_frame->next) {
-                NvDsFrameMeta *frame_meta = (NvDsFrameMeta *)l_frame->data;
-
-                if (frame_meta->num_obj_meta > 0) {
-                    std::cout << "SGIE Frame " << sgie_frame_count << ": " << frame_meta->num_obj_meta << " faces processed by ArcFace" << std::endl;
-
-                    for (NvDsMetaList *l_obj = frame_meta->obj_meta_list; l_obj != NULL; l_obj = l_obj->next) {
-                        NvDsObjectMeta *obj_meta = (NvDsObjectMeta *)l_obj->data;
-
-                        std::cout << "  Refined Face: confidence=" << std::fixed << std::setprecision(3) << obj_meta->confidence
-                                 << " bbox=(" << obj_meta->rect_params.left << ","
-                                 << obj_meta->rect_params.top << ","
-                                 << obj_meta->rect_params.width << ","
-                                 << obj_meta->rect_params.height << ")" << std::endl;
-
-                        // Check for classifier meta (landmarks might be stored here)
-                        for (NvDsMetaList *l_classifier = obj_meta->classifier_meta_list; l_classifier != NULL; l_classifier = l_classifier->next) {
-                            NvDsClassifierMeta *classifier_meta = (NvDsClassifierMeta *)l_classifier->data;
-                            std::cout << "    Classifier: " << classifier_meta->classifier_type << std::endl;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return GST_PAD_PROBE_OK;
-}
 
 static void source_pad_added_callback(GstElement *src, GstPad *new_pad, GstElement *converter) {
     // Get the sink pad index from the source element
@@ -225,6 +146,15 @@ int main(int argc, char *argv[]) {
     if (!config) {
         g_printerr("Failed to parse config file: %s\n", config_path.c_str());
         return -1;
+    }
+
+    // Extract verbose setting from debug section
+    bool verbose = false;
+    if (config->has_section("debug")) {
+        auto& debug_section = config->sections["debug"];
+        if (debug_section.find("verbose") != debug_section.end()) {
+            verbose = (debug_section["verbose"] == "1" || debug_section["verbose"] == "true");
+        }
     }
 
     // Create pipeline
@@ -515,24 +445,10 @@ int main(int argc, char *argv[]) {
     }
     g_print("Pipeline set to READY state\n");
 
-    // Add probe to PGIE src pad
-    GstPad *pgie_src_pad = gst_element_get_static_pad(pgie, "src");
-    if (pgie_src_pad) {
-        gst_pad_add_probe(pgie_src_pad, GST_PAD_PROBE_TYPE_BUFFER, pgie_pad_probe, NULL, NULL);
-        gst_object_unref(pgie_src_pad);
-        g_print("Probe attached to PGIE src pad\n");
-    } else {
-        g_printerr("Failed to get SGIE src pad for probe\n");
-    }
-
-    // Add probe to SGIE src pad
-    GstPad *sgie_src_pad = gst_element_get_static_pad(sgie, "src");
-    if (sgie_src_pad) {
-        gst_pad_add_probe(sgie_src_pad, GST_PAD_PROBE_TYPE_BUFFER, sgie_pad_probe, NULL, NULL);
-        gst_object_unref(sgie_src_pad);
-        g_print("Probe attached to SGIE src pad\n");
-    } else {
-        g_printerr("Failed to get SGIE src pad for probe\n");
+    // Attach probes to PGIE and SGIE using centralized probe logic
+    if (!EdgeDeepStream::attach_probes(pgie, sgie, nullptr, verbose)) {
+        g_printerr("Failed to attach probes to pipeline elements\n");
+        return -1;
     }
 
     // Add bus watch

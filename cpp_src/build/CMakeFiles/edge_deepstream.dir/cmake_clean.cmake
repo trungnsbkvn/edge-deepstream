@@ -3,8 +3,6 @@ file(REMOVE_RECURSE
   "CMakeFiles/edge_deepstream.dir/src/main.cpp.o.d"
   "CMakeFiles/edge_deepstream.dir/src/pipeline.cpp.o"
   "CMakeFiles/edge_deepstream.dir/src/pipeline.cpp.o.d"
-  "CMakeFiles/edge_deepstream.dir/src/probe.cpp.o"
-  "CMakeFiles/edge_deepstream.dir/src/probe.cpp.o.d"
   "CMakeFiles/edge_deepstream.dir/src/source_bin.cpp.o"
   "CMakeFiles/edge_deepstream.dir/src/source_bin.cpp.o.d"
   "edge_deepstream"

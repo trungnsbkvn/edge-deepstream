@@ -132,13 +132,16 @@ set(MAIN_SOURCES
     src/main.cpp
     src/pipeline.cpp
     src/source_bin.cpp
-    src/probe.cpp
 )
 
 # Create utility library
 add_library(edge_utils STATIC ${UTIL_SOURCES})
 target_link_libraries(edge_utils
     ${GST_LIBRARIES}
+    ${GST_APP_LIBRARIES}
+    ${DEEPSTREAM_NVDS_META}
+    ${DEEPSTREAM_NVBUFSURFACE}
+    ${DEEPSTREAM_NVDSGST_META}
     ${OpenCV_LIBS}
     ${CUDA_LIBRARIES}
 )
