@@ -8,9 +8,9 @@ realtime=1
 
 [streammux]
 gpu_id=0
-batch-size=4                    # Match number of sources
+batch-size=8                    # Match number of sources
 width=1280                      # Common resolution for all inputs
-height=720                     # Common resolution for all inputs
+height=720                      # Common resolution for all inputs
 batched-push-timeout=15000      # 15ms - More aggressive for motion scenarios
 enable-padding=1                # Keep aspect ratio, pad with black
 nvbuf-memory-type=0             # Use default memory type for NVMM compatibility

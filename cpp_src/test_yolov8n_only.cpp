@@ -290,21 +290,47 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    // Create tracker
+    tracker = gst_element_factory_make("nvtracker", "tracker");
+    if (!tracker) {
+        g_printerr("Failed to create tracker\n");
+        return -1;
+    } else {
+        g_print("Successfully created tracker\n");
+    }
+
+    // Set tracker properties from config
+    if (config->has_section("tracker")) {
+        auto& tracker_config = config->sections["tracker"];
+        std::string config_file_path = config->get<std::string>("tracker", "config-file-path", "");
+        if (!config_file_path.empty()) {
+            // Set tracker properties directly
+            g_object_set(G_OBJECT(tracker),
+                        "ll-lib-file", "/opt/nvidia/deepstream/deepstream-6.3/lib/libnvds_nvmultiobjecttracker.so",
+                        "ll-config-file", config_file_path.c_str(),
+                        "tracker-width", 320,
+                        "tracker-height", 320,
+                        "gpu-id", 0,
+                        NULL);
+            g_print("Tracker properties set from config\n");
+        }
+    }
+
     // Get display mode from config
     bool enable_display = config->get<int>("pipeline", "display", 0);
 
     // Create sink based on display mode
     if (enable_display) {
-        // Try nvvideosink first for Jetson
-        sink = gst_element_factory_make("nvvideosink", "sink");
+        // Try autovideosink first since it works on Jetson
+        sink = gst_element_factory_make("autovideosink", "sink");
         if (!sink) {
-            g_printerr("Failed to create nvvideosink, trying nveglglessink\n");
-            sink = gst_element_factory_make("nveglglessink", "sink");
+            g_printerr("Failed to create autovideosink, trying nvvideosink\n");
+            sink = gst_element_factory_make("nvvideosink", "sink");
             if (!sink) {
-                g_printerr("Failed to create nveglglessink, trying autovideosink\n");
-                sink = gst_element_factory_make("autovideosink", "sink");
+                g_printerr("Failed to create nvvideosink, trying nveglglessink\n");
+                sink = gst_element_factory_make("nveglglessink", "sink");
                 if (!sink) {
-                    g_printerr("Failed to create autovideosink, using fakesink\n");
+                    g_printerr("Failed to create nveglglessink, using fakesink\n");
                     sink = gst_element_factory_make("fakesink", "sink");
                 }
             }
@@ -318,6 +344,9 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    // Print which sink was created
+    g_print("Created sink: %s\n", GST_ELEMENT_NAME(sink));
+
     // Set sink properties from config
     if (config->has_section("sink")) {
         auto& sink_config = config->sections["sink"];
@@ -327,39 +356,28 @@ int main(int argc, char *argv[]) {
                      NULL);
     }
 
+    // Additional sink properties for better visibility on Jetson
+    if (enable_display) {
+        g_print("Setting additional sink properties for display visibility...\n");
+        // Try to set window properties if available
+        g_object_set(G_OBJECT(sink),
+                     "force-aspect-ratio", TRUE,
+                     NULL);
+        g_print("Sink properties set for display\n");
+    }
+
     // Check if display is enabled
     g_print("Display mode: %s\n", enable_display ? "enabled" : "disabled (headless)");
 
     // Create display elements if needed
-    if (enable_display) {
-        // Create tracker
-        tracker = gst_element_factory_make("nvtracker", "tracker");
-        if (!tracker) {
-            g_printerr("Failed to create tracker\n");
-            return -1;
-        }
-
-        // Set tracker properties from config
-        if (config->has_section("tracker")) {
-            auto& tracker_config = config->sections["tracker"];
-            std::string config_file_path = config->get<std::string>("tracker", "config-file-path", "");
-            if (!config_file_path.empty()) {
-                // Set tracker properties directly
-                g_object_set(G_OBJECT(tracker),
-                           "ll-lib-file", "/opt/nvidia/deepstream/deepstream-6.3/lib/libnvds_nvmultiobjecttracker.so",
-                           "ll-config-file", config_file_path.c_str(),
-                           "tracker-width", 320,
-                           "tracker-height", 320,
-                           "gpu-id", 0,
-                           NULL);
-            }
-        }
-
+    if (enable_display) {        
         // Create tiler
         tiler = gst_element_factory_make("nvmultistreamtiler", "tiler");
         if (!tiler) {
             g_printerr("Failed to create tiler\n");
             return -1;
+        } else {
+            g_print("Successfully created tiler\n");
         }
 
         // Set tiler properties from config
@@ -369,6 +387,9 @@ int main(int argc, char *argv[]) {
                          "width", config->get<int>("tiler", "width", 1280),
                          "height", config->get<int>("tiler", "height", 720),
                          NULL);
+            g_print("Tiler properties set: width=%d, height=%d\n",
+                    config->get<int>("tiler", "width", 1280),
+                    config->get<int>("tiler", "height", 720));
         }
 
         // Create nvosd
@@ -376,6 +397,8 @@ int main(int argc, char *argv[]) {
         if (!nvosd) {
             g_printerr("Failed to create nvosd\n");
             return -1;
+        } else {
+            g_print("Successfully created nvosd\n");
         }
 
         // Set nvosd properties from config
@@ -385,6 +408,9 @@ int main(int argc, char *argv[]) {
                          "process-mode", config->get<int>("nvosd", "process-mode", 0),
                          "display-text", config->get<int>("nvosd", "display-text", 1),
                          NULL);
+            g_print("NVOSD properties set: process-mode=%d, display-text=%d\n",
+                    config->get<int>("nvosd", "process-mode", 0),
+                    config->get<int>("nvosd", "display-text", 1));
         }
 
         g_print("Display elements created (with tracker)\n");
@@ -392,12 +418,16 @@ int main(int argc, char *argv[]) {
 
     // Add elements to pipeline
     if (enable_display) {
+        g_print("Adding display elements to pipeline...\n");
         gst_bin_add_many(GST_BIN(pipeline), streammux, pgie, sgie, tracker, tiler, nvosd, sink, NULL);
 
-        // Link elements: streammux -> pgie -> sgie -> tracker -> tiler -> nvosd -> sink
-        if (!gst_element_link_many(streammux, pgie, sgie, tracker, tiler, nvosd, sink, NULL)) {
+        // Link elements: streammux -> pgie -> tracker -> sgie -> tiler -> nvosd -> sink
+        g_print("Linking display pipeline elements...\n");
+        if (!gst_element_link_many(streammux, pgie, tracker, sgie, tiler, nvosd, sink, NULL)) {
             g_printerr("Failed to link display pipeline elements\n");
             return -1;
+        } else {
+            g_print("Successfully linked display pipeline: streammux -> pgie -> tracker -> sgie -> tiler -> nvosd -> sink\n");
         }
     } else {
         gst_bin_add_many(GST_BIN(pipeline), streammux, pgie, sgie, sink, NULL);
