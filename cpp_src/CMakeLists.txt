@@ -189,6 +189,7 @@ target_link_libraries(test_yolov8n_only
     ${DEEPSTREAM_NVDSGST_META}
     ${OpenCV_LIBS}
     ${CUDA_LIBRARIES}
+    edge_utils
     pthread
 )
 

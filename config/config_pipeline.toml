@@ -8,7 +8,7 @@ realtime=1
 
 [streammux]
 gpu_id=0
-batch-size=1                    # = number of sources (if all active simultaneously)
+batch-size=8                    # = number of sources (if all active simultaneously)
 width=960
 height=540
 batched-push-timeout=15000      # 15ms - More aggressive for motion scenarios
@@ -24,7 +24,7 @@ process-mode=0
 display-text=1
 
 [source]
-"test_video" = "data/media/friends_s1e1_cut.mp4"
+"test_video" = "/home/m2n/edge-deepstream/data/media/friends_s1e1_cut.mp4"
 
 [pgie]
 #config-file-path="/home/m2n/edge-deepstream/config/config_retinaface.txt"

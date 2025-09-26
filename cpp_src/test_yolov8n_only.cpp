@@ -5,10 +5,15 @@
 #include <thread>
 #include <chrono>
 #include <iomanip>
+#include <map>
 
 // DeepStream includes
 #include "gstnvdsmeta.h"
 #include "nvbufsurface.h"
+
+// Config parsing
+#include "config_parser.h"
+#include "edge_deepstream.h"
 
 #define CHECK_ERROR(error) \
     if (error) { \
@@ -20,9 +25,13 @@
 static GMainLoop *loop = NULL;
 static GstElement *pipeline = NULL;
 static GstElement *streammux = NULL;
+static GstElement *source_bin = NULL;
 static GstElement *pgie = NULL;
 static GstElement *sgie = NULL;
-static GstElement *fakesink = NULL;
+static GstElement *tracker = NULL;
+static GstElement *nvosd = NULL;
+static GstElement *tiler = NULL;
+static GstElement *sink = NULL;
 
 static GstPadProbeReturn pgie_pad_probe(GstPad *pad, GstPadProbeInfo *info, gpointer u_data) {
     static int frame_count = 0;
@@ -141,98 +150,157 @@ static gboolean bus_call(GstBus *bus, GstMessage *msg, gpointer data) {
 int main(int argc, char *argv[]) {
     gst_init(&argc, &argv);
 
+    // Parse config file
+    std::string config_path = "/home/m2n/edge-deepstream/config/config_pipeline.toml";
+    auto config = EdgeDeepStream::ConfigParser::parse_toml(config_path);
+    if (!config) {
+        g_printerr("Failed to parse config file: %s\n", config_path.c_str());
+        return -1;
+    }
+
     // Create pipeline
-    pipeline = gst_pipeline_new("yolov8n-test-pipeline");
+    pipeline = gst_pipeline_new("edge-deepstream-pipeline");
     if (!pipeline) {
         g_printerr("Failed to create pipeline\n");
         return -1;
     }
 
-    // Create elements
+    // Create elements from config
     streammux = gst_element_factory_make("nvstreammux", "streammux");
-    pgie = gst_element_factory_make("nvinfer", "pgie");
-    sgie = gst_element_factory_make("nvinfer", "sgie");
-    fakesink = gst_element_factory_make("fakesink", "fakesink");
-
-    if (!streammux || !pgie || !sgie || !fakesink) {
-        g_printerr("Failed to create elements\n");
+    if (!streammux) {
+        g_printerr("Failed to create streammux\n");
         return -1;
     }
 
+    // Set streammux properties from config
+    if (config->has_section("streammux")) {
+        auto& streammux_config = config->sections["streammux"];
+        g_object_set(G_OBJECT(streammux),
+                     "gpu-id", config->get<int>("streammux", "gpu_id", 0),
+                     "batch-size", config->get<int>("streammux", "batch-size", 1),
+                     "width", config->get<int>("streammux", "width", 960),
+                     "height", config->get<int>("streammux", "height", 540),
+                     "batched-push-timeout", config->get<int>("streammux", "batched-push-timeout", 15000),
+                     "enable-padding", config->get<int>("streammux", "enable-padding", 1),
+                     "nvbuf-memory-type", config->get<int>("streammux", "nvbuf-memory-type", 0),
+                     "live-source", config->get<int>("streammux", "live-source", 1),
+                     "sync-inputs", config->get<int>("streammux", "sync-inputs", 0),
+                     "attach-sys-ts", config->get<int>("streammux", "attach-sys-ts", 1),
+                     NULL);
+    }
+
+    // Create PGIE
+    pgie = gst_element_factory_make("nvinfer", "pgie");
+    if (!pgie) {
+        g_printerr("Failed to create pgie\n");
+        return -1;
+    }
+
+    // Set PGIE properties from config
+    if (config->has_section("pgie")) {
+        auto& pgie_config = config->sections["pgie"];
+        std::string config_file_path = config->get<std::string>("pgie", "config-file-path", "");
+        if (!config_file_path.empty()) {
+            g_object_set(G_OBJECT(pgie), "config-file-path", config_file_path.c_str(), NULL);
+        }
+    }
+
+    // Create SGIE
+    sgie = gst_element_factory_make("nvinfer", "sgie");
+    if (!sgie) {
+        g_printerr("Failed to create sgie\n");
+        return -1;
+    }
+
+    // Set SGIE properties from config
+    if (config->has_section("sgie")) {
+        auto& sgie_config = config->sections["sgie"];
+        std::string config_file_path = config->get<std::string>("sgie", "config-file-path", "");
+        if (!config_file_path.empty()) {
+            g_object_set(G_OBJECT(sgie), "config-file-path", config_file_path.c_str(), NULL);
+        }
+    }
+
+    // Create sink
+    sink = gst_element_factory_make("fakesink", "sink");
+    if (!sink) {
+        g_printerr("Failed to create sink\n");
+        return -1;
+    }
+
+    // Set sink properties from config
+    if (config->has_section("sink")) {
+        auto& sink_config = config->sections["sink"];
+        g_object_set(G_OBJECT(sink),
+                     "qos", config->get<int>("sink", "qos", 1),
+                     "sync", config->get<int>("sink", "sync", 0),
+                     NULL);
+    }
+
     // Add elements to pipeline
-    gst_bin_add_many(GST_BIN(pipeline), streammux, pgie, sgie, fakesink, NULL);
+    gst_bin_add_many(GST_BIN(pipeline), streammux, pgie, sgie, sink, NULL);
 
-    // Set properties
-    g_object_set(G_OBJECT(streammux),
-                 "batch-size", 1,
-                 "width", 960,
-                 "height", 540,
-                 "batched-push-timeout", 15000,
-                 "enable-padding", 1,
-                 "nvbuf-memory-type", 0,
-                 "live-source", 1,
-                 "sync-inputs", 0,
-                 "attach-sys-ts", 1,
-                 NULL);
-
-    g_object_set(G_OBJECT(pgie),
-                 "config-file-path", "/home/m2n/edge-deepstream/config/config_yolov8n_face.txt",
-                 NULL);
-
-    g_object_set(G_OBJECT(sgie),
-                 "config-file-path", "/home/m2n/edge-deepstream/config/config_arcface.txt",
-                 NULL);
-
-    g_object_set(G_OBJECT(fakesink),
-                 "sync", 0,
-                 "qos", 1,
-                 NULL);
-
-    // Link elements: streammux -> pgie -> sgie -> fakesink
-    if (!gst_element_link_many(streammux, pgie, sgie, fakesink, NULL)) {
+    // Link elements: streammux -> pgie -> sgie -> sink
+    if (!gst_element_link_many(streammux, pgie, sgie, sink, NULL)) {
         g_printerr("Failed to link elements\n");
         return -1;
     }
 
-    // Create source bin for video file
-    GstElement *source_bin = gst_element_factory_make("uridecodebin", "source");
-    if (!source_bin) {
-        g_printerr("Failed to create source\n");
-        return -1;
+    // Create source bin for video file from config
+    if (config->has_section("source")) {
+        auto& source_config = config->sections["source"];
+        // Get the first source (for simplicity, using "test_video")
+        std::string video_path = config->get<std::string>("source", "test_video", "");
+        if (!video_path.empty()) {
+            g_print("Creating source for video: %s\n", video_path.c_str());
+            source_bin = gst_element_factory_make("uridecodebin", "source");
+            if (!source_bin) {
+                g_printerr("Failed to create source\n");
+                return -1;
+            }
+
+            std::string full_path = video_path;
+            g_print("Full video path: %s\n", full_path.c_str());
+            g_object_set(G_OBJECT(source_bin),
+                         "uri", ("file://" + full_path).c_str(),
+                         NULL);
+
+            gst_bin_add(GST_BIN(pipeline), source_bin);
+
+            // Connect source to streammux
+            g_signal_connect(source_bin, "pad-added", G_CALLBACK(+[](GstElement *src, GstPad *new_pad, GstElement *mux) {
+                g_print("Pad-added signal received for source\n");
+                // Check if pad is video
+                GstCaps *caps = gst_pad_get_current_caps(new_pad);
+                if (!caps) {
+                    g_print("No caps on pad\n");
+                    return;
+                }
+
+                const GstStructure *str = gst_caps_get_structure(caps, 0);
+                g_print("Pad caps: %s\n", gst_structure_get_name(str));
+                if (!g_str_has_prefix(gst_structure_get_name(str), "video/")) {
+                    gst_caps_unref(caps);
+                    g_print("Not a video pad, ignoring\n");
+                    return;
+                }
+                gst_caps_unref(caps);
+
+                // Get sink pad from streammux
+                GstPad *sink_pad = gst_element_get_request_pad(mux, "sink_0");
+                if (!sink_pad) {
+                    g_printerr("Failed to get sink pad from streammux\n");
+                    return;
+                }
+
+                g_print("Linking video pad to streammux sink_0\n");
+                if (gst_pad_link(new_pad, sink_pad) != GST_PAD_LINK_OK) {
+                    g_printerr("Failed to link source to mux\n");
+                }
+                gst_object_unref(sink_pad);
+            }), streammux);
+        }
     }
-
-    g_object_set(G_OBJECT(source_bin),
-                 "uri", "file:///home/m2n/edge-deepstream/data/media/friends_s1e1_cut.mp4",
-                 NULL);
-
-    gst_bin_add(GST_BIN(pipeline), source_bin);
-
-    // Connect source to streammux
-    g_signal_connect(source_bin, "pad-added", G_CALLBACK(+[](GstElement *src, GstPad *new_pad, GstElement *mux) {
-        // Check if pad is video
-        GstCaps *caps = gst_pad_get_current_caps(new_pad);
-        if (!caps) return;
-
-        const GstStructure *str = gst_caps_get_structure(caps, 0);
-        if (!g_str_has_prefix(gst_structure_get_name(str), "video/")) {
-            gst_caps_unref(caps);
-            return;
-        }
-        gst_caps_unref(caps);
-
-        // Get sink pad from streammux
-        GstPad *sink_pad = gst_element_get_request_pad(mux, "sink_0");
-        if (!sink_pad) {
-            g_printerr("Failed to get sink pad from streammux\n");
-            return;
-        }
-
-        g_print("Linking video pad to streammux sink_0\n");
-        if (gst_pad_link(new_pad, sink_pad) != GST_PAD_LINK_OK) {
-            g_printerr("Failed to link source to mux\n");
-        }
-        gst_object_unref(sink_pad);
-    }), streammux);
 
         // Add probe to PGIE src pad
     GstPad *pgie_src_pad = gst_element_get_static_pad(pgie, "src");
@@ -260,7 +328,7 @@ int main(int argc, char *argv[]) {
     gst_object_unref(bus);
 
     // Set pipeline to playing
-    g_print("Starting YOLOv8n model test...\n");
+    g_print("Starting EdgeDeepStream pipeline test...\n");
     GstStateChangeReturn ret = gst_element_set_state(pipeline, GST_STATE_PLAYING);
     if (ret == GST_STATE_CHANGE_FAILURE) {
         g_printerr("Failed to start pipeline\n");
@@ -278,7 +346,7 @@ int main(int argc, char *argv[]) {
 
     // Cleanup
     gst_object_unref(pipeline);
-    g_print("Test completed successfully!\n");
+    g_print("Config-driven pipeline test completed successfully!\n");
 
     return 0;
 }
