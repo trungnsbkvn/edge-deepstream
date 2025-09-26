@@ -8,12 +8,12 @@ realtime=1
 
 [streammux]
 gpu_id=0
-batch-size=8                    # = number of sources (if all active simultaneously)
-width=960
-height=540
+batch-size=4                    # Match number of sources
+width=1280                      # Common resolution for all inputs
+height=720                     # Common resolution for all inputs
 batched-push-timeout=15000      # 15ms - More aggressive for motion scenarios
 enable-padding=1                # Keep aspect ratio, pad with black
-nvbuf-memory-type=0             # Use system memory (more stable for buffer overflow issues)
+nvbuf-memory-type=0             # Use default memory type for NVMM compatibility
 live-source=1                   # Important for RTSP
 sync-inputs=0                   # Critical: Don't wait for slow sources to prevent buffer backup
 # Motion-specific optimizations
@@ -24,7 +24,6 @@ process-mode=0
 display-text=1
 
 [source]
-"test_video" = "file:///home/m2n/edge-deepstream/data/media/friends_s1e1_cut.mp4"
 "621ca2e007e648f898099597a078bccd" = "rtsp://admin:123456Aa@192.168.0.213:1554/Streaming/Channels/501"
 "625d66f10a0b4a0a920be73f705773bd" = "rtsp://admin:wesmart!@192.168.0.243:554/Unicast/channels/101"
 "c9bb715db20a489f94f58d36bb3602d0" = "rtsp://admin:wesmart1@192.168.0.102:554/Streaming/Channels/101"

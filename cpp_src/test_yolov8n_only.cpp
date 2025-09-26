@@ -27,6 +27,7 @@ static GMainLoop *loop = NULL;
 static GstElement *pipeline = NULL;
 static GstElement *streammux = NULL;
 static std::vector<GstElement*> source_bins;
+static std::vector<GstElement*> video_converters;
 static GstElement *pgie = NULL;
 static GstElement *sgie = NULL;
 static GstElement *tracker = NULL;
@@ -115,11 +116,12 @@ static GstPadProbeReturn sgie_pad_probe(GstPad *pad, GstPadProbeInfo *info, gpoi
     return GST_PAD_PROBE_OK;
 }
 
-static void source_pad_added_callback(GstElement *src, GstPad *new_pad, GstElement *mux) {
+static void source_pad_added_callback(GstElement *src, GstPad *new_pad, GstElement *converter) {
     // Get the sink pad index from the source element
     int sink_pad_index = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(src), "sink_pad_index"));
-    
+
     g_print("Pad-added signal received for source %d\n", sink_pad_index);
+
     // Check if pad is video
     GstCaps *caps = gst_pad_get_current_caps(new_pad);
     if (!caps) {
@@ -129,27 +131,55 @@ static void source_pad_added_callback(GstElement *src, GstPad *new_pad, GstEleme
 
     const GstStructure *str = gst_caps_get_structure(caps, 0);
     g_print("Pad caps: %s\n", gst_structure_get_name(str));
+
     if (!g_str_has_prefix(gst_structure_get_name(str), "video/")) {
         gst_caps_unref(caps);
         g_print("Not a video pad, ignoring\n");
         return;
     }
+
+    // Print caps details for debugging
+    gchar *caps_str = gst_caps_to_string(caps);
+    g_print("Video caps: %s\n", caps_str);
+    g_free(caps_str);
     gst_caps_unref(caps);
 
-    // Get sink pad from streammux with specific index
-    gchar *sink_pad_name = g_strdup_printf("sink_%d", sink_pad_index);
-    GstPad *sink_pad = gst_element_get_request_pad(mux, sink_pad_name);
-    g_free(sink_pad_name);
-    
+    // Get sink pad from converter
+    GstPad *sink_pad = gst_element_get_static_pad(converter, "sink");
+
     if (!sink_pad) {
-        g_printerr("Failed to get sink pad sink_%d from streammux\n", sink_pad_index);
+        g_printerr("Failed to get sink pad from converter for source %d\n", sink_pad_index);
         return;
     }
 
-    g_print("Linking video pad to streammux sink_%d\n", sink_pad_index);
-    if (gst_pad_link(new_pad, sink_pad) != GST_PAD_LINK_OK) {
-        g_printerr("Failed to link source %d to mux\n", sink_pad_index);
+    g_print("Linking video pad to converter sink for source %d\n", sink_pad_index);
+
+    // Check if pads can be linked
+    GstPadLinkReturn link_ret = gst_pad_link(new_pad, sink_pad);
+    if (link_ret != GST_PAD_LINK_OK) {
+        g_printerr("Failed to link source %d to converter: %s\n", sink_pad_index, gst_pad_link_get_name(link_ret));
+
+        // Print pad caps for debugging
+        GstCaps *src_caps = gst_pad_get_current_caps(new_pad);
+        GstCaps *sink_caps = gst_pad_get_current_caps(sink_pad);
+
+        if (src_caps) {
+            gchar *src_caps_str = gst_caps_to_string(src_caps);
+            g_printerr("Source pad caps: %s\n", src_caps_str);
+            g_free(src_caps_str);
+            gst_caps_unref(src_caps);
+        }
+
+        if (sink_caps) {
+            gchar *sink_caps_str = gst_caps_to_string(sink_caps);
+            g_printerr("Sink pad caps: %s\n", sink_caps_str);
+            g_free(sink_caps_str);
+            gst_caps_unref(sink_caps);
+        }
+    } else {
+        g_print("Successfully linked source %d to converter\n", sink_pad_index);
     }
+
     gst_object_unref(sink_pad);
 }
 
@@ -260,8 +290,29 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // Create sink
-    sink = gst_element_factory_make("fakesink", "sink");
+    // Get display mode from config
+    bool enable_display = config->get<int>("pipeline", "display", 0);
+
+    // Create sink based on display mode
+    if (enable_display) {
+        // Try nvvideosink first for Jetson
+        sink = gst_element_factory_make("nvvideosink", "sink");
+        if (!sink) {
+            g_printerr("Failed to create nvvideosink, trying nveglglessink\n");
+            sink = gst_element_factory_make("nveglglessink", "sink");
+            if (!sink) {
+                g_printerr("Failed to create nveglglessink, trying autovideosink\n");
+                sink = gst_element_factory_make("autovideosink", "sink");
+                if (!sink) {
+                    g_printerr("Failed to create autovideosink, using fakesink\n");
+                    sink = gst_element_factory_make("fakesink", "sink");
+                }
+            }
+        }
+    } else {
+        sink = gst_element_factory_make("fakesink", "sink");
+    }
+
     if (!sink) {
         g_printerr("Failed to create sink\n");
         return -1;
@@ -276,29 +327,102 @@ int main(int argc, char *argv[]) {
                      NULL);
     }
 
-    // Add elements to pipeline
-    gst_bin_add_many(GST_BIN(pipeline), streammux, pgie, sgie, sink, NULL);
+    // Check if display is enabled
+    g_print("Display mode: %s\n", enable_display ? "enabled" : "disabled (headless)");
 
-    // Link elements: streammux -> pgie -> sgie -> sink
-    if (!gst_element_link_many(streammux, pgie, sgie, sink, NULL)) {
-        g_printerr("Failed to link elements\n");
-        return -1;
+    // Create display elements if needed
+    if (enable_display) {
+        // Create tracker
+        tracker = gst_element_factory_make("nvtracker", "tracker");
+        if (!tracker) {
+            g_printerr("Failed to create tracker\n");
+            return -1;
+        }
+
+        // Set tracker properties from config
+        if (config->has_section("tracker")) {
+            auto& tracker_config = config->sections["tracker"];
+            std::string config_file_path = config->get<std::string>("tracker", "config-file-path", "");
+            if (!config_file_path.empty()) {
+                // Set tracker properties directly
+                g_object_set(G_OBJECT(tracker),
+                           "ll-lib-file", "/opt/nvidia/deepstream/deepstream-6.3/lib/libnvds_nvmultiobjecttracker.so",
+                           "ll-config-file", config_file_path.c_str(),
+                           "tracker-width", 320,
+                           "tracker-height", 320,
+                           "gpu-id", 0,
+                           NULL);
+            }
+        }
+
+        // Create tiler
+        tiler = gst_element_factory_make("nvmultistreamtiler", "tiler");
+        if (!tiler) {
+            g_printerr("Failed to create tiler\n");
+            return -1;
+        }
+
+        // Set tiler properties from config
+        if (config->has_section("tiler")) {
+            auto& tiler_config = config->sections["tiler"];
+            g_object_set(G_OBJECT(tiler),
+                         "width", config->get<int>("tiler", "width", 1280),
+                         "height", config->get<int>("tiler", "height", 720),
+                         NULL);
+        }
+
+        // Create nvosd
+        nvosd = gst_element_factory_make("nvdsosd", "nvosd");
+        if (!nvosd) {
+            g_printerr("Failed to create nvosd\n");
+            return -1;
+        }
+
+        // Set nvosd properties from config
+        if (config->has_section("nvosd")) {
+            auto& nvosd_config = config->sections["nvosd"];
+            g_object_set(G_OBJECT(nvosd),
+                         "process-mode", config->get<int>("nvosd", "process-mode", 0),
+                         "display-text", config->get<int>("nvosd", "display-text", 1),
+                         NULL);
+        }
+
+        g_print("Display elements created (with tracker)\n");
     }
 
-    // Create source bins for all sources from config
+    // Add elements to pipeline
+    if (enable_display) {
+        gst_bin_add_many(GST_BIN(pipeline), streammux, pgie, sgie, tracker, tiler, nvosd, sink, NULL);
+
+        // Link elements: streammux -> pgie -> sgie -> tracker -> tiler -> nvosd -> sink
+        if (!gst_element_link_many(streammux, pgie, sgie, tracker, tiler, nvosd, sink, NULL)) {
+            g_printerr("Failed to link display pipeline elements\n");
+            return -1;
+        }
+    } else {
+        gst_bin_add_many(GST_BIN(pipeline), streammux, pgie, sgie, sink, NULL);
+
+        // Link elements: streammux -> pgie -> sgie -> sink
+        if (!gst_element_link_many(streammux, pgie, sgie, sink, NULL)) {
+            g_printerr("Failed to link headless pipeline elements\n");
+            return -1;
+        }
+    }
+
+    // Create source bins for all sources from config BEFORE setting pipeline to READY
     if (config->has_section("source")) {
         auto& source_config = config->sections["source"];
-        
+
         // Iterate through all sources in the config
         int source_index = 0;
         for (const auto& source_pair : source_config) {
             std::string source_key = source_pair.first;
             std::string source_uri = source_pair.second;
-            
+
             if (source_uri.empty()) continue;
-            
+
             g_print("Creating source '%s': %s\n", source_key.c_str(), source_uri.c_str());
-            
+
             // Determine source type from URI
             std::string source_type = "unknown";
             if (source_uri.find("file://") == 0) {
@@ -306,40 +430,86 @@ int main(int argc, char *argv[]) {
             } else if (source_uri.find("rtsp://") == 0) {
                 source_type = "rtsp";
             }
-            
+
             g_print("Detected source type: %s\n", source_type.c_str());
-            
+
             // Create source element
             GstElement *src_bin = gst_element_factory_make("uridecodebin", source_key.c_str());
             if (!src_bin) {
                 g_printerr("Failed to create source for %s\n", source_key.c_str());
                 continue;
             }
-            
+
+            // Create video converter for this source
+            std::string converter_name = "converter_" + std::to_string(source_index);
+            GstElement *converter = gst_element_factory_make("nvvideoconvert", converter_name.c_str());
+            if (!converter) {
+                g_printerr("Failed to create video converter for %s\n", source_key.c_str());
+                gst_object_unref(src_bin);
+                continue;
+            }
+
             g_object_set(G_OBJECT(src_bin), "uri", source_uri.c_str(), NULL);
-            gst_bin_add(GST_BIN(pipeline), src_bin);
+            gst_bin_add_many(GST_BIN(pipeline), src_bin, converter, NULL);
             source_bins.push_back(src_bin);
-            
+            video_converters.push_back(converter);
+
             // Store the sink pad index for this source
             g_object_set_data(G_OBJECT(src_bin), "sink_pad_index", GINT_TO_POINTER(source_index));
-            
-            // Connect source to streammux with unique sink pad index
-            g_signal_connect(src_bin, "pad-added", G_CALLBACK(source_pad_added_callback), streammux);
-            
+
+            // Connect source to converter
+            g_signal_connect(src_bin, "pad-added", G_CALLBACK(source_pad_added_callback), converter);
+
+            // Link converter to streammux
+            gchar *sink_pad_name = g_strdup_printf("sink_%d", source_index);
+            GstPad *sink_pad = gst_element_get_request_pad(streammux, sink_pad_name);
+            g_free(sink_pad_name);
+
+            if (!sink_pad) {
+                g_printerr("Failed to get sink pad sink_%d from streammux\n", source_index);
+                continue;
+            }
+
+            GstPad *converter_src_pad = gst_element_get_static_pad(converter, "src");
+            if (!converter_src_pad) {
+                g_printerr("Failed to get src pad from converter for source %d\n", source_index);
+                gst_object_unref(sink_pad);
+                continue;
+            }
+
+            if (gst_pad_link(converter_src_pad, sink_pad) != GST_PAD_LINK_OK) {
+                g_printerr("Failed to link converter to streammux for source %d\n", source_index);
+                gst_object_unref(converter_src_pad);
+                gst_object_unref(sink_pad);
+                continue;
+            }
+
+            gst_object_unref(converter_src_pad);
+            gst_object_unref(sink_pad);
+
             source_index++;
         }
-        
+
         g_print("Created %d sources\n", (int)source_bins.size());
     }
 
-        // Add probe to PGIE src pad
+    // Set pipeline to READY state after adding sources
+    g_print("Setting pipeline to READY state...\n");
+    GstStateChangeReturn ret = gst_element_set_state(pipeline, GST_STATE_READY);
+    if (ret == GST_STATE_CHANGE_FAILURE) {
+        g_printerr("Failed to set pipeline to READY state\n");
+        return -1;
+    }
+    g_print("Pipeline set to READY state\n");
+
+    // Add probe to PGIE src pad
     GstPad *pgie_src_pad = gst_element_get_static_pad(pgie, "src");
     if (pgie_src_pad) {
         gst_pad_add_probe(pgie_src_pad, GST_PAD_PROBE_TYPE_BUFFER, pgie_pad_probe, NULL, NULL);
         gst_object_unref(pgie_src_pad);
         g_print("Probe attached to PGIE src pad\n");
     } else {
-        g_printerr("Failed to get PGIE src pad for probe\n");
+        g_printerr("Failed to get SGIE src pad for probe\n");
     }
 
     // Add probe to SGIE src pad
@@ -359,16 +529,16 @@ int main(int argc, char *argv[]) {
 
     // Set pipeline to playing
     g_print("Starting EdgeDeepStream pipeline test...\n");
-    GstStateChangeReturn ret = gst_element_set_state(pipeline, GST_STATE_PLAYING);
+    ret = gst_element_set_state(pipeline, GST_STATE_PLAYING);
     if (ret == GST_STATE_CHANGE_FAILURE) {
         g_printerr("Failed to start pipeline\n");
         return -1;
     }
     g_print("Pipeline set to PLAYING state\n");
 
-    // Run for 30 seconds to see detection results
-    g_print("Running inference for 30 seconds to verify detections...\n");
-    std::this_thread::sleep_for(std::chrono::seconds(30));
+    // Run for 60 seconds to see detection results
+    g_print("Running inference for 60 seconds to verify detections...\n");
+    std::this_thread::sleep_for(std::chrono::seconds(60));
 
     // Stop pipeline
     g_print("Stopping pipeline...\n");

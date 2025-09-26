@@ -6,5 +6,5 @@ CXX_DEFINES = -DHAVE_FAISS -DHAVE_JSON -DHAVE_TOML11
 
 CXX_INCLUDES = -I/home/m2n/edge-deepstream/cpp_src/include -I/home/m2n/edge-deepstream/cpp_src/cpp_roi_helper -I/usr/include/gstreamer-1.0 -I/usr/include/glib-2.0 -I/usr/lib/aarch64-linux-gnu/glib-2.0/include -I/opt/nvidia/deepstream/deepstream/sources/includes -I/usr/local/cuda-11.4/include -I/home/m2n/edge-deepstream/third_party/toml11/single_include -isystem /usr/include/opencv4
 
-CXX_FLAGS = -std=gnu++17 -pthread -I/usr/include/gstreamer-1.0 -I/usr/include -I/usr/include/glib-2.0 -I/usr/lib/aarch64-linux-gnu/glib-2.0/include -Wall -Wextra -O2 -g
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -pthread -I/usr/include/gstreamer-1.0 -I/usr/include -I/usr/include/glib-2.0 -I/usr/lib/aarch64-linux-gnu/glib-2.0/include -Wall -Wextra -O2 -g
 

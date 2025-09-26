@@ -25,4 +25,4 @@ data/index/faiss.index
 data/index/labels.json
 cpp_src/build
 cpp_src/test
-cpp_src/build
+cpp_src/build/*
