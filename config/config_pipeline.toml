@@ -1,8 +1,8 @@
 [pipeline]
 display=0
 is_aarch64=1
-known_face_dir="data/known_faces"
-save_feature_path="data/features"
+known_face_dir="/home/m2n/edge-deepstream/data/known_faces"
+save_feature_path="/home/m2n/edge-deepstream/data/features"
 save_feature=0
 realtime=1
 
@@ -54,7 +54,7 @@ sync=0
 # Optimized: Slightly higher cosine similarity threshold for better precision
 threshold=0.5
 # Directory to save recognized face images
-#save_dir="data/faces/recognized"
+#save_dir="/home/m2n/edge-deepstream/data/faces/recognized"
 save_dir="/dev/shm/edge-deepstream/recognized"
 # Save mode for recognized images: "all" (every frame), "first" (first per track), "best" (best score per track)
 save_mode="first"
@@ -62,7 +62,7 @@ save_mode="first"
 backend="faiss"
 # If your known_face_dir has images instead of .npy embeddings, you can point to a folder of .npy features
 # to build the index from. If empty or not set, will use known_face_dir.
-feature_dir="data/known_faces"
+feature_dir="/home/m2n/edge-deepstream/data/known_faces"
 # Vector index configuration
 # Use FAISS-based index for matching (1 to enable, 0 to disable)
 use_index=1
@@ -79,8 +79,8 @@ nlist=0
 m_pq=0
 nbits_pq=8
 # Persisted index paths (optional); if present, will attempt to load; else build and save
-index_path="data/index/faiss.index"
-labels_path="data/index/labels.json"
+index_path="/home/m2n/edge-deepstream/data/index/faiss.index"
+labels_path="/home/m2n/edge-deepstream/data/index/labels.json"
 
 # --- Live indexing options ---
 # Enable adding embeddings from the live stream into the index
@@ -90,8 +90,8 @@ index_mode="per_track"
 # "track" | "name"
 index_label="name"
 # Optional: live-updated index; if empty, reuse index_path/labels_path
-stream_index_path="data/index/live.index"
-stream_labels_path="data/index/live_labels.json"
+stream_index_path="/home/m2n/edge-deepstream/data/index/live.index"
+stream_labels_path="/home/m2n/edge-deepstream/data/index/live_labels.json"
 
 # Motion-optimized: Disable recognize-once for better motion tracking
 # This allows re-recognition during motion for better stability

@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.10)
+project(deepstream_recommended)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.16 gstreamer-base-1.0)
+include_directories(${GST_INCLUDE_DIRS})
+link_directories(${GST_LIBRARY_DIRS})
+# Add toml11 single_include directory
+include_directories(/home/m2n/edge-deepstream/third_party/toml11/single_include)
+add_executable(deepstream_recommended main.cpp source_bin.cpp)
+target_link_libraries(deepstream_recommended ${GST_LIBRARIES} dl pthread)

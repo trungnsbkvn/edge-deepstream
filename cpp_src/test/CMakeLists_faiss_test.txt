@@ -1,0 +1,84 @@
+cmake_minimum_required(VERSION 3.16)
+project(EdgeDeepStreamFAISSTest VERSION 1.0.0 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Find required packages
+find_package(PkgConfig REQUIRED)
+
+# GStreamer packages
+pkg_check_modules(GST REQUIRED gstreamer-1.0)
+pkg_check_modules(GST_APP REQUIRED gstreamer-app-1.0)
+pkg_check_modules(GST_VIDEO REQUIRED gstreamer-video-1.0)
+
+# toml11 for TOML parsing
+find_path(TOML11_INCLUDE_DIR
+    NAMES toml.hpp
+    PATHS /usr/local/include 
+          /usr/include
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/toml11/single_include
+)
+
+# FAISS library
+find_path(FAISS_INCLUDE_DIR
+    NAMES faiss/IndexFlat.h
+    PATHS /usr/local/include 
+          /usr/include
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/faiss/include
+    REQUIRED)
+
+find_library(FAISS_LIBRARY
+    NAMES faiss
+    PATHS /usr/local/lib 
+          /usr/lib
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/faiss/lib
+    REQUIRED)
+
+# Compiler flags
+add_compile_options(
+    -Wall
+    -Wextra
+    -O2
+    -g
+)
+
+# Include directories
+include_directories(
+    ${FAISS_INCLUDE_DIR}
+    ../cpp_src/include
+)
+
+# Add FAISS definition
+add_compile_definitions(HAVE_FAISS)
+
+if(TOML11_INCLUDE_DIR)
+    include_directories(${TOML11_INCLUDE_DIR})
+    add_compile_definitions(HAVE_TOML11)
+endif()
+
+# FAISS test executable
+add_executable(test_faiss
+    ../cpp_src/test/test_faiss.cpp
+    ../cpp_src/utils/faiss_index.cpp
+)
+
+target_include_directories(test_faiss PRIVATE
+    ${FAISS_INCLUDE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${GST_INCLUDE_DIRS}
+)
+
+target_link_libraries(test_faiss 
+    ${FAISS_LIBRARY}
+    pthread
+)
+
+message(STATUS "FAISS Test Configuration:")
+message(STATUS "  FAISS include: ${FAISS_INCLUDE_DIR}")
+message(STATUS "  FAISS library: ${FAISS_LIBRARY}")
+if(TOML11_INCLUDE_DIR)
+    message(STATUS "  TOML11 found: ${TOML11_INCLUDE_DIR}")
+else()
+    message(STATUS "  TOML11 not found - using fallback parser")
+endif()

@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/deepstream_recommended.dir/main.cpp.o CMakeFiles/deepstream_recommended.dir/source_bin.cpp.o -o deepstream_recommended  -lgstbase-1.0 -lgstreamer-1.0 -lgobject-2.0 -lglib-2.0 -ldl -lpthread
