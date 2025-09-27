@@ -66,6 +66,7 @@ CMAKE_BINARY_DIR = /home/m2n/edge-deepstream/cpp_src/build
 all: CMakeFiles/edge_utils.dir/all
 all: CMakeFiles/edge_deepstream.dir/all
 all: CMakeFiles/test_yolov8n_only.dir/all
+all: CMakeFiles/test_faiss.dir/all
 all: cpp/roi_helper/all
 .PHONY : all
 
@@ -73,6 +74,7 @@ all: cpp/roi_helper/all
 codegen: CMakeFiles/edge_utils.dir/codegen
 codegen: CMakeFiles/edge_deepstream.dir/codegen
 codegen: CMakeFiles/test_yolov8n_only.dir/codegen
+codegen: CMakeFiles/test_faiss.dir/codegen
 codegen: cpp/roi_helper/codegen
 .PHONY : codegen
 
@@ -84,6 +86,7 @@ preinstall: cpp/roi_helper/preinstall
 clean: CMakeFiles/edge_utils.dir/clean
 clean: CMakeFiles/edge_deepstream.dir/clean
 clean: CMakeFiles/test_yolov8n_only.dir/clean
+clean: CMakeFiles/test_faiss.dir/clean
 clean: cpp/roi_helper/clean
 .PHONY : clean
 
@@ -179,7 +182,7 @@ CMakeFiles/test_yolov8n_only.dir/all: CMakeFiles/edge_utils.dir/all
 CMakeFiles/test_yolov8n_only.dir/all: cpp/roi_helper/CMakeFiles/roi_helper.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_yolov8n_only.dir/build.make CMakeFiles/test_yolov8n_only.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_yolov8n_only.dir/build.make CMakeFiles/test_yolov8n_only.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=19,20 "Built target test_yolov8n_only"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=21,22 "Built target test_yolov8n_only"
 .PHONY : CMakeFiles/test_yolov8n_only.dir/all
 
 # Build rule for subdir invocation for target.
@@ -196,13 +199,46 @@ test_yolov8n_only: CMakeFiles/test_yolov8n_only.dir/rule
 # codegen rule for target.
 CMakeFiles/test_yolov8n_only.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_yolov8n_only.dir/build.make CMakeFiles/test_yolov8n_only.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=19,20 "Finished codegen for target test_yolov8n_only"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=21,22 "Finished codegen for target test_yolov8n_only"
 .PHONY : CMakeFiles/test_yolov8n_only.dir/codegen
 
 # clean rule for target.
 CMakeFiles/test_yolov8n_only.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_yolov8n_only.dir/build.make CMakeFiles/test_yolov8n_only.dir/clean
 .PHONY : CMakeFiles/test_yolov8n_only.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/test_faiss.dir
+
+# All Build rule for target.
+CMakeFiles/test_faiss.dir/all: CMakeFiles/edge_utils.dir/all
+CMakeFiles/test_faiss.dir/all: cpp/roi_helper/CMakeFiles/roi_helper.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_faiss.dir/build.make CMakeFiles/test_faiss.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_faiss.dir/build.make CMakeFiles/test_faiss.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=19,20 "Built target test_faiss"
+.PHONY : CMakeFiles/test_faiss.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/test_faiss.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/m2n/edge-deepstream/cpp_src/build/CMakeFiles 16
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/test_faiss.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/m2n/edge-deepstream/cpp_src/build/CMakeFiles 0
+.PHONY : CMakeFiles/test_faiss.dir/rule
+
+# Convenience name for target.
+test_faiss: CMakeFiles/test_faiss.dir/rule
+.PHONY : test_faiss
+
+# codegen rule for target.
+CMakeFiles/test_faiss.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_faiss.dir/build.make CMakeFiles/test_faiss.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles --progress-num=19,20 "Finished codegen for target test_faiss"
+.PHONY : CMakeFiles/test_faiss.dir/codegen
+
+# clean rule for target.
+CMakeFiles/test_faiss.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_faiss.dir/build.make CMakeFiles/test_faiss.dir/clean
+.PHONY : CMakeFiles/test_faiss.dir/clean
 
 #=============================================================================
 # Target rules for target cpp/roi_helper/CMakeFiles/roi_helper.dir

@@ -1,6 +1,7 @@
 /home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/edge_utils.dir
 /home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/edge_deepstream.dir
 /home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/test_yolov8n_only.dir
+/home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/test_faiss.dir
 /home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/edit_cache.dir
 /home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/rebuild_cache.dir
 /home/m2n/edge-deepstream/cpp_src/build/CMakeFiles/list_install_components.dir

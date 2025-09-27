@@ -201,6 +201,19 @@ test_yolov8n_only/fast:
 .PHONY : test_yolov8n_only/fast
 
 #=============================================================================
+# Target rules for targets named test_faiss
+
+# Build rule for target.
+test_faiss: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_faiss
+.PHONY : test_faiss
+
+# fast build rule for target.
+test_faiss/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_faiss.dir/build.make CMakeFiles/test_faiss.dir/build
+.PHONY : test_faiss/fast
+
+#=============================================================================
 # Target rules for targets named roi_helper
 
 # Build rule for target.
@@ -284,6 +297,30 @@ src/source_bin.s: src/source_bin.cpp.s
 src/source_bin.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/edge_deepstream.dir/build.make CMakeFiles/edge_deepstream.dir/src/source_bin.cpp.s
 .PHONY : src/source_bin.cpp.s
+
+test/test_faiss.o: test/test_faiss.cpp.o
+.PHONY : test/test_faiss.o
+
+# target to build an object file
+test/test_faiss.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_faiss.dir/build.make CMakeFiles/test_faiss.dir/test/test_faiss.cpp.o
+.PHONY : test/test_faiss.cpp.o
+
+test/test_faiss.i: test/test_faiss.cpp.i
+.PHONY : test/test_faiss.i
+
+# target to preprocess a source file
+test/test_faiss.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_faiss.dir/build.make CMakeFiles/test_faiss.dir/test/test_faiss.cpp.i
+.PHONY : test/test_faiss.cpp.i
+
+test/test_faiss.s: test/test_faiss.cpp.s
+.PHONY : test/test_faiss.s
+
+# target to generate assembly for a file
+test/test_faiss.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_faiss.dir/build.make CMakeFiles/test_faiss.dir/test/test_faiss.cpp.s
+.PHONY : test/test_faiss.cpp.s
 
 test_yolov8n_only.o: test_yolov8n_only.cpp.o
 .PHONY : test_yolov8n_only.o
@@ -588,6 +625,7 @@ help:
 	@echo "... edge_deepstream"
 	@echo "... edge_utils"
 	@echo "... roi_helper"
+	@echo "... test_faiss"
 	@echo "... test_yolov8n_only"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
@@ -598,6 +636,9 @@ help:
 	@echo "... src/source_bin.o"
 	@echo "... src/source_bin.i"
 	@echo "... src/source_bin.s"
+	@echo "... test/test_faiss.o"
+	@echo "... test/test_faiss.i"
+	@echo "... test/test_faiss.s"
 	@echo "... test_yolov8n_only.o"
 	@echo "... test_yolov8n_only.i"
 	@echo "... test_yolov8n_only.s"

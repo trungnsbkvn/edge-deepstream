@@ -196,6 +196,27 @@ target_link_libraries(test_yolov8n_only
     pthread
 )
 
+# FAISS test executable
+add_executable(test_faiss test/test_faiss.cpp)
+target_include_directories(test_faiss PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${GST_INCLUDE_DIRS}
+    ${DEEPSTREAM_INCLUDE_DIR}
+    ${CUDA_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}
+)
+target_link_libraries(test_faiss
+    ${GST_LIBRARIES}
+    ${GST_APP_LIBRARIES}
+    ${DEEPSTREAM_NVDS_META}
+    ${DEEPSTREAM_NVBUFSURFACE}
+    ${DEEPSTREAM_NVDSGST_META}
+    ${OpenCV_LIBS}
+    ${CUDA_LIBRARIES}
+    edge_utils
+    pthread
+)
+
 # Install targets
 install(TARGETS edge_deepstream DESTINATION bin)
 install(TARGETS edge_utils DESTINATION lib)
